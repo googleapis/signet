@@ -1,0 +1,1013 @@
+# Copyright (C) 2010 Google Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+require 'stringio'
+require 'addressable/uri'
+require 'signet/oauth_1'
+require 'signet/oauth_1/credential'
+require 'signet/errors'
+
+module Signet #:nodoc:
+  module OAuth1
+    class Client
+      ##
+      # Creates an OAuth 1.0 client.
+      #
+      # @param [Hash] options
+      #   The configuration parameters for the client.
+      #   - <code>:temporary_credential_uri</code> — 
+      #     The OAuth temporary credentials URI.
+      #   - <code>:authorization_uri</code> —  The OAuth authorization URI.
+      #   - <code>:token_credential_uri</code> — 
+      #     The OAuth token credentials URI.
+      #   - <code>:client_credential_key</code> — 
+      #     The OAuth client credential key.
+      #   - <code>:client_credential_secret</code> — 
+      #     The OAuth client credential secret.
+      #   - <code>:callback</code> —  The OAuth callback.  Defaults to 'oob'.
+      #
+      # @example
+      #   client = Signet::OAuth1::Client.new(
+      #     :temporary_credential_uri =>
+      #       'https://www.google.com/accounts/OAuthGetRequestToken',
+      #     :authorization_uri =>
+      #       'https://www.google.com/accounts/OAuthAuthorizeToken',
+      #     :token_credential_uri =>
+      #       'https://www.google.com/accounts/OAuthGetAccessToken',
+      #     :client_credential_key => 'anonymous',
+      #     :client_credential_secret => 'anonymous'
+      #   )
+      def initialize(options={})
+        self.temporary_credential_uri = options[:temporary_credential_uri]
+        self.authorization_uri = options[:authorization_uri]
+        self.token_credential_uri = options[:token_credential_uri]
+        # Technically... this would allow you to pass in a :client key...
+        # But that would be weird.  Don't do that.
+        self.client_credential_key =
+          Signet::OAuth1.extract_credential_key_option(:client, options)
+        self.client_credential_secret =
+          Signet::OAuth1.extract_credential_secret_option(:client, options)
+        self.temporary_credential_key =
+          Signet::OAuth1.extract_credential_key_option(:temporary, options)
+        self.temporary_credential_secret =
+          Signet::OAuth1.extract_credential_secret_option(:temporary, options)
+        self.token_credential_key =
+          Signet::OAuth1.extract_credential_key_option(:token, options)
+        self.token_credential_secret =
+          Signet::OAuth1.extract_credential_secret_option(:token, options)
+        self.callback = options[:callback]
+      end
+
+      ##
+      # Returns the temporary credentials URI for this client.
+      #
+      # @return [Addressable::URI] The temporary credentials URI.
+      def temporary_credential_uri
+        return @temporary_credential_uri
+      end
+      alias_method :request_token_uri, :temporary_credential_uri
+
+      ##
+      # Sets the temporary credentials URI for this client.
+      #
+      # @param [Addressable::URI, String, #to_str]
+      #   new_temporary_credential_uri
+      #   The temporary credentials URI.
+      def temporary_credential_uri=(new_temporary_credential_uri)
+        if new_temporary_credential_uri != nil
+          new_temporary_credential_uri =
+            Addressable::URI.parse(new_temporary_credential_uri)
+          @temporary_credential_uri = new_temporary_credential_uri
+        else
+          @temporary_credential_uri = nil
+        end
+      end
+      alias_method :request_token_uri=, :temporary_credential_uri=
+
+      ##
+      # Returns the authorization URI that the user should be redirected to.
+      #
+      # @return [Addressable::URI] The authorization URI.
+      #
+      # @see Signet::OAuth1.generate_authorization_uri
+      def authorization_uri(options={})
+        options = options.merge(
+          :temporary_credential_key => self.temporary_credential_key,
+          :callback => self.callback
+        )
+        return nil if @authorization_uri == nil
+        return Addressable::URI.parse(
+          ::Signet::OAuth1.generate_authorization_uri(
+            @authorization_uri, options
+          )
+        )
+      end
+
+      ##
+      # Sets the authorization URI for this client.
+      #
+      # @param [Addressable::URI, String, #to_str] new_authorization_uri
+      #   The authorization URI.
+      def authorization_uri=(new_authorization_uri)
+        if new_authorization_uri != nil
+          new_authorization_uri =
+            Addressable::URI.parse(new_authorization_uri)
+          @authorization_uri = new_authorization_uri
+        else
+          @authorization_uri = nil
+        end
+      end
+
+      ##
+      # Returns the token credential URI for this client.
+      #
+      # @return [Addressable::URI] The token credential URI.
+      def token_credential_uri
+        return @token_credential_uri
+      end
+      alias_method :access_token_uri, :token_credential_uri
+
+      ##
+      # Sets the token credential URI for this client.
+      #
+      # @param [Addressable::URI, String, #to_str] new_token_credential_uri
+      #   The token credential URI.
+      def token_credential_uri=(new_token_credential_uri)
+        if new_token_credential_uri != nil
+          new_token_credential_uri =
+            Addressable::URI.parse(new_token_credential_uri)
+          @token_credential_uri = new_token_credential_uri
+        else
+          @token_credential_uri = nil
+        end
+      end
+      alias_method :access_token_uri=, :token_credential_uri=
+
+      # Lots of duplicated code here, but for the sake of auto-generating
+      # documentation, we're going to let it slide.  Oh well.
+
+      ##
+      # Returns the client credential for this client.
+      #
+      # @return [Signet::OAuth1::Credential] The client credentials.
+      def client_credential
+        if self.client_credential_key && self.client_credential_secret
+          return ::Signet::OAuth1::Credential.new(
+            self.client_credential_key,
+            self.client_credential_secret
+          )
+        elsif !self.client_credential_key && !self.client_credential_secret
+          return nil
+        else
+          raise ArgumentError,
+            "The client credential key and secret must be set."
+        end
+      end
+      alias_method :consumer_token, :client_credential
+
+      ##
+      # Sets the client credential for this client.
+      #
+      # @param [Signet::OAuth1::Credential] new_client_credential
+      #   The client credentials.
+      def client_credential=(new_client_credential)
+        if new_client_credential != nil
+          if !new_client_credential.kind_of?(::Signet::OAuth1::Credential)
+            raise TypeError,
+              "Expected Signet::OAuth1::Credential, " +
+              "got #{new_client_credential.class}."
+          end
+          @client_credential_key = new_client_credential.key
+          @client_credential_secret = new_client_credential.secret
+        else
+          @client_credential_key = nil
+          @client_credential_secret = nil
+        end
+      end
+      alias_method :consumer_token=, :client_credential=
+
+      ##
+      # Returns the client credential key for this client.
+      #
+      # @return [String] The client credential key.
+      def client_credential_key
+        return @client_credential_key
+      end
+      alias_method :consumer_key, :client_credential_key
+
+      ##
+      # Sets the client credential key for this client.
+      #
+      # @param [String, #to_str] new_client_credential_key
+      #   The client credential key.
+      def client_credential_key=(new_client_credential_key)
+        if new_client_credential_key != nil
+          if !new_client_credential_key.respond_to?(:to_str)
+            raise TypeError,
+              "Can't convert #{new_client_credential_key.class} into String."
+          end
+          new_client_credential_key = new_client_credential_key.to_str
+          @client_credential_key = new_client_credential_key
+        else
+          @client_credential_key = nil
+        end
+      end
+      alias_method :consumer_key=, :client_credential_key=
+
+      ##
+      # Returns the client credential secret for this client.
+      #
+      # @return [String] The client credential secret.
+      def client_credential_secret
+        return @client_credential_secret
+      end
+      alias_method :consumer_secret, :client_credential_secret
+
+      ##
+      # Sets the client credential secret for this client.
+      #
+      # @param [String, #to_str] new_client_credential_secret
+      #   The client credential secret.
+      def client_credential_secret=(new_client_credential_secret)
+        if new_client_credential_secret != nil
+          if !new_client_credential_secret.respond_to?(:to_str)
+            raise TypeError,
+              "Can't convert #{new_client_credential_secret.class} " +
+              "into String."
+          end
+          new_client_credential_secret = new_client_credential_secret.to_str
+          @client_credential_secret = new_client_credential_secret
+        else
+          @client_credential_secret = nil
+        end
+      end
+      alias_method :consumer_secret=, :client_credential_secret=
+
+      ##
+      # Returns the temporary credential for this client.
+      #
+      # @return [Signet::OAuth1::Credential] The temporary credentials.
+      def temporary_credential
+        if self.temporary_credential_key && self.temporary_credential_secret
+          return ::Signet::OAuth1::Credential.new(
+            self.temporary_credential_key,
+            self.temporary_credential_secret
+          )
+        elsif !self.temporary_credential_key &&
+            !self.temporary_credential_secret
+          return nil
+        else
+          raise ArgumentError,
+            "The temporary credential key and secret must be set."
+        end
+      end
+      alias_method :request_token, :temporary_credential
+
+      ##
+      # Sets the temporary credential for this client.
+      #
+      # @param [Signet::OAuth1::Credential] new_temporary_credential
+      #   The temporary credentials.
+      def temporary_credential=(new_temporary_credential)
+        if new_temporary_credential != nil
+          if !new_temporary_credential.kind_of?(::Signet::OAuth1::Credential)
+            raise TypeError,
+              "Expected Signet::OAuth1::Credential, " +
+              "got #{new_temporary_credential.class}."
+          end
+          @temporary_credential_key = new_temporary_credential.key
+          @temporary_credential_secret = new_temporary_credential.secret
+        else
+          @temporary_credential_key = nil
+          @temporary_credential_secret = nil
+        end
+      end
+      alias_method :request_token=, :temporary_credential=
+
+      ##
+      # Returns the temporary credential key for this client.
+      #
+      # @return [String] The temporary credential key.
+      def temporary_credential_key
+        return @temporary_credential_key
+      end
+      alias_method :request_token_key, :temporary_credential_key
+
+      ##
+      # Sets the temporary credential key for this client.
+      #
+      # @param [String, #to_str] new_temporary_credential_key
+      #   The temporary credential key.
+      def temporary_credential_key=(new_temporary_credential_key)
+        if new_temporary_credential_key != nil
+          if !new_temporary_credential_key.respond_to?(:to_str)
+            raise TypeError,
+              "Can't convert #{new_temporary_credential_key.class} " +
+              "into String."
+          end
+          new_temporary_credential_key = new_temporary_credential_key.to_str
+          @temporary_credential_key = new_temporary_credential_key
+        else
+          @temporary_credential_key = nil
+        end
+      end
+      alias_method :request_token_key=, :temporary_credential_key=
+
+      ##
+      # Returns the temporary credential secret for this client.
+      #
+      # @return [String] The temporary credential secret.
+      def temporary_credential_secret
+        return @temporary_credential_secret
+      end
+      alias_method :request_token_secret, :temporary_credential_secret
+
+      ##
+      # Sets the temporary credential secret for this client.
+      #
+      # @param [String, #to_str] new_temporary_credential_secret
+      #   The temporary credential secret.
+      def temporary_credential_secret=(new_temporary_credential_secret)
+        if new_temporary_credential_secret != nil
+          if !new_temporary_credential_secret.respond_to?(:to_str)
+            raise TypeError,
+              "Can't convert #{new_temporary_credential_secret.class} " +
+              "into String."
+          end
+          new_temporary_credential_secret =
+            new_temporary_credential_secret.to_str
+          @temporary_credential_secret = new_temporary_credential_secret
+        else
+          @temporary_credential_secret = nil
+        end
+      end
+      alias_method :request_token_secret=, :temporary_credential_secret=
+
+      ##
+      # Returns the token credential for this client.
+      #
+      # @return [Signet::OAuth1::Credential] The token credentials.
+      def token_credential
+        if self.token_credential_key && self.token_credential_secret
+          return ::Signet::OAuth1::Credential.new(
+            self.token_credential_key,
+            self.token_credential_secret
+          )
+        elsif !self.token_credential_key &&
+            !self.token_credential_secret
+          return nil
+        else
+          raise ArgumentError,
+            "The token credential key and secret must be set."
+        end
+      end
+      alias_method :access_token, :token_credential
+
+      ##
+      # Sets the token credential for this client.
+      #
+      # @param [Signet::OAuth1::Credential] new_token_credential
+      #   The token credentials.
+      def token_credential=(new_token_credential)
+        if new_token_credential != nil
+          if !new_token_credential.kind_of?(::Signet::OAuth1::Credential)
+            raise TypeError,
+              "Expected Signet::OAuth1::Credential, " +
+              "got #{new_token_credential.class}."
+          end
+          @token_credential_key = new_token_credential.key
+          @token_credential_secret = new_token_credential.secret
+        else
+          @token_credential_key = nil
+          @token_credential_secret = nil
+        end
+      end
+      alias_method :access_token=, :token_credential=
+
+      ##
+      # Returns the token credential key for this client.
+      #
+      # @return [String] The token credential key.
+      def token_credential_key
+        return @token_credential_key
+      end
+      alias_method :access_token_key, :token_credential_key
+
+      ##
+      # Sets the token credential key for this client.
+      #
+      # @param [String, #to_str] new_token_credential_key
+      #   The token credential key.
+      def token_credential_key=(new_token_credential_key)
+        if new_token_credential_key != nil
+          if !new_token_credential_key.respond_to?(:to_str)
+            raise TypeError,
+              "Can't convert #{new_token_credential_key.class} " +
+              "into String."
+          end
+          new_token_credential_key = new_token_credential_key.to_str
+          @token_credential_key = new_token_credential_key
+        else
+          @token_credential_key = nil
+        end
+      end
+      alias_method :access_token_key=, :token_credential_key=
+
+      ##
+      # Returns the token credential secret for this client.
+      #
+      # @return [String] The token credential secret.
+      def token_credential_secret
+        return @token_credential_secret
+      end
+      alias_method :access_token_secret, :token_credential_secret
+
+      ##
+      # Sets the token credential secret for this client.
+      #
+      # @param [String, #to_str] new_token_credential_secret
+      #   The token credential secret.
+      def token_credential_secret=(new_token_credential_secret)
+        if new_token_credential_secret != nil
+          if !new_token_credential_secret.respond_to?(:to_str)
+            raise TypeError,
+              "Can't convert #{new_token_credential_secret.class} " +
+              "into String."
+          end
+          new_token_credential_secret =
+            new_token_credential_secret.to_str
+          @token_credential_secret = new_token_credential_secret
+        else
+          @token_credential_secret = nil
+        end
+      end
+      alias_method :access_token_secret=, :token_credential_secret=
+
+      ##
+      # Returns the callback for this client.
+      #
+      # @return [String] The OAuth callback.
+      def callback
+        return @callback || ::Signet::OAuth1::OUT_OF_BAND
+      end
+
+      ##
+      # Sets the callback for this client.
+      #
+      # @param [String, #to_str] new_callback
+      #   The OAuth callback.
+      def callback=(new_callback)
+        if new_callback != nil
+          if !new_callback.respond_to?(:to_str)
+            raise TypeError,
+              "Can't convert #{new_callback.class} into String."
+          end
+          new_callback = new_callback.to_str
+          @callback = new_callback
+        else
+          @callback = nil
+        end
+      end
+
+      ##
+      # Generates a request for temporary credentials.
+      #
+      # @param [Hash] options
+      #   The configuration parameters for the request.
+      #   - <code>:signature_method</code> — 
+      #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
+      #   - <code>:additional_parameters</code> — 
+      #     Non-standard additional parameters.
+      #   - <code>:realm</code> — 
+      #     The Authorization realm.  See RFC 2617.
+      #
+      # @return [Array] The request object.
+      def generate_temporary_credential_request(options={})
+        verifications = {
+          :temporary_credential_uri => 'Temporary credentials URI',
+          :client_credential_key => 'Client credential key',
+          :client_credential_secret => 'Client credential secret'
+        }
+        # Make sure all required state is set
+        verifications.each do |(key, value)|
+          unless self.send(key)
+            raise ArgumentError, "#{key} was not set."
+          end
+        end
+        options = {
+          :signature_method => 'HMAC-SHA1',
+          :additional_parameters => [],
+          :realm => nil
+        }.merge(options)
+        method = 'POST'
+        parameters = ::Signet::OAuth1.unsigned_temporary_credential_parameters(
+          :client_credential_key => self.client_credential_key,
+          :callback => self.callback,
+          :signature_method => options[:signature_method],
+          :additional_parameters => options[:additional_parameters]
+        )
+        signature = ::Signet::OAuth1.sign_parameters(
+          method,
+          self.temporary_credential_uri,
+          parameters,
+          self.client_credential_secret
+        )
+        parameters << ['oauth_signature', signature]
+        authorization_header = [
+          'Authorization',
+          ::Signet::OAuth1.generate_authorization_header(
+            parameters, options[:realm]
+          )
+        ]
+        headers = [authorization_header]
+        if method == 'POST'
+          headers << ['Content-Type', 'application/x-www-form-urlencoded']
+        end
+        return [
+          method,
+          self.temporary_credential_uri.to_str,
+          headers,
+          ['']
+        ]
+      end
+      alias_method(
+        :generate_request_token_request,
+        :generate_temporary_credential_request
+      )
+
+      ##
+      # Transmits a request for a temporary credential.  This method does not
+      # have side-effects within the client.
+      #
+      # @param [Hash] options
+      #   The configuration parameters for the request.
+      #   - <code>:signature_method</code> — 
+      #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
+      #   - <code>:additional_parameters</code> — 
+      #     Non-standard additional parameters.
+      #   - <code>:realm</code> — 
+      #     The Authorization realm.  See RFC 2617.
+      #   - <code>:adapter</code> — 
+      #     The HTTP adapter.
+      #     Defaults to <code>HTTPAdapter::NetHTTPRequestAdapter</code>.
+      #   - <code>:connection</code> — 
+      #     An open, manually managed HTTP connection.
+      #     Must be of type <code>HTTPAdapter::Connection</code> and the
+      #     internal connection representation must match the HTTP adapter
+      #     being used.
+      #
+      # @return [Signet::OAuth1::Credential] The temporary credential.
+      #
+      # @example
+      #   temporary_credential = client.fetch_temporary_credential(
+      #     :additional_parameters => {
+      #       :scope => 'https://mail.google.com/mail/feed/atom'
+      #     }
+      #   )
+      def fetch_temporary_credential(options={})
+        adapter = options[:adapter]
+        unless adapter
+          require 'httpadapter'
+          require 'httpadapter/adapters/net_http'
+          adapter = HTTPAdapter::NetHTTPRequestAdapter
+        end
+        connection = options[:connection]
+        request = self.generate_temporary_credential_request(options)
+        response = HTTPAdapter.transmit(request, adapter, connection)
+        status, headers, body = response
+        merged_body = StringIO.new
+        body.each do |chunk|
+          merged_body.write(chunk)
+        end
+        body = merged_body.string
+        if status.to_i == 200
+          return ::Signet::OAuth1.parse_form_encoded_credentials(body)
+        elsif [400, 401, 403].include?(status.to_i)
+          message = 'Authorization failed.'
+          if body.strip.length > 0
+            message += "  Server message:\n#{body.strip}"
+          end
+          error = ::Signet::AuthorizationError.new(message, request, response)
+          raise error
+        else
+          message = "Unexpected status code: #{status}."
+          if body.strip.length > 0
+            message += "  Server message:\n#{body.strip}"
+          end
+          error = ::Signet::AuthorizationError.new(message, request, response)
+          raise error
+        end
+      end
+      alias_method(
+        :fetch_request_token,
+        :fetch_temporary_credential
+      )
+
+      ##
+      # Transmits a request for a temporary credential.  This method updates
+      # the client with the new temporary credential.
+      #
+      # @param [Hash] options
+      #   The configuration parameters for the request.
+      #   - <code>:signature_method</code> — 
+      #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
+      #   - <code>:additional_parameters</code> — 
+      #     Non-standard additional parameters.
+      #   - <code>:realm</code> — 
+      #     The Authorization realm.  See RFC 2617.
+      #   - <code>:adapter</code> — 
+      #     The HTTP adapter.
+      #     Defaults to <code>HTTPAdapter::NetHTTPRequestAdapter</code>.
+      #   - <code>:connection</code> — 
+      #     An open, manually managed HTTP connection.
+      #     Must be of type <code>HTTPAdapter::Connection</code> and the
+      #     internal connection representation must match the HTTP adapter
+      #     being used.
+      #
+      # @return [Signet::OAuth1::Credential] The temporary credential.
+      #
+      # @example
+      #   client.fetch_temporary_credential!(:additional_parameters => {
+      #     :scope => 'https://mail.google.com/mail/feed/atom'
+      #   })
+      def fetch_temporary_credential!(options={})
+        credential = self.fetch_temporary_credential(options)
+        self.temporary_credential = credential
+      end
+      alias_method(
+        :fetch_request_token!,
+        :fetch_temporary_credential!
+      )
+
+      ##
+      # Generates a request for token credentials.
+      #
+      # @param [Hash] options
+      #   The configuration parameters for the request.
+      #   - <code>:verifier</code> — 
+      #     The OAuth verifier provided by the server.  Required.
+      #   - <code>:signature_method</code> — 
+      #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
+      #   - <code>:realm</code> — 
+      #     The Authorization realm.  See RFC 2617.
+      #
+      # @return [Array] The request object.
+      def generate_token_credential_request(options={})
+        verifications = {
+          :token_credential_uri => 'Token credentials URI',
+          :client_credential_key => 'Client credential key',
+          :client_credential_secret => 'Client credential secret',
+          :temporary_credential_key => 'Temporary credential key',
+          :temporary_credential_secret => 'Temporary credential secret'
+        }
+        # Make sure all required state is set
+        verifications.each do |(key, value)|
+          unless self.send(key)
+            raise ArgumentError, "#{key} was not set."
+          end
+        end
+        options = {
+          :signature_method => 'HMAC-SHA1',
+          :realm => nil
+        }.merge(options)
+        method = 'POST'
+        parameters = ::Signet::OAuth1.unsigned_token_credential_parameters(
+          :client_credential_key => self.client_credential_key,
+          :temporary_credential_key => self.temporary_credential_key,
+          :signature_method => options[:signature_method],
+          :verifier => options[:verifier]
+        )
+        signature = ::Signet::OAuth1.sign_parameters(
+          method,
+          self.token_credential_uri,
+          parameters,
+          self.client_credential_secret,
+          self.temporary_credential_secret
+        )
+        parameters << ['oauth_signature', signature]
+        authorization_header = [
+          'Authorization',
+          ::Signet::OAuth1.generate_authorization_header(
+            parameters, options[:realm]
+          )
+        ]
+        headers = [authorization_header]
+        if method == 'POST'
+          headers << ['Content-Type', 'application/x-www-form-urlencoded']
+        end
+        return [
+          method,
+          self.token_credential_uri.to_str,
+          headers,
+          ['']
+        ]
+      end
+      alias_method(
+        :generate_access_token_request,
+        :generate_token_credential_request
+      )
+
+      ##
+      # Transmits a request for a token credential.  This method does not
+      # have side-effects within the client.
+      #
+      # @param [Hash] options
+      #   The configuration parameters for the request.
+      #   - <code>:verifier</code> — 
+      #     The OAuth verifier provided by the server.  Required.
+      #   - <code>:signature_method</code> — 
+      #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
+      #   - <code>:realm</code> — 
+      #     The Authorization realm.  See RFC 2617.
+      #   - <code>:adapter</code> — 
+      #     The HTTP adapter.
+      #     Defaults to <code>HTTPAdapter::NetHTTPRequestAdapter</code>.
+      #   - <code>:connection</code> — 
+      #     An open, manually managed HTTP connection.
+      #     Must be of type <code>HTTPAdapter::Connection</code> and the
+      #     internal connection representation must match the HTTP adapter
+      #     being used.
+      #
+      # @return [Signet::OAuth1::Credential] The token credential.
+      #
+      # @example
+      #   token_credential = client.fetch_token_credential(
+      #     :verifier => '12345'
+      #   )
+      def fetch_token_credential(options={})
+        adapter = options[:adapter]
+        unless adapter
+          require 'httpadapter'
+          require 'httpadapter/adapters/net_http'
+          adapter = HTTPAdapter::NetHTTPRequestAdapter
+        end
+        connection = options[:connection]
+        request = self.generate_token_credential_request(options)
+        response = HTTPAdapter.transmit(request, adapter, connection)
+        status, headers, body = response
+        merged_body = StringIO.new
+        body.each do |chunk|
+          merged_body.write(chunk)
+        end
+        body = merged_body.string
+        if status.to_i == 200
+          return ::Signet::OAuth1.parse_form_encoded_credentials(body)
+        elsif [400, 401, 403].include?(status.to_i)
+          message = 'Authorization failed.'
+          if body.strip.length > 0
+            message += "  Server message:\n#{body.strip}"
+          end
+          error = ::Signet::AuthorizationError.new(message, request, response)
+          raise error
+        else
+          message = "Unexpected status code: #{status}."
+          if body.strip.length > 0
+            message += "  Server message:\n#{body.strip}"
+          end
+          error = ::Signet::AuthorizationError.new(message, request, response)
+          raise error
+        end
+      end
+      alias_method(
+        :fetch_access_token,
+        :fetch_token_credential
+      )
+
+      ##
+      # Transmits a request for a token credential.  This method updates
+      # the client with the new token credential.
+      #
+      # @param [Hash] options
+      #   The configuration parameters for the request.
+      #   - <code>:signature_method</code> — 
+      #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
+      #   - <code>:additional_parameters</code> — 
+      #     Non-standard additional parameters.
+      #   - <code>:realm</code> — 
+      #     The Authorization realm.  See RFC 2617.
+      #   - <code>:adapter</code> — 
+      #     The HTTP adapter.
+      #     Defaults to <code>HTTPAdapter::NetHTTPRequestAdapter</code>.
+      #   - <code>:connection</code> — 
+      #     An open, manually managed HTTP connection.
+      #     Must be of type <code>HTTPAdapter::Connection</code> and the
+      #     internal connection representation must match the HTTP adapter
+      #     being used.
+      #
+      # @return [Signet::OAuth1::Credential] The token credential.
+      #
+      # @example
+      #   client.fetch_token_credential!(:verifier => '12345')
+      def fetch_token_credential!(options={})
+        credential = self.fetch_token_credential(options)
+        self.token_credential = credential
+      end
+      alias_method(
+        :fetch_access_token!,
+        :fetch_token_credential!
+      )
+
+      ##
+      # Generates an authenticated request for protected resources.
+      #
+      # @param [Hash] options
+      #   The configuration parameters for the request.
+      #   - <code>:request</code> — 
+      #     A pre-constructed request to sign.
+      #   - <code>:method</code> — 
+      #     The HTTP method for the request.  Defaults to 'GET'.
+      #   - <code>:uri</code> — 
+      #     The URI for the request.
+      #   - <code>:headers</code> — 
+      #     The HTTP headers for the request.
+      #   - <code>:body</code> — 
+      #     The HTTP body for the request.
+      #   - <code>:signature_method</code> — 
+      #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
+      #   - <code>:realm</code> — 
+      #     The Authorization realm.  See RFC 2617.
+      #
+      # @return [Array] The request object.
+      def generate_authenticated_request(options={})
+        verifications = {
+          :client_credential_key => 'Client credential key',
+          :client_credential_secret => 'Client credential secret',
+          :token_credential_key => 'Token credential key',
+          :token_credential_secret => 'Token credential secret'
+        }
+        # Make sure all required state is set
+        verifications.each do |(key, value)|
+          unless self.send(key)
+            raise ArgumentError, "#{key} was not set."
+          end
+        end
+        options = {
+          :signature_method => 'HMAC-SHA1',
+          :realm => nil
+        }.merge(options)
+        if options[:request]
+          if options[:request].kind_of?(Array)
+            request = options[:request]
+          elsif options[:adapter] || options[:request].respond_to?(:to_ary)
+            request =
+              HTTPAdapter.adapt_request(options[:request], options[:adapter])
+          end
+          method, uri, headers, body = request
+        else
+          method = options[:method] || 'GET'
+          uri = options[:uri]
+          headers = options[:headers] || []
+          body = options[:body] || ''
+        end
+        request_components = {
+          :method => method,
+          :uri => uri,
+          :headers => headers,
+          :body => body
+        }
+        # Verify that we have all pieces required to return an HTTP request
+        request_components.each do |(key, value)|
+          unless value
+            raise ArgumentError, "Missing :#{key} parameter."
+          end
+        end
+        if !body.kind_of?(String) && body.respond_to?(:each)
+          # Just in case we get a chunked body
+          merged_body = StringIO.new
+          body.each do |chunk|
+            merged_body.write(chunk)
+          end
+          body = merged_body.string
+        end
+        if !body.kind_of?(String)
+          raise TypeError, "Expected String, got #{body.class}."
+        end
+        method = method.to_s.upcase
+        parameters = ::Signet::OAuth1.unsigned_resource_parameters(
+          :client_credential_key => self.client_credential_key,
+          :token_credential_key => self.token_credential_key,
+          :signature_method => options[:signature_method]
+        )
+        media_type = nil
+        headers.each do |(header, value)|
+          if header.downcase == 'Content-Type'.downcase
+            media_type = value.gsub(/^([^;]+)(;.*?)?$/, '\1')
+          end
+        end
+        if method == 'POST' &&
+            media_type == 'application/x-www-form-urlencoded'
+          post_parameters = Addressable::URI.form_unencode(body)
+        else
+          post_parameters = []
+        end
+        parameters = parameters.concat(post_parameters)
+        # No need to attach URI query parameters, the .sign_parameters
+        # method takes care of that automatically.
+        signature = ::Signet::OAuth1.sign_parameters(
+          method,
+          uri,
+          parameters,
+          self.client_credential_secret,
+          self.token_credential_secret
+        )
+        parameters << ['oauth_signature', signature]
+        authorization_header = [
+          'Authorization',
+          ::Signet::OAuth1.generate_authorization_header(
+            parameters, options[:realm]
+          )
+        ]
+        headers << authorization_header
+        return [method, uri.to_str, headers, [body]]
+      end
+
+      ##
+      # Transmits a request for a protected resource.
+      #
+      # @param [Hash] options
+      #   The configuration parameters for the request.
+      #   - <code>:request</code> — 
+      #     A pre-constructed request to sign.
+      #   - <code>:method</code> — 
+      #     The HTTP method for the request.  Defaults to 'GET'.
+      #   - <code>:uri</code> — 
+      #     The URI for the request.
+      #   - <code>:headers</code> — 
+      #     The HTTP headers for the request.
+      #   - <code>:body</code> — 
+      #     The HTTP body for the request.
+      #   - <code>:signature_method</code> — 
+      #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
+      #   - <code>:realm</code> — 
+      #     The Authorization realm.  See RFC 2617.
+      #   - <code>:adapter</code> — 
+      #     The HTTP adapter.
+      #     Defaults to <code>HTTPAdapter::NetHTTPRequestAdapter</code>.
+      #   - <code>:connection</code> — 
+      #     An open, manually managed HTTP connection.
+      #     Must be of type <code>HTTPAdapter::Connection</code> and the
+      #     internal connection representation must match the HTTP adapter
+      #     being used.
+      #
+      # @example
+      #   # Using Net::HTTP
+      #   response = client.fetch_protected_resource(
+      #     :uri => 'http://www.example.com/protected/resource'
+      #   )
+      #   status, headers, body = response
+      #
+      # @example
+      #   # Using Typhoeus
+      #   response = client.fetch_protected_resource(
+      #     :request => Typhoeus::Request.new(
+      #       'http://www.example.com/protected/resource'
+      #     ),
+      #     :adapter => HTTPAdapter::TyphoeusRequestAdapter,
+      #     :connection => connection
+      #   )
+      #   status, headers, body = response
+      #
+      # @return [Array] The response object.
+      def fetch_protected_resource(options={})
+        adapter = options[:adapter]
+        unless adapter
+          require 'httpadapter'
+          require 'httpadapter/adapters/net_http'
+          adapter = HTTPAdapter::NetHTTPRequestAdapter
+        end
+        connection = options[:connection]
+        request = self.generate_authenticated_request(options)
+        response = HTTPAdapter.transmit(request, adapter, connection)
+        status, headers, body = response
+        merged_body = StringIO.new
+        body.each do |chunk|
+          merged_body.write(chunk)
+        end
+        body = merged_body.string
+        if status.to_i == 401
+          # When accessing a protected resource, we only want to raise an
+          # error for 401 responses.
+          message = 'Authorization failed.'
+          if body.strip.length > 0
+            message += "  Server message:\n#{body.strip}"
+          end
+          error = ::Signet::AuthorizationError.new(message, request, response)
+          raise error
+        else
+          return response
+        end
+      end
+    end
+  end
+end
