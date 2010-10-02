@@ -101,7 +101,72 @@ describe Signet::OAuth1 do
     )
   end
 
-  it 'should correctly generate a base string with normalized ports' do
+  it "should correctly generate a base string with an already encoded URI" do
+    method = "GET"
+    uri = "http://photos.example.net/https%3A%2F%2Fwww.example.com"
+    parameters = {
+      "oauth_consumer_key" => "dpf43f3p2l4k3l03",
+      "oauth_token" => "nnch734d00sl2jdk",
+      "oauth_signature_method" => "HMAC-SHA1",
+      "oauth_timestamp" => "1191242096",
+      "oauth_nonce" => "kllo9940pd9333jh",
+      "oauth_version" => "1.0",
+      "file" => "vacation.jpg",
+      "size" => "original"
+    }
+    Signet::OAuth1.generate_base_string(method, uri, parameters).should == (
+      "GET&http%3A%2F%2Fphotos.example.net%2F" +
+      "https%253A%252F%252Fwww.example.com&file%3Dvacation.jpg%26" +
+      "oauth_consumer_key%3Ddpf43f3p2l4k3l03%26" +
+      "oauth_nonce%3Dkllo9940pd9333jh%26" +
+      "oauth_signature_method%3DHMAC-SHA1%26" +
+      "oauth_timestamp%3D1191242096%26oauth_token%3Dnnch734d00sl2jdk%26" +
+      "oauth_version%3D1.0%26size%3Doriginal"
+    )
+  end
+
+  it "should correctly generate a base string with an already encoded URI" do
+    method = "GET"
+    uri = "http://example.com/r%20v/X?id=123"
+    parameters = {
+      "oauth_consumer_key" => "dpf43f3p2l4k3l03",
+      "oauth_token" => "nnch734d00sl2jdk",
+      "oauth_signature_method" => "HMAC-SHA1",
+      "oauth_timestamp" => "1191242096",
+      "oauth_nonce" => "kllo9940pd9333jh",
+      "oauth_version" => "1.0"
+    }
+    Signet::OAuth1.generate_base_string(method, uri, parameters).should == (
+      "GET&http%3A%2F%2Fexample.com%2Fr%2520v%2FX&" +
+      "id%3D123%26oauth_consumer_key%3Ddpf43f3p2l4k3l03%26" +
+      "oauth_nonce%3Dkllo9940pd9333jh%26" +
+      "oauth_signature_method%3DHMAC-SHA1%26" +
+      "oauth_timestamp%3D1191242096%26oauth_token%3Dnnch734d00sl2jdk%26" +
+      "oauth_version%3D1.0"
+    )
+  end
+
+  it 'should correctly generate a base string when port 8080 is specified' do
+    method = "GET"
+    uri = "http://www.example.net:8080/?q=1"
+    parameters = {
+      "oauth_consumer_key" => "dpf43f3p2l4k3l03",
+      "oauth_token" => "nnch734d00sl2jdk",
+      "oauth_signature_method" => "HMAC-SHA1",
+      "oauth_timestamp" => "1191242096",
+      "oauth_nonce" => "kllo9940pd9333jh",
+      "oauth_version" => "1.0"
+    }
+    Signet::OAuth1.generate_base_string(method, uri, parameters).should == (
+      "GET&http%3A%2F%2Fwww.example.net%3A8080%2F&" +
+      "oauth_consumer_key%3Ddpf43f3p2l4k3l03%26" +
+      "oauth_nonce%3Dkllo9940pd9333jh%26" +
+      "oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1191242096%26" +
+      "oauth_token%3Dnnch734d00sl2jdk%26oauth_version%3D1.0%26q%3D1"
+    )
+  end
+
+  it 'should correctly generate a base string when port 80 is specified' do
     method = "GET"
     uri = "http://photos.example.net:80/photos"
     parameters = {
@@ -124,7 +189,7 @@ describe Signet::OAuth1 do
     )
   end
 
-  it 'should correctly generate a base string with normalized ports' do
+  it 'should correctly generate a base string when port 443 is specified' do
     method = "GET"
     uri = "https://photos.example.net:443/photos"
     parameters = {
@@ -147,10 +212,56 @@ describe Signet::OAuth1 do
     )
   end
 
-  it 'should correctly generate a base signature' do
+  it 'should correctly generate a base signature with uppercase scheme' do
+    method = 'GET'
+    uri =
+      "HTTP://photos.example.net/photos?file=vacation.jpg"
+    parameters = {
+      "oauth_consumer_key" => "dpf43f3p2l4k3l03",
+      "oauth_token" => "nnch734d00sl2jdk",
+      "oauth_signature_method" => "HMAC-SHA1",
+      "oauth_timestamp" => "1191242096",
+      "oauth_nonce" => "kllo9940pd9333jh",
+      "oauth_version" => "1.0",
+      "size" => "original"
+    }
+    Signet::OAuth1.generate_base_string(method, uri, parameters).should == (
+      "GET&http%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26" +
+      "oauth_consumer_key%3Ddpf43f3p2l4k3l03%26" +
+      "oauth_nonce%3Dkllo9940pd9333jh%26" +
+      "oauth_signature_method%3DHMAC-SHA1%26" +
+      "oauth_timestamp%3D1191242096%26oauth_token%3Dnnch734d00sl2jdk%26" +
+      "oauth_version%3D1.0%26size%3Doriginal"
+    )
+  end
+
+  it 'should correctly generate a base signature with mixedcase authority' do
+    method = 'GET'
+    uri =
+      "http://photos.eXaMpLe.NET/photos?file=vacation.jpg"
+    parameters = {
+      "oauth_consumer_key" => "dpf43f3p2l4k3l03",
+      "oauth_token" => "nnch734d00sl2jdk",
+      "oauth_signature_method" => "HMAC-SHA1",
+      "oauth_timestamp" => "1191242096",
+      "oauth_nonce" => "kllo9940pd9333jh",
+      "oauth_version" => "1.0",
+      "size" => "original"
+    }
+    Signet::OAuth1.generate_base_string(method, uri, parameters).should == (
+      "GET&http%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26" +
+      "oauth_consumer_key%3Ddpf43f3p2l4k3l03%26" +
+      "oauth_nonce%3Dkllo9940pd9333jh%26" +
+      "oauth_signature_method%3DHMAC-SHA1%26" +
+      "oauth_timestamp%3D1191242096%26oauth_token%3Dnnch734d00sl2jdk%26" +
+      "oauth_version%3D1.0%26size%3Doriginal"
+    )
+  end
+
+  it 'should correctly generate a base signature with a method symbol' do
     method = :get
     uri =
-      "HTTP://photos.EXAMPLE.net:80/photos?file=vacation.jpg"
+      "http://photos.example.net/photos?file=vacation.jpg"
     parameters = {
       "oauth_consumer_key" => "dpf43f3p2l4k3l03",
       "oauth_token" => "nnch734d00sl2jdk",

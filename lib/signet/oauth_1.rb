@@ -175,7 +175,14 @@ module Signet #:nodoc:
         raise TypeError, "Expected Enumerable, got #{parameters.class}."
       end
       method = method.to_s.upcase
-      uri = Addressable::URI.parse(uri).normalize
+      parsed_uri = Addressable::URI.parse(uri)
+      uri = Addressable::URI.new(
+        :scheme => parsed_uri.normalized_scheme,
+        :authority => parsed_uri.normalized_authority,
+        :path => parsed_uri.path,
+        :query => parsed_uri.query,
+        :fragment => parsed_uri.fragment
+      )
       uri_parameters = uri.query_values.to_a
       uri = uri.omit(:query, :fragment).to_s
       merged_parameters =
