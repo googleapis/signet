@@ -870,6 +870,7 @@ module Signet #:nodoc:
           headers = options[:headers] || []
           body = options[:body] || ''
         end
+        headers = headers.to_a if headers.kind_of?(Hash)
         request_components = {
           :method => method,
           :uri => uri,
