@@ -1,6 +1,7 @@
 == 0.1.3
 
 * fixed issue with headers passed in as a Hash
+* fixed incompatibilities with Ruby 1.8.6
 
 == 0.1.2
 
