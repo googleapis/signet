@@ -197,7 +197,8 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
     )
     status, headers, body = response
     status.should == 200
-    Hash[headers]['Content-Type'].should == 'application/json'
+    headers = headers.inject({}) { |h,(k,v)| h[k]=v; h }
+    headers['Content-Type'].should == 'application/json'
     merge_body(body).should == '{"data":"goes here"}'
   end
 
@@ -229,7 +230,8 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
     )
     status, headers, body = response
     status.should == 200
-    Hash[headers]['Content-Type'].should == 'application/json'
+    headers = headers.inject({}) { |h,(k,v)| h[k]=v; h }
+    headers['Content-Type'].should == 'application/json'
     merge_body(body).should == '{"data":"goes here"}'
   end
 end

@@ -330,7 +330,7 @@ describe Signet::OAuth1 do
   end
 
   it 'should correctly parse an authorization header' do
-    parameters = Hash[Signet::OAuth1.parse_authorization_header(
+    parameters = Signet::OAuth1.parse_authorization_header(
       'OAuth realm="http://sp.example.com/", ' +
       'oauth_consumer_key="0685bd9184jfhq22", ' +
       'oauth_token="ad180jjd733klru7", ' +
@@ -339,7 +339,7 @@ describe Signet::OAuth1 do
       'oauth_timestamp="137131200", ' +
       'oauth_nonce="4572616e48616d6d65724c61686176", ' +
       'oauth_version="1.0"'
-    )]
+    ).inject({}) { |h,(k,v)| h[k]=v; h }
     parameters['realm'].should == 'http://sp.example.com/'
     parameters['oauth_consumer_key'].should == '0685bd9184jfhq22'
     parameters['oauth_token'].should == 'ad180jjd733klru7'
@@ -464,14 +464,13 @@ describe Signet::OAuth1, 'when generating temporary credentials parameters' do
     @signature_method = 'HMAC-SHA1'
     @scope = 'http://photos.example.com/full_access'
     @additional_parameters = [['scope', @scope]]
-    @unsigned_parameters = Hash[
+    @unsigned_parameters =
       Signet::OAuth1.unsigned_temporary_credential_parameters(
         :client_credential_key => @client_credential_key,
         :callback => @callback,
         :signature_method => @signature_method,
         :additional_parameters => @additional_parameters
-      )
-    ]
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
   end
 
   it 'should raise an error if the client credential key is missing' do
@@ -533,14 +532,13 @@ describe Signet::OAuth1, 'when generating token credential parameters' do
     @temporary_credential_key = 'hh5s93j4hdidpola'
     @verifier = '473f82d3'
     @signature_method = 'HMAC-SHA1'
-    @unsigned_parameters = Hash[
+    @unsigned_parameters =
       Signet::OAuth1.unsigned_token_credential_parameters(
         :client_credential_key => @client_credential_key,
         :temporary_credential_key => @temporary_credential_key,
         :signature_method => @signature_method,
         :verifier => @verifier
-      )
-    ]
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
   end
 
   it 'should raise an error if the client credential key is missing' do
@@ -623,13 +621,12 @@ describe Signet::OAuth1, 'when generating protected resource parameters' do
     @client_credential_key = 'dpf43f3p2l4k3l03'
     @token_credential_key = 'nnch734d00sl2jdk'
     @signature_method = 'HMAC-SHA1'
-    @unsigned_parameters = Hash[
+    @unsigned_parameters =
       Signet::OAuth1.unsigned_resource_parameters(
         :client_credential_key => @client_credential_key,
         :token_credential_key => @token_credential_key,
         :signature_method => @signature_method
-      )
-    ]
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
   end
 
   it 'should raise an error if the client credential key is missing' do
@@ -700,14 +697,13 @@ describe Signet::OAuth1, 'when generating token credential parameters ' +
     )
     @verifier = '473f82d3'
     @signature_method = 'HMAC-SHA1'
-    @unsigned_parameters = Hash[
+    @unsigned_parameters =
       Signet::OAuth1.unsigned_token_credential_parameters(
         :client_credential => @client_credential,
         :temporary_credential => @temporary_credential,
         :signature_method => @signature_method,
         :verifier => @verifier
-      )
-    ]
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
   end
 
   it 'should have the correct client credential key' do
@@ -759,13 +755,12 @@ describe Signet::OAuth1, 'when generating token credential parameters ' +
     )
     @verifier = '473f82d3'
     @signature_method = 'HMAC-SHA1'
-    @unsigned_parameters = Hash[
+    @unsigned_parameters =
       Signet::OAuth1.unsigned_token_credential_parameters(
         :client => @client,
         :signature_method => @signature_method,
         :verifier => @verifier
-      )
-    ]
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
   end
 
   it 'should have the correct client credential key' do
@@ -818,14 +813,13 @@ describe Signet::OAuth1, 'when generating token credential parameters ' +
     )
     @verifier = '473f82d3'
     @signature_method = 'HMAC-SHA1'
-    @unsigned_parameters = Hash[
+    @unsigned_parameters =
       Signet::OAuth1.unsigned_token_credential_parameters(
         :client_credential => @client_credential,
         :temporary_credential => @temporary_credential,
         :signature_method => @signature_method,
         :verifier => @verifier
-      )
-    ]
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
   end
 
   it 'should have the correct client credential key' do
