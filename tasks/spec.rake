@@ -18,7 +18,8 @@ namespace :spec do
       '--exclude', 'spec',
       '--exclude', 'compat',
       '--exclude', '1\\.8\\/gems',
-      '--exclude', '1\\.9\\/gems'
+      '--exclude', '1\\.9\\/gems',
+      '--exclude', '\\.rvm'
     ]
   end
 
