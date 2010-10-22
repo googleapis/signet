@@ -75,7 +75,7 @@ module Signet #:nodoc:
             args = args.first.to_ary
           end
           if args.all? { |value| value.kind_of?(Array) }
-            parameters = Hash[args]
+            parameters = args.inject({}) { |h,(k,v)| h[k]=v; h }
             @key = key_from_hash.call(parameters)
             @secret = secret_from_hash.call(parameters)
           elsif args.size == 2

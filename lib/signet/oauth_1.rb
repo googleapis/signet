@@ -284,7 +284,9 @@ module Signet #:nodoc:
       # be a temporary credential secret when obtaining a token credential
       # for the first time
       base_string = self.generate_base_string(method, uri, parameters)
-      signature_method = Hash[parameters]['oauth_signature_method']
+      signature_method = (
+        parameters.inject({}) { |h,(k,v)| h[k]=v; h }
+      )['oauth_signature_method']
       case signature_method
       when 'HMAC-SHA1'
         require 'signet/oauth_1/signature_methods/hmac_sha1'
@@ -358,8 +360,9 @@ module Signet #:nodoc:
       parsed_uri = Addressable::URI.parse(authorization_uri)
       query_values = parsed_uri.query_values || {}
       if options[:additional_parameters]
-        query_values =
-          query_values.merge(Hash[options[:additional_parameters]])
+        query_values = query_values.merge(
+          options[:additional_parameters].inject({}) { |h,(k,v)| h[k]=v; h }
+        )
       end
       if temporary_credential_key
         query_values['oauth_token'] = temporary_credential_key

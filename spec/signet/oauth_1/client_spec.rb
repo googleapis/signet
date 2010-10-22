@@ -560,9 +560,9 @@ describe Signet::OAuth1::Client, 'configured' do
       headers.each do |(header, value)|
         authorization_header = value if header == 'Authorization'
       end
-      parameters = Hash[::Signet::OAuth1.parse_authorization_header(
+      parameters = ::Signet::OAuth1.parse_authorization_header(
         authorization_header
-      )]
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
       parameters.should_not have_key('oauth_client_credential_key')
       parameters.should_not have_key('oauth_temporary_credential_key')
       parameters.should_not have_key('oauth_token')
@@ -589,9 +589,9 @@ describe Signet::OAuth1::Client, 'configured' do
       headers.each do |(header, value)|
         authorization_header = value if header == 'Authorization'
       end
-      parameters = Hash[::Signet::OAuth1.parse_authorization_header(
+      parameters = ::Signet::OAuth1.parse_authorization_header(
         authorization_header
-      )]
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
       parameters.should_not have_key('oauth_client_credential_key')
       parameters.should_not have_key('oauth_temporary_credential_key')
       parameters.should_not have_key('oauth_callback')
@@ -627,9 +627,9 @@ describe Signet::OAuth1::Client, 'configured' do
         authorization_header = value if header == 'Authorization'
       end
       merge_body(body).should == ''
-      parameters = Hash[::Signet::OAuth1.parse_authorization_header(
+      parameters = ::Signet::OAuth1.parse_authorization_header(
         authorization_header
-      )]
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
       parameters.should_not have_key('oauth_client_credential_key')
       parameters.should_not have_key('oauth_temporary_credential_key')
       parameters.should_not have_key('oauth_token_credential_key')
@@ -669,9 +669,9 @@ describe Signet::OAuth1::Client, 'configured' do
         authorization_header = value if header == 'Authorization'
       end
       merge_body(body).should == 'file=vacation.jpg&size=original'
-      parameters = Hash[::Signet::OAuth1.parse_authorization_header(
+      parameters = ::Signet::OAuth1.parse_authorization_header(
         authorization_header
-      )]
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
       parameters.should_not have_key('oauth_client_credential_key')
       parameters.should_not have_key('oauth_temporary_credential_key')
       parameters.should_not have_key('oauth_token_credential_key')

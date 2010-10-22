@@ -37,6 +37,15 @@
 #
 
 require 'digest'
+if !''.respond_to?(:bytesize) || !''.respond_to?(:bytes)
+  begin
+    require 'backports/1.8.7'
+  rescue LoadError
+    STDERR.puts "Please install backports:"
+    STDERR.puts "sudo gem install backports"
+    exit(1)
+  end
+end
 
 unless defined?(Digest::HMAC)
   module Digest

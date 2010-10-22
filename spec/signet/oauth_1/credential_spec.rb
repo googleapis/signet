@@ -66,7 +66,7 @@ describe Signet::OAuth1::Credential, 'with a Hash for initialization' do
   it 'should allow parameters to be specified as an implicit Hash' do
     class ParameterHashSet
       def initialize(parameters)
-        @parameters = Hash[parameters]
+        @parameters = parameters.inject({}) { |h,(k,v)| h[k]=v; h }
       end
 
       def to_hash
@@ -156,7 +156,7 @@ describe Signet::OAuth1::Credential, 'with a Hash for initialization' do
     token = Signet::OAuth1::Credential.new(
       "dpf43f3p2l4k3l03", "kd94hf93k423kf44"
     )
-    parameters = Hash[token]
+    parameters = token.to_h
     parameters['oauth_token'].should == "dpf43f3p2l4k3l03"
     parameters['oauth_token_secret'].should == "kd94hf93k423kf44"
   end
