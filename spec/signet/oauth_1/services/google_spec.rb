@@ -235,3 +235,22 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
     merge_body(body).should == '{"data":"goes here"}'
   end
 end
+
+describe Signet::OAuth1::Client, 'configured for two-legged OAuth' do
+  before do
+    @client = Signet::OAuth1::Client.new(
+      :client_credential_key => '12345',
+      :client_credential_secret => '12345',
+      :two_legged => true
+    )
+  end
+
+  it 'should raise an error if the client credentials are bogus' do
+    (lambda do
+      @client.fetch_protected_resource(
+        :uri =>
+          'http://www-opensocial.googleusercontent.com/api/people/@me/@self'
+      )
+    end).should raise_error(Signet::AuthorizationError)
+  end
+end

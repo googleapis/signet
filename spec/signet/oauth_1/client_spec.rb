@@ -362,6 +362,13 @@ describe Signet::OAuth1::Client, 'unconfigured' do
       @client.token_credential_secret = 54321
     end).should raise_error(TypeError)
   end
+
+  it 'should not allow the two_legged flag ' +
+      'to be set to a non-Boolean' do
+    (lambda do
+      @client.two_legged = 42
+    end).should raise_error(TypeError)
+  end
 end
 
 describe Signet::OAuth1::Client, 'configured' do

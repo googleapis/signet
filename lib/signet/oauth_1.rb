@@ -284,9 +284,8 @@ module Signet #:nodoc:
       # be a temporary credential secret when obtaining a token credential
       # for the first time
       base_string = self.generate_base_string(method, uri, parameters)
-      signature_method = (
-        parameters.inject({}) { |h,(k,v)| h[k]=v; h }
-      )['oauth_signature_method']
+      parameters = parameters.inject({}) { |h,(k,v)| h[k.to_s]=v; h }
+      signature_method = parameters['oauth_signature_method']
       case signature_method
       when 'HMAC-SHA1'
         require 'signet/oauth_1/signature_methods/hmac_sha1'
@@ -305,13 +304,13 @@ module Signet #:nodoc:
     #
     # @param [Hash] options
     #   The configuration parameters for the request.
-    #   - <code>:client_credential_key</code> — 
+    #   - <code>:client_credential_key</code> —
     #     The client credential key.
-    #   - <code>:callback</code> — 
+    #   - <code>:callback</code> —
     #     The OAuth callback.  Defaults to {Signet::OAuth1::OUT_OF_BAND}.
-    #   - <code>:signature_method</code> — 
+    #   - <code>:signature_method</code> —
     #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-    #   - <code>:additional_parameters</code> — 
+    #   - <code>:additional_parameters</code> —
     #     Non-standard additional parameters.
     #
     # @return [Array]
@@ -380,13 +379,13 @@ module Signet #:nodoc:
     #
     # @param [Hash] options
     #   The configuration parameters for the request.
-    #   - <code>:client_credential_key</code> — 
+    #   - <code>:client_credential_key</code> —
     #     The client credential key.
-    #   - <code>:temporary_credential_key</code> — 
+    #   - <code>:temporary_credential_key</code> —
     #     The temporary credential key.
-    #   - <code>:verifier</code> — 
+    #   - <code>:verifier</code> —
     #     The OAuth verifier.
-    #   - <code>:signature_method</code> — 
+    #   - <code>:signature_method</code> —
     #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
     #
     # @return [Array]
@@ -428,37 +427,44 @@ module Signet #:nodoc:
     #
     # @param [Hash] options
     #   The configuration parameters for the request.
-    #   - <code>:client_credential_key</code> — 
+    #   - <code>:client_credential_key</code> —
     #     The client credential key.
-    #   - <code>:token_credential_key</code> — 
+    #   - <code>:token_credential_key</code> —
     #     The token credential key.
-    #   - <code>:signature_method</code> — 
+    #   - <code>:signature_method</code> —
     #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
+    #   - <code>:two_legged</code> —
+    #     A switch for two-legged OAuth.  Defaults to <code>false</code>.
     #
     # @return [Array]
     #   The parameter list as an <code>Array</code> of key/value pairs.
     def self.unsigned_resource_parameters(options={})
       options = {
-        :signature_method => 'HMAC-SHA1'
+        :signature_method => 'HMAC-SHA1',
+        :two_legged => false
       }.merge(options)
       client_credential_key =
         self.extract_credential_key_option(:client, options)
-      token_credential_key =
-        self.extract_credential_key_option(:token, options)
       if client_credential_key == nil
         raise ArgumentError, "Missing :client_credential_key parameter."
       end
-      if token_credential_key == nil
-        raise ArgumentError, "Missing :token_credential_key parameter."
+      unless options[:two_legged]
+        token_credential_key =
+          self.extract_credential_key_option(:token, options)
+        if token_credential_key == nil
+          raise ArgumentError, "Missing :token_credential_key parameter."
+        end
       end
       parameters = [
         ["oauth_consumer_key", client_credential_key],
-        ["oauth_token", token_credential_key],
         ["oauth_signature_method", options[:signature_method]],
         ["oauth_timestamp", self.generate_timestamp()],
         ["oauth_nonce", self.generate_nonce()],
         ["oauth_version", "1.0"]
       ]
+      unless options[:two_legged]
+        parameters << ["oauth_token", token_credential_key]
+      end
       # No additional parameters allowed here
       return parameters
     end

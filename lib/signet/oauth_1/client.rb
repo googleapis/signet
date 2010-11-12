@@ -26,14 +26,14 @@ module Signet #:nodoc:
       #
       # @param [Hash] options
       #   The configuration parameters for the client.
-      #   - <code>:temporary_credential_uri</code> — 
+      #   - <code>:temporary_credential_uri</code> —
       #     The OAuth temporary credentials URI.
       #   - <code>:authorization_uri</code> —  The OAuth authorization URI.
-      #   - <code>:token_credential_uri</code> — 
+      #   - <code>:token_credential_uri</code> —
       #     The OAuth token credentials URI.
-      #   - <code>:client_credential_key</code> — 
+      #   - <code>:client_credential_key</code> —
       #     The OAuth client credential key.
-      #   - <code>:client_credential_secret</code> — 
+      #   - <code>:client_credential_secret</code> —
       #     The OAuth client credential secret.
       #   - <code>:callback</code> —  The OAuth callback.  Defaults to 'oob'.
       #
@@ -67,6 +67,7 @@ module Signet #:nodoc:
         self.token_credential_secret =
           Signet::OAuth1.extract_credential_secret_option(:token, options)
         self.callback = options[:callback]
+        self.two_legged = options[:two_legged] || false
       end
 
       ##
@@ -481,15 +482,38 @@ module Signet #:nodoc:
       end
 
       ##
+      # Returns whether the client is in two-legged mode.
+      #
+      # @return [TrueClass, FalseClass]
+      #   <code>true</code> for two-legged mode, <code>false</code> otherwise.
+      def two_legged
+        return @two_legged ||= false
+      end
+
+      ##
+      # Sets the client for two-legged mode.
+      #
+      # @param [TrueClass, FalseClass] new_two_legged
+      #   <code>true</code> for two-legged mode, <code>false</code> otherwise.
+      def two_legged=(new_two_legged)
+        if new_two_legged != true && new_two_legged != false
+          raise TypeError,
+            "Expected true or false, got #{new_two_legged.class}."
+        else
+          @two_legged = new_two_legged
+        end
+      end
+
+      ##
       # Generates a request for temporary credentials.
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:signature_method</code> — 
+      #   - <code>:signature_method</code> —
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-      #   - <code>:additional_parameters</code> — 
+      #   - <code>:additional_parameters</code> —
       #     Non-standard additional parameters.
-      #   - <code>:realm</code> — 
+      #   - <code>:realm</code> —
       #     The Authorization realm.  See RFC 2617.
       #
       # @return [Array] The request object.
@@ -552,16 +576,16 @@ module Signet #:nodoc:
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:signature_method</code> — 
+      #   - <code>:signature_method</code> —
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-      #   - <code>:additional_parameters</code> — 
+      #   - <code>:additional_parameters</code> —
       #     Non-standard additional parameters.
-      #   - <code>:realm</code> — 
+      #   - <code>:realm</code> —
       #     The Authorization realm.  See RFC 2617.
-      #   - <code>:adapter</code> — 
+      #   - <code>:adapter</code> —
       #     The HTTP adapter.
       #     Defaults to <code>HTTPAdapter::NetHTTPRequestAdapter</code>.
-      #   - <code>:connection</code> — 
+      #   - <code>:connection</code> —
       #     An open, manually managed HTTP connection.
       #     Must be of type <code>HTTPAdapter::Connection</code> and the
       #     internal connection representation must match the HTTP adapter
@@ -620,16 +644,16 @@ module Signet #:nodoc:
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:signature_method</code> — 
+      #   - <code>:signature_method</code> —
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-      #   - <code>:additional_parameters</code> — 
+      #   - <code>:additional_parameters</code> —
       #     Non-standard additional parameters.
-      #   - <code>:realm</code> — 
+      #   - <code>:realm</code> —
       #     The Authorization realm.  See RFC 2617.
-      #   - <code>:adapter</code> — 
+      #   - <code>:adapter</code> —
       #     The HTTP adapter.
       #     Defaults to <code>HTTPAdapter::NetHTTPRequestAdapter</code>.
-      #   - <code>:connection</code> — 
+      #   - <code>:connection</code> —
       #     An open, manually managed HTTP connection.
       #     Must be of type <code>HTTPAdapter::Connection</code> and the
       #     internal connection representation must match the HTTP adapter
@@ -655,11 +679,11 @@ module Signet #:nodoc:
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:verifier</code> — 
+      #   - <code>:verifier</code> —
       #     The OAuth verifier provided by the server.  Required.
-      #   - <code>:signature_method</code> — 
+      #   - <code>:signature_method</code> —
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-      #   - <code>:realm</code> — 
+      #   - <code>:realm</code> —
       #     The Authorization realm.  See RFC 2617.
       #
       # @return [Array] The request object.
@@ -724,16 +748,16 @@ module Signet #:nodoc:
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:verifier</code> — 
+      #   - <code>:verifier</code> —
       #     The OAuth verifier provided by the server.  Required.
-      #   - <code>:signature_method</code> — 
+      #   - <code>:signature_method</code> —
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-      #   - <code>:realm</code> — 
+      #   - <code>:realm</code> —
       #     The Authorization realm.  See RFC 2617.
-      #   - <code>:adapter</code> — 
+      #   - <code>:adapter</code> —
       #     The HTTP adapter.
       #     Defaults to <code>HTTPAdapter::NetHTTPRequestAdapter</code>.
-      #   - <code>:connection</code> — 
+      #   - <code>:connection</code> —
       #     An open, manually managed HTTP connection.
       #     Must be of type <code>HTTPAdapter::Connection</code> and the
       #     internal connection representation must match the HTTP adapter
@@ -790,16 +814,16 @@ module Signet #:nodoc:
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:signature_method</code> — 
+      #   - <code>:signature_method</code> —
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-      #   - <code>:additional_parameters</code> — 
+      #   - <code>:additional_parameters</code> —
       #     Non-standard additional parameters.
-      #   - <code>:realm</code> — 
+      #   - <code>:realm</code> —
       #     The Authorization realm.  See RFC 2617.
-      #   - <code>:adapter</code> — 
+      #   - <code>:adapter</code> —
       #     The HTTP adapter.
       #     Defaults to <code>HTTPAdapter::NetHTTPRequestAdapter</code>.
-      #   - <code>:connection</code> — 
+      #   - <code>:connection</code> —
       #     An open, manually managed HTTP connection.
       #     Must be of type <code>HTTPAdapter::Connection</code> and the
       #     internal connection representation must match the HTTP adapter
@@ -823,29 +847,33 @@ module Signet #:nodoc:
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:request</code> — 
+      #   - <code>:request</code> —
       #     A pre-constructed request to sign.
-      #   - <code>:method</code> — 
+      #   - <code>:method</code> —
       #     The HTTP method for the request.  Defaults to 'GET'.
-      #   - <code>:uri</code> — 
+      #   - <code>:uri</code> —
       #     The URI for the request.
-      #   - <code>:headers</code> — 
+      #   - <code>:headers</code> —
       #     The HTTP headers for the request.
-      #   - <code>:body</code> — 
+      #   - <code>:body</code> —
       #     The HTTP body for the request.
-      #   - <code>:signature_method</code> — 
+      #   - <code>:signature_method</code> —
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-      #   - <code>:realm</code> — 
+      #   - <code>:realm</code> —
       #     The Authorization realm.  See RFC 2617.
       #
       # @return [Array] The request object.
       def generate_authenticated_request(options={})
         verifications = {
           :client_credential_key => 'Client credential key',
-          :client_credential_secret => 'Client credential secret',
-          :token_credential_key => 'Token credential key',
-          :token_credential_secret => 'Token credential secret'
+          :client_credential_secret => 'Client credential secret'
         }
+        unless self.two_legged
+          verifications.update(
+            :token_credential_key => 'Token credential key',
+            :token_credential_secret => 'Token credential secret'
+          )
+        end
         # Make sure all required state is set
         verifications.each do |(key, value)|
           unless self.send(key)
@@ -898,7 +926,8 @@ module Signet #:nodoc:
         parameters = ::Signet::OAuth1.unsigned_resource_parameters(
           :client_credential_key => self.client_credential_key,
           :token_credential_key => self.token_credential_key,
-          :signature_method => options[:signature_method]
+          :signature_method => options[:signature_method],
+          :two_legged => self.two_legged
         )
         media_type = nil
         headers.each do |(header, value)|
@@ -938,24 +967,24 @@ module Signet #:nodoc:
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:request</code> — 
+      #   - <code>:request</code> —
       #     A pre-constructed request to sign.
-      #   - <code>:method</code> — 
+      #   - <code>:method</code> —
       #     The HTTP method for the request.  Defaults to 'GET'.
-      #   - <code>:uri</code> — 
+      #   - <code>:uri</code> —
       #     The URI for the request.
-      #   - <code>:headers</code> — 
+      #   - <code>:headers</code> —
       #     The HTTP headers for the request.
-      #   - <code>:body</code> — 
+      #   - <code>:body</code> —
       #     The HTTP body for the request.
-      #   - <code>:signature_method</code> — 
+      #   - <code>:signature_method</code> —
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-      #   - <code>:realm</code> — 
+      #   - <code>:realm</code> —
       #     The Authorization realm.  See RFC 2617.
-      #   - <code>:adapter</code> — 
+      #   - <code>:adapter</code> —
       #     The HTTP adapter.
       #     Defaults to <code>HTTPAdapter::NetHTTPRequestAdapter</code>.
-      #   - <code>:connection</code> — 
+      #   - <code>:connection</code> —
       #     An open, manually managed HTTP connection.
       #     Must be of type <code>HTTPAdapter::Connection</code> and the
       #     internal connection representation must match the HTTP adapter
