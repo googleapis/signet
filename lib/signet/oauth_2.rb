@@ -19,14 +19,21 @@ module Signet #:nodoc:
     ##
     # Generates a Basic Authorization header from a client identifier and a
     # client password.
-    def self.generate_basic_authorization_header(
-        client_identifier, client_password)
-      if client_identifier =~ /:/
+    #
+    # @param [String] client_id
+    #   The client identifier.
+    # @param [String] client_password
+    #   The client password.
+    #
+    # @return [String]
+    #   The value for the HTTP Basic Authorization header.
+    def self.generate_basic_authorization_header(client_id, client_password)
+      if client_id =~ /:/
         raise ArgumentError,
           "A client identifier may not contain a ':' character."
       end
       return 'Basic ' + Base64.encode64(
-        client_identifier + ':' + client_password
+        client_id + ':' + client_password
       ).gsub(/\n/, '')
     end
   end
