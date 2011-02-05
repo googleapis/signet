@@ -622,15 +622,17 @@ module Signet #:nodoc:
           if body.strip.length > 0
             message += "  Server message:\n#{body.strip}"
           end
-          error = ::Signet::AuthorizationError.new(message, request, response)
-          raise error
+          raise ::Signet::AuthorizationError.new(
+            message, :request => request, :response => response
+          )
         else
           message = "Unexpected status code: #{status}."
           if body.strip.length > 0
             message += "  Server message:\n#{body.strip}"
           end
-          error = ::Signet::AuthorizationError.new(message, request, response)
-          raise error
+          raise ::Signet::AuthorizationError.new(
+            message, :request => request, :response => response
+          )
         end
       end
       alias_method(
@@ -792,15 +794,17 @@ module Signet #:nodoc:
           if body.strip.length > 0
             message += "  Server message:\n#{body.strip}"
           end
-          error = ::Signet::AuthorizationError.new(message, request, response)
-          raise error
+          raise ::Signet::AuthorizationError.new(
+            message, :request => request, :response => response
+          )
         else
           message = "Unexpected status code: #{status}."
           if body.strip.length > 0
             message += "  Server message:\n#{body.strip}"
           end
-          error = ::Signet::AuthorizationError.new(message, request, response)
-          raise error
+          raise ::Signet::AuthorizationError.new(
+            message, :request => request, :response => response
+          )
         end
       end
       alias_method(
@@ -1032,8 +1036,9 @@ module Signet #:nodoc:
           if body.strip.length > 0
             message += "  Server message:\n#{body.strip}"
           end
-          error = ::Signet::AuthorizationError.new(message, request, response)
-          raise error
+          raise ::Signet::AuthorizationError.new(
+            message, :request => request, :response => response
+          )
         else
           return response
         end

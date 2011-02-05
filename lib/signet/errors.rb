@@ -12,6 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+require 'addressable/uri'
+
 module Signet #:nodoc:
   class AuthorizationError < StandardError
     ##
@@ -19,15 +21,35 @@ module Signet #:nodoc:
     #
     # @param [String] message
     #   A message describing the error.
-    # @param [Array] request
-    #   A tuple of method, uri, headers, and body.  Optional.
-    # @param [Array] response
-    #   A tuple of status, headers, and body.  Optional.
-    def initialize(message, request=nil, response=nil)
+    # @param [Hash] options
+    #   The configuration parameters for the request.
+    #   - <code>:request</code> —
+    #     A tuple of method, uri, headers, and body.  Optional.
+    #   - <code>:response</code> —
+    #     A tuple of status, headers, and body.  Optional.
+    #   - <code>:code</code> —
+    #     An error code.
+    #   - <code>:description</code> —
+    #     Human-readable text intended to be used to assist in resolving the
+    #     error condition.
+    #   - <code>:uri</code> —
+    #     A URI identifying a human-readable web page with additional
+    #     information about the error, indended for the resource owner.
+    def initialize(message, options={})
       super(message)
-      @request = request
-      @response = response
+      @options = options
+      @request = options[:request]
+      @response = options[:response]
+      @code = options[:code]
+      @description = options[:description]
+      @uri = Addressable::URI.parse(options[:uri])
     end
+
+    ##
+    # The HTTP request that triggered this authentication error.
+    #
+    # @return [Array] A tuple of method, uri, headers, and body.
+    attr_reader :request
 
     ##
     # The HTTP response that triggered this authentication error.
