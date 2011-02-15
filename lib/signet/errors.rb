@@ -15,6 +15,13 @@
 require 'addressable/uri'
 
 module Signet #:nodoc:
+  ##
+  # An error indicating the client failed to parse a value.
+  class ParseError < StandardError
+  end
+
+  ##
+  # An error indicating the server refused to authorize the client.
   class AuthorizationError < StandardError
     ##
     # Creates a new authentication error.

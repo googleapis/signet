@@ -362,7 +362,7 @@ describe Signet::OAuth1 do
       Signet::OAuth1.parse_authorization_header(
         'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=='
       )
-    end).should raise_error(ArgumentError)
+    end).should raise_error(Signet::ParseError)
   end
 
   it 'should correctly parse a form encoded credential' do
@@ -421,7 +421,7 @@ describe Signet::OAuth1 do
     parameters = {
       "oauth_consumer_key" => "dpf43f3p2l4k3l03",
       "oauth_token" => "nnch734d00sl2jdk",
-      "oauth_signature_method" => "HMAC-BOGUS",
+      "oauth_signature_method" => "HMAC-BOGUS", # Unknown signature method
       "oauth_timestamp" => "1191242096",
       "oauth_nonce" => "kllo9940pd9333jh",
       "oauth_version" => "1.0",

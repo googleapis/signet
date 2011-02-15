@@ -15,7 +15,57 @@
 require 'base64'
 
 module Signet #:nodoc:
+  ##
+  # An implementation of http://tools.ietf.org/html/draft-ietf-oauth-v2-10
+  #
+  # This module will be updated periodically to support newer drafts of the
+  # specification, as they become widely deployed.
   module OAuth2
+    def self.parse_authorization_header(field_value)
+      auth_scheme = field_value[/^([-._0-9a-zA-Z]+)/, 1]
+      case auth_scheme
+      when /^Basic$/i
+        # HTTP Basic is allowed in OAuth 2
+        return self.parse_basic_credentials(field_value[/^Basic\s+(.*)$/i, 1])
+      when /^OAuth$/i
+        # Other token types may be supported eventually
+        return self.parse_bearer_credentials(field_value[/^OAuth\s+(.*)$/i, 1])
+      else
+        raise ParseError,
+          'Parsing non-OAuth Authorization headers is out of scope.'
+      end
+    end
+
+    def self.parse_www_authenticate_header(field_value)
+      # TODO
+    end
+
+    def self.parse_basic_credentials(credential_string)
+      decoded = Base64.decode64(credential_string)
+      client_id, client_secret = decoded.split(':', 2)
+      return [['client_id', client_id], ['client_secret', client_secret]]
+    end
+
+    def self.parse_bearer_credentials(credential_string)
+      access_token = credential_string[/^([^,\s]+)(?:\s|,|$)/i, 1]
+      parameters = []
+      parameters << ['access_token', access_token]
+      auth_param_string = credential_string[/^(?:[^,\s]+)\s*,\s*(.*)$/i, 1]
+      if auth_param_string
+        # This code will rarely get called, but is included for completeness
+        auth_param_pairs = auth_param_string.split(/\s*,\s*/)
+        parameters.concat(auth_param_pairs.inject([]) do |accu, pair|
+          name, value = pair.split('=', 2)
+          if value =~ /^".*"$/
+            value = value.gsub(/^"(.*)"$/, '\1').gsub('"', '\"')
+          end
+          accu << [name, value]
+          accu
+        end)
+      end
+      return parameters
+    end
+
     ##
     # Generates a Basic Authorization header from a client identifier and a
     # client password.

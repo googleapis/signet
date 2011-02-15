@@ -231,7 +231,7 @@ module Signet #:nodoc:
         raise TypeError, "Expected String, got #{header.class}."
       end
       unless header[0...6] == 'OAuth '
-        raise ArgumentError,
+        raise ParseError,
           'Parsing non-OAuth Authorization headers is out of scope.'
       end
       header = header.gsub(/^OAuth /, '')
