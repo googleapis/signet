@@ -28,7 +28,8 @@ module Signet #:nodoc:
       #   The configuration parameters for the client.
       #   - <code>:temporary_credential_uri</code> —
       #     The OAuth temporary credentials URI.
-      #   - <code>:authorization_uri</code> —  The OAuth authorization URI.
+      #   - <code>:authorization_uri</code> —
+      #     The OAuth authorization URI.
       #   - <code>:token_credential_uri</code> —
       #     The OAuth token credentials URI.
       #   - <code>:client_credential_key</code> —

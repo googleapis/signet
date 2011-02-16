@@ -1,4 +1,5 @@
 require 'addressable/uri'
+require 'signet'
 
 begin
   require 'securerandom'
