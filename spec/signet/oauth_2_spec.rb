@@ -34,12 +34,115 @@ describe Signet::OAuth2 do
       parameters['access_token'].should == 'vF9dft4qmT'
     end
 
-    it 'should correctly handle OAuth auth-scheme with auth-params' do
+    it 'should correctly handle OAuth auth-scheme with realm' do
       parameters = Signet::OAuth2.parse_authorization_header(
         'OAuth vF9dft4qmT, realm="http://sp.example.com/"'
       ).inject({}) { |h,(k,v)| h[k]=v; h }
       parameters['access_token'].should == 'vF9dft4qmT'
       parameters['realm'].should == 'http://sp.example.com/'
+    end
+
+    it 'should correctly handle OAuth auth-scheme with multiple auth-params' do
+      parameters = Signet::OAuth2.parse_authorization_header(
+        'OAuth vF9dft4qmT, first="one", second="two"'
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
+      parameters['access_token'].should == 'vF9dft4qmT'
+      parameters['first'].should == 'one'
+      parameters['second'].should == 'two'
+    end
+
+    it 'should liberally handle auth-params with single-quoted strings' do
+      parameters = Signet::OAuth2.parse_authorization_header(
+        'OAuth vF9dft4qmT, first=\'one\', second=\'two\''
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
+      parameters['access_token'].should == 'vF9dft4qmT'
+      parameters['first'].should == 'one'
+      parameters['second'].should == 'two'
+    end
+
+    it 'should liberally handle auth-params with unquoted strings' do
+      parameters = Signet::OAuth2.parse_authorization_header(
+        'OAuth vF9dft4qmT, first=one, second=two'
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
+      parameters['access_token'].should == 'vF9dft4qmT'
+      parameters['first'].should == 'one'
+      parameters['second'].should == 'two'
+    end
+
+    it 'should not allow unquoted strings that do not match tchar' do
+      (lambda do
+        parameters = Signet::OAuth2.parse_authorization_header(
+          'OAuth vF9dft4qmT, first=one:1'
+        )
+      end).should raise_error(Signet::ParseError)
+    end
+
+    it 'should not parse non-OAuth auth-schemes' do
+      (lambda do
+        Signet::OAuth2.parse_authorization_header(
+          'AuthSub token="GD32CMCL25aZ-v____8B"'
+        )
+      end).should raise_error(Signet::ParseError)
+    end
+  end
+
+  # This behavior will almost certainly change in subsequent updates.
+  describe 'when parsing a WWW-Authenticate header' do
+    it 'should correctly handle OAuth challenge with auth-params' do
+      parameters = Signet::OAuth2.parse_www_authenticate_header(
+        'OAuth realm="http://sp.example.com/", error="expired_token", ' +
+        'error_description="The access token has expired."'
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
+      parameters['realm'].should == 'http://sp.example.com/'
+      parameters['error'].should == 'expired_token'
+      parameters['error_description'].should == 'The access token has expired.'
+    end
+
+    it 'should liberally handle auth-params with single-quoted strings' do
+      parameters = Signet::OAuth2.parse_www_authenticate_header(
+        'OAuth realm=\'http://sp.example.com/\', error=\'expired_token\', ' +
+        'error_description=\'The access token has expired.\''
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
+      parameters['realm'].should == 'http://sp.example.com/'
+      parameters['error'].should == 'expired_token'
+      parameters['error_description'].should == 'The access token has expired.'
+    end
+
+    it 'should liberally handle auth-params with token strings' do
+      parameters = Signet::OAuth2.parse_www_authenticate_header(
+        'OAuth realm="http://sp.example.com/", error=expired_token, ' +
+        'error_description="The access token has expired."'
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
+      parameters['realm'].should == 'http://sp.example.com/'
+      parameters['error'].should == 'expired_token'
+      parameters['error_description'].should == 'The access token has expired.'
+    end
+
+    it 'should liberally handle out-of-order auth-params' do
+      parameters = Signet::OAuth2.parse_www_authenticate_header(
+        'OAuth error_description=\'The access token has expired.\', ' +
+        'error=\'expired_token\', realm=\'http://sp.example.com/\''
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
+      parameters['realm'].should == 'http://sp.example.com/'
+      parameters['error'].should == 'expired_token'
+      parameters['error_description'].should == 'The access token has expired.'
+    end
+
+    it 'should not allow unquoted strings that do not match tchar' do
+      (lambda do
+        Signet::OAuth2.parse_www_authenticate_header(
+          'OAuth realm=http://sp.example.com/, error=expired_token, ' +
+          'error_description="The access token has expired."'
+        )
+      end).should raise_error(Signet::ParseError)
+    end
+
+    it 'should not parse non-OAuth challenges' do
+      (lambda do
+        Signet::OAuth2.parse_www_authenticate_header(
+          'AuthSub realm="https://www.google.com/accounts/AuthSubRequest"'
+        )
+      end).should raise_error(Signet::ParseError)
     end
   end
 

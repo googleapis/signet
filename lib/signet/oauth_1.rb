@@ -235,6 +235,7 @@ module Signet #:nodoc:
           'Parsing non-OAuth Authorization headers is out of scope.'
       end
       header = header.gsub(/^OAuth /, '')
+      # TODO(bobaman): Figure out how to use the shared auth param method.
       return header.split(/,\s*/).inject([]) do |accu, pair|
         k = pair[/^(.*?)=\"[^\"]*\"/, 1]
         v = pair[/^.*?=\"([^\"]*)\"/, 1]

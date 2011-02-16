@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 require 'base64'
+require 'signet'
 
 module Signet #:nodoc:
   ##
@@ -37,7 +38,15 @@ module Signet #:nodoc:
     end
 
     def self.parse_www_authenticate_header(field_value)
-      # TODO
+      auth_scheme = field_value[/^([-._0-9a-zA-Z]+)/, 1]
+      case auth_scheme
+      when /^OAuth$/i
+        # Other token types may be supported eventually
+        return self.parse_oauth_challenge(field_value[/^OAuth\s+(.*)$/i, 1])
+      else
+        raise ParseError,
+          'Parsing non-OAuth WWW-Authenticate headers is out of scope.'
+      end
     end
 
     def self.parse_basic_credentials(credential_string)
@@ -53,17 +62,13 @@ module Signet #:nodoc:
       auth_param_string = credential_string[/^(?:[^,\s]+)\s*,\s*(.*)$/i, 1]
       if auth_param_string
         # This code will rarely get called, but is included for completeness
-        auth_param_pairs = auth_param_string.split(/\s*,\s*/)
-        parameters.concat(auth_param_pairs.inject([]) do |accu, pair|
-          name, value = pair.split('=', 2)
-          if value =~ /^".*"$/
-            value = value.gsub(/^"(.*)"$/, '\1').gsub('"', '\"')
-          end
-          accu << [name, value]
-          accu
-        end)
+        parameters.concat(Signet.parse_auth_param_list(auth_param_string))
       end
       return parameters
+    end
+
+    def self.parse_oauth_challenge(challenge_string)
+      return Signet.parse_auth_param_list(challenge_string)
     end
 
     ##
