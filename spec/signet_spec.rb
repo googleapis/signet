@@ -18,6 +18,16 @@ require 'signet/oauth_2'
 
 describe Signet do
   describe 'when parsing an auth param list' do
+    it 'should correctly handle commas' do
+      parameters = Signet.parse_auth_param_list(
+        'a="1, 2" , b="3,4",c="5 , 6" ,d="7 ,8"'
+      ).inject({}) { |h,(k,v)| h[k]=v; h }
+      parameters['a'].should == '1, 2'
+      parameters['b'].should == '3,4'
+      parameters['c'].should == '5 , 6'
+      parameters['d'].should == '7 ,8'
+    end
+
     it 'should correctly handle backslash-escaped pairs' do
       parameters = Signet.parse_auth_param_list(
         'token="\t\o\k\e\n" sigalg="\s\i\g\a\l\g" data="\d\a\t\a"'
