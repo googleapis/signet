@@ -350,6 +350,29 @@ describe Signet::OAuth1 do
     parameters['oauth_version'].should == '1.0'
   end
 
+  it 'should not unescape a realm in an authorization header' do
+    parameters = Signet::OAuth1.parse_authorization_header(
+      'OAuth realm="http%3A%2F%2Fsp.example.com%2F", ' +
+      'domain="http%3A%2F%2Fsp.example.com%2F", ' +
+      'oauth_consumer_key="0685bd9184jfhq22", ' +
+      'oauth_token="ad180jjd733klru7", ' +
+      'oauth_signature_method="HMAC-SHA1", ' +
+      'oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D", ' +
+      'oauth_timestamp="137131200", ' +
+      'oauth_nonce="4572616e48616d6d65724c61686176", ' +
+      'oauth_version="1.0"'
+    ).inject({}) { |h,(k,v)| h[k]=v; h }
+    parameters['realm'].should == 'http%3A%2F%2Fsp.example.com%2F'
+    parameters['domain'].should == 'http://sp.example.com/'
+    parameters['oauth_consumer_key'].should == '0685bd9184jfhq22'
+    parameters['oauth_token'].should == 'ad180jjd733klru7'
+    parameters['oauth_signature_method'].should == 'HMAC-SHA1'
+    parameters['oauth_signature'].should == 'wOJIO9A2W5mFwDgiDvZbTSMK/PY='
+    parameters['oauth_timestamp'].should == '137131200'
+    parameters['oauth_nonce'].should == '4572616e48616d6d65724c61686176'
+    parameters['oauth_version'].should == '1.0'
+  end
+
   it 'should raise an error if parsing an authorization header ' +
       'with bogus values' do
     (lambda do

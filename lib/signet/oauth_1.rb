@@ -226,27 +226,26 @@ module Signet #:nodoc:
     # Parses an <code>Authorization</code> header into its component
     # parameters.  Parameter keys and values are decoded according to the
     # rules given in RFC 5849.
-    def self.parse_authorization_header(header)
-      if !header.kind_of?(String)
-        raise TypeError, "Expected String, got #{header.class}."
+    def self.parse_authorization_header(field_value)
+      if !field_value.kind_of?(String)
+        raise TypeError, "Expected String, got #{field_value.class}."
       end
-      unless header[0...6] == 'OAuth '
+      auth_scheme = field_value[/^([-._0-9a-zA-Z]+)/, 1]
+      case auth_scheme
+      when /^OAuth$/i
+        # Other token types may be supported eventually
+        pairs = Signet.parse_auth_param_list(field_value[/^OAuth\s+(.*)$/i, 1])
+        return (pairs.inject([]) do |accu, (k, v)|
+          if k != 'realm'
+            k = self.unencode(k)
+            v = self.unencode(v)
+          end
+          accu << [k, v]
+          accu
+        end)
+      else
         raise ParseError,
           'Parsing non-OAuth Authorization headers is out of scope.'
-      end
-      header = header.gsub(/^OAuth /, '')
-      # TODO(bobaman): Figure out how to use the shared auth param method.
-      return header.split(/,\s*/).inject([]) do |accu, pair|
-        k = pair[/^(.*?)=\"[^\"]*\"/, 1]
-        v = pair[/^.*?=\"([^\"]*)\"/, 1]
-        if k != 'realm'
-          k = self.unencode(k)
-          v = self.unencode(v)
-        else
-          v = v.gsub('\"', '"')
-        end
-        accu << [k, v]
-        accu
       end
     end
 
