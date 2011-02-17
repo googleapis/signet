@@ -14,7 +14,13 @@
 
 require 'addressable/uri'
 
-module Signet #:nodoc:
+module Signet
+  ##
+  # An error indicating that the client has aborted an operation that
+  # would have been unsafe to perform.
+  class UnsafeOperationError < StandardError
+  end
+
   ##
   # An error indicating the client failed to parse a value.
   class ParseError < StandardError

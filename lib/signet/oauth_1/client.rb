@@ -14,11 +14,12 @@
 
 require 'stringio'
 require 'addressable/uri'
+require 'signet'
+require 'signet/errors'
 require 'signet/oauth_1'
 require 'signet/oauth_1/credential'
-require 'signet/errors'
 
-module Signet #:nodoc:
+module Signet
   module OAuth1
     class Client
       ##

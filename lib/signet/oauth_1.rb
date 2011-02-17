@@ -357,7 +357,7 @@ module Signet #:nodoc:
       }.merge(options)
       temporary_credential_key =
         self.extract_credential_key_option(:temporary, options)
-      parsed_uri = Addressable::URI.parse(authorization_uri)
+      parsed_uri = Addressable::URI.parse(authorization_uri).dup
       query_values = parsed_uri.query_values || {}
       if options[:additional_parameters]
         query_values = query_values.merge(

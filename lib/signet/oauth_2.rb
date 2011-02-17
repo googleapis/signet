@@ -91,5 +91,24 @@ module Signet #:nodoc:
         client_id + ':' + client_password
       ).gsub(/\n/, '')
     end
+
+    ##
+    # Appends the necessary OAuth parameters to
+    # the base authorization endpoint URI.
+    #
+    # @param [Addressable::URI, String, #to_str] authorization_uri
+    #   The base authorization endpoint URI.
+    #
+    # @return [String] The authorization URI to redirect the user to.
+    def self.generate_authorization_uri(authorization_uri, parameters={})
+      for key, value in parameters
+        parameters.delete(key) if value == nil
+      end
+      parsed_uri = Addressable::URI.parse(authorization_uri).dup
+      query_values = parsed_uri.query_values || {}
+      query_values = query_values.merge(parameters)
+      parsed_uri.query_values = query_values
+      return parsed_uri.normalize.to_s
+    end
   end
 end
