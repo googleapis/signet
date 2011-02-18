@@ -74,20 +74,82 @@ module Signet
       #     :scope => 'example',
       #     :redirect_uri => 'https://example.client.com/oauth'
       #   )
+      #
+      # @see Signet::OAuth2::Client#update!
       def initialize(options={})
-        self.authorization_uri = options[:authorization_uri]
-        self.token_credential_uri = options[:token_credential_uri]
-        self.client_id = options[:client_id]
-        self.client_secret = options[:client_secret]
-        self.scope = options[:scope]
-        self.state = options[:state]
-        self.code = options[:code]
-        self.redirect_uri = options[:redirect_uri]
-        self.username = options[:username]
-        self.password = options[:password]
-        self.assertion_type = options[:assertion_type]
-        self.assertion = options[:assertion]
-        self.refresh_token = options[:refresh_token]
+        self.update!(options)
+      end
+
+      ##
+      # Updates an OAuth 2.0 client.
+      #
+      # @param [Hash] options
+      #   The configuration parameters for the client.
+      #   - <code>:authorization_uri</code> —
+      #     The authorization server's HTTP endpoint capable of
+      #     authenticating the end-user and obtaining authorization.
+      #   - <code>:token_credential_uri</code> —
+      #     The authorization server's HTTP endpoint capable of issuing
+      #     tokens and refreshing expired tokens.
+      #   - <code>:client_id</code> —
+      #     A unique identifier issued to the client to identify itself to the
+      #     authorization server.
+      #   - <code>:client_secret</code> —
+      #     A shared symmetric secret issued by the authorization server,
+      #     which is used to authenticate the client.
+      #   - <code>:scope</code> —
+      #     The scope of the access request, expressed either as an Array
+      #     or as a space-delimited String.
+      #   - <code>:state</code> —
+      #     An arbitrary string designed to allow the client to maintain state.
+      #   - <code>:code</code> —
+      #     The authorization code received from the authorization server.
+      #   - <code>:redirect_uri</code> —
+      #     The redirection URI used in the initial request.
+      #   - <code>:username</code> —
+      #     The resource owner's username.
+      #   - <code>:password</code> —
+      #     The resource owner's password.
+      #   - <code>:assertion_type</code> —
+      #     The format of the assertion as defined by the
+      #     authorization server. The value must be an absolute URI.
+      #   - <code>:assertion</code> —
+      #     The raw assertion value.
+      #   - <code>:refresh_token</code> —
+      #     The refresh token associated with the access token
+      #     to be refreshed.
+      #   - <code>:access_token</code> —
+      #     The current access token for this client.
+      #   - <code>:expires_in</code> —
+      #     The current access token for this client.
+      #
+      # @example
+      #   client.update!(
+      #     :code => 'i1WsRn1uB1',
+      #     :access_token => 'FJQbwq9',
+      #     :expires_in => 3600
+      #   )
+      #
+      # @see Signet::OAuth2::Client#initialize
+      def update!(options={})
+        # Normalize key to String to allow indifferent access.
+        options = options.inject({}) do |accu, (key, value)|
+          accu[key.to_s] = value
+          accu
+        end
+        self.authorization_uri = options["authorization_uri"]
+        self.token_credential_uri = options["token_credential_uri"]
+        self.client_id = options["client_id"]
+        self.client_secret = options["client_secret"]
+        self.scope = options["scope"]
+        self.state = options["state"]
+        self.code = options["code"]
+        self.redirect_uri = options["redirect_uri"]
+        self.username = options["username"]
+        self.password = options["password"]
+        self.assertion_type = options["assertion_type"]
+        self.assertion = options["assertion"]
+        self.refresh_token = options["refresh_token"]
       end
 
       ##
@@ -409,6 +471,54 @@ module Signet
       #   The access token.
       def access_token=(new_access_token)
         @access_token = new_access_token
+      end
+
+      ##
+      # Returns the lifetime of the access token in seconds.
+      #
+      # @return [Integer] The access token lifetime.
+      def expires_in
+        return @expires_in
+      end
+
+      ##
+      # Sets the lifetime of the access token in seconds.  Resets the issued
+      # timestamp.
+      #
+      # @param [String] new_expires_in
+      #   The access token lifetime.
+      def expires_in=(new_expires_in)
+        @expires_in = new_expires_in
+        @issued_at = Time.now
+      end
+
+      ##
+      # Returns the timestamp the access token was issued at.
+      #
+      # @return [Integer] The access token issuance time.
+      def issued_at
+        return @issued_at
+      end
+
+      ##
+      # Sets the timestamp the access token was issued at.
+      #
+      # @param [String] new_issued_at
+      #    The access token issuance time.
+      def issued_at=(new_issued_at)
+        @issued_at = new_issued_at
+      end
+
+      ##
+      # Returns the timestamp the access token will expire at.
+      #
+      # @return [Integer] The access token lifetime.
+      def expires_at
+        if @issued_at && @expires_in
+          return @issued_at + @expires_in
+        else
+          return nil
+        end
       end
     end
   end
