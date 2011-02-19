@@ -150,6 +150,9 @@ module Signet
         self.assertion_type = options["assertion_type"]
         self.assertion = options["assertion"]
         self.refresh_token = options["refresh_token"]
+        self.access_token = options["access_token"]
+        self.expires_in = options["expires_in"]
+        return self
       end
 
       ##
@@ -488,7 +491,7 @@ module Signet
       # @param [String] new_expires_in
       #   The access token lifetime.
       def expires_in=(new_expires_in)
-        @expires_in = new_expires_in
+        @expires_in = new_expires_in.to_i
         @issued_at = Time.now
       end
 
@@ -528,6 +531,120 @@ module Signet
       #   The expiration state of the access token.
       def expired?
         return Time.now >= self.expires_at
+      end
+
+      ##
+      # Returns the inferred grant type, based on the current state of the
+      # client object.  Returns `"none"` if the client has insufficient
+      # information to make an in-band authorization request.
+      #
+      # @return [String]
+      #   The inferred grant type.
+      def grant_type
+        if self.code && self.redirect_uri
+          return 'authorization_code'
+        elsif self.assertion && self.assertion_type
+          return 'assertion'
+        elsif self.refresh_token
+          return 'refresh_token'
+        elsif self.username && self.password
+          return 'password'
+        else
+          # We don't have sufficient auth information, assume an out-of-band
+          # authorization arrangement between the client and server.
+          return 'none'
+        end
+      end
+
+      ##
+      # Generates a request for token credentials.
+      #
+      # @param [Hash] options
+      #   The configuration parameters for the request.
+      #   - <code>:code</code> —
+      #     The authorization code.
+      #
+      # @return [Array] The request object.
+      def generate_access_token_request
+        if self.token_credential_uri == nil
+          raise ArgumentError, 'Missing token endpoint URI.'
+        end
+        if self.client_id == nil
+          raise ArgumentError, 'Missing client identifier.'
+        end
+        if self.client_secret == nil
+          raise ArgumentError, 'Missing client secret.'
+        end
+        method = 'POST'
+        parameters = {"grant_type" => self.grant_type}
+        case self.grant_type
+        when 'authorization_code'
+          parameters['code'] = self.code
+          parameters['redirect_uri'] = self.redirect_uri
+        when 'password'
+          parameters['username'] = self.username
+          parameters['password'] = self.password
+        when 'assertion'
+          parameters['assertion_type'] = self.assertion_type
+          parameters['assertion'] = self.assertion
+        when 'refresh_token'
+          parameters['refresh_token'] = self.refresh_token
+        end
+        parameters['client_id'] = self.client_id
+        parameters['client_secret'] = self.client_secret
+        headers = [
+          ['Cache-Control', 'no-store'],
+          ['Content-Type', 'application/x-www-form-urlencoded']
+        ]
+        return [
+          method,
+          self.token_credential_uri.to_str,
+          headers,
+          [Addressable::URI.form_encode(parameters)]
+        ]
+      end
+
+      def fetch_access_token(options={})
+        adapter = options[:adapter]
+        unless adapter
+          require 'httpadapter'
+          require 'httpadapter/adapters/net_http'
+          adapter = HTTPAdapter::NetHTTPRequestAdapter
+        end
+        connection = options[:connection]
+        request = self.generate_access_token_request
+        response = HTTPAdapter.transmit(request, adapter, connection)
+        status, headers, body = response
+        merged_body = StringIO.new
+        body.each do |chunk|
+          merged_body.write(chunk)
+        end
+        body = merged_body.string
+        if status.to_i == 200
+          return ::Signet::OAuth2.parse_json_credentials(body)
+        elsif [400, 401, 403].include?(status.to_i)
+          message = 'Authorization failed.'
+          if body.strip.length > 0
+            message += "  Server message:\n#{body.strip}"
+          end
+          raise ::Signet::AuthorizationError.new(
+            message, :request => request, :response => response
+          )
+        else
+          message = "Unexpected status code: #{status}."
+          if body.strip.length > 0
+            message += "  Server message:\n#{body.strip}"
+          end
+          raise ::Signet::AuthorizationError.new(
+            message, :request => request, :response => response
+          )
+        end
+      end
+
+      def fetch_access_token!(options={})
+        token_hash = self.fetch_access_token(options)
+        self.update!(token_hash)
+        return token_hash
       end
     end
   end

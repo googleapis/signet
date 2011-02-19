@@ -14,6 +14,7 @@
 
 require 'base64'
 require 'signet'
+require 'json'
 
 module Signet #:nodoc:
   ##
@@ -69,6 +70,13 @@ module Signet #:nodoc:
 
     def self.parse_oauth_challenge(challenge_string)
       return Signet.parse_auth_param_list(challenge_string)
+    end
+
+    def self.parse_json_credentials(body)
+      if !body.kind_of?(String)
+        raise TypeError, "Expected String, got #{body.class}."
+      end
+      return JSON.parse(body)
     end
 
     ##

@@ -28,13 +28,13 @@ describe Signet::OAuth2::Client, 'unconfigured' do
   it 'should allow the authorization_uri to be set to a String' do
     @client.authorization_uri = 'https://example.com/authorize'
     @client.client_id = 's6BhdRkqt3'
-    @client.redirect_uri = 'https://example.client.com/oauth'
+    @client.redirect_uri = 'https://example.client.com/callback'
     @client.authorization_uri.to_s.should include(
       'https://example.com/authorize'
     )
     @client.authorization_uri.query_values['client_id'].should == 's6BhdRkqt3'
     @client.authorization_uri.query_values['redirect_uri'].should == (
-      'https://example.client.com/oauth'
+      'https://example.client.com/callback'
     )
   end
 
@@ -43,13 +43,13 @@ describe Signet::OAuth2::Client, 'unconfigured' do
       Addressable::URI.parse('https://example.com/authorize')
     @client.client_id = 's6BhdRkqt3'
     @client.redirect_uri =
-      Addressable::URI.parse('https://example.client.com/oauth')
+      Addressable::URI.parse('https://example.client.com/callback')
     @client.authorization_uri.to_s.should include(
       'https://example.com/authorize'
     )
     @client.authorization_uri.query_values['client_id'].should == 's6BhdRkqt3'
     @client.authorization_uri.query_values['redirect_uri'].should == (
-      'https://example.client.com/oauth'
+      'https://example.client.com/callback'
     )
   end
 
