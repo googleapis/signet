@@ -520,6 +520,15 @@ module Signet
           return nil
         end
       end
+
+      ##
+      # Returns true if the access token has expired.
+      #
+      # @return [TrueClass, FalseClass]
+      #   The expiration state of the access token.
+      def expired?
+        return Time.now >= self.expires_at
+      end
     end
   end
 end
