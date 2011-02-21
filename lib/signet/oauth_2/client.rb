@@ -17,7 +17,6 @@ require 'addressable/uri'
 require 'signet'
 require 'signet/errors'
 require 'signet/oauth_2'
-require 'signet/oauth_2/credential'
 
 module Signet
   module OAuth2
@@ -131,6 +130,7 @@ module Signet
       #   )
       #
       # @see Signet::OAuth2::Client#initialize
+      # @see Signet::OAuth2::Client#update_token!
       def update!(options={})
         # Normalize key to String to allow indifferent access.
         options = options.inject({}) do |accu, (key, value)|
@@ -149,6 +149,38 @@ module Signet
         self.password = options["password"]
         self.assertion_type = options["assertion_type"]
         self.assertion = options["assertion"]
+        self.update_token!(options)
+        return self
+      end
+
+      ##
+      # Updates an OAuth 2.0 client.
+      #
+      # @param [Hash] options
+      #   The configuration parameters related to the token.
+      #   - <code>:refresh_token</code> —
+      #     The refresh token associated with the access token
+      #     to be refreshed.
+      #   - <code>:access_token</code> —
+      #     The current access token for this client.
+      #   - <code>:expires_in</code> —
+      #     The current access token for this client.
+      #
+      # @example
+      #   client.update!(
+      #     :refresh_token => 'n4E9O119d',
+      #     :access_token => 'FJQbwq9',
+      #     :expires_in => 3600
+      #   )
+      #
+      # @see Signet::OAuth2::Client#initialize
+      # @see Signet::OAuth2::Client#update!
+      def update_token!(options={})
+        # Normalize key to String to allow indifferent access.
+        options = options.inject({}) do |accu, (key, value)|
+          accu[key.to_s] = value
+          accu
+        end
         self.refresh_token = options["refresh_token"]
         self.access_token = options["access_token"]
         self.expires_in = options["expires_in"]
@@ -643,7 +675,10 @@ module Signet
 
       def fetch_access_token!(options={})
         token_hash = self.fetch_access_token(options)
-        self.update!(token_hash)
+        if token_hash
+          self.issued_at = Time.now
+          self.update_token!(token_hash)
+        end
         return token_hash
       end
     end
