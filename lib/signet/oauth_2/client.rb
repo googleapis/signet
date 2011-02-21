@@ -607,6 +607,11 @@ module Signet
         if self.client_secret == nil
           raise ArgumentError, 'Missing client secret.'
         end
+        if self.redirect_uri && !self.code
+          # Grant type can be assumed to be `authorization_code` because of
+          # the presence of the redirect URI.
+          raise ArgumentError, 'Missing authorization code.'
+        end
         method = 'POST'
         parameters = {"grant_type" => self.grant_type}
         case self.grant_type
@@ -676,10 +681,170 @@ module Signet
       def fetch_access_token!(options={})
         token_hash = self.fetch_access_token(options)
         if token_hash
+          # No-op for grant types other than `authorization_code`.
+          # An authorization code is a one-time use token and is immediately
+          # revoked after usage.
+          self.code = nil
           self.issued_at = Time.now
           self.update_token!(token_hash)
         end
         return token_hash
+      end
+
+      ##
+      # Generates an authenticated request for protected resources.
+      #
+      # @param [Hash] options
+      #   The configuration parameters for the request.
+      #   - <code>:request</code> —
+      #     A pre-constructed request.  An OAuth 2 Authorization header
+      #     will be added to it, as well as an explicit Cache-Control
+      #     `no-store` directive.
+      #   - <code>:method</code> —
+      #     The HTTP method for the request.  Defaults to 'GET'.
+      #   - <code>:uri</code> —
+      #     The URI for the request.
+      #   - <code>:headers</code> —
+      #     The HTTP headers for the request.
+      #   - <code>:body</code> —
+      #     The HTTP body for the request.
+      #   - <code>:realm</code> —
+      #     The Authorization realm.  See RFC 2617.
+      #
+      # @return [Array] The request object.
+      def generate_authenticated_request(options={})
+        if self.access_token == nil
+          raise ArgumentError, 'Missing access token.'
+        end
+        options = {
+          :realm => nil
+        }.merge(options)
+        if options[:request]
+          if options[:request].kind_of?(Array)
+            request = options[:request]
+          elsif options[:adapter] || options[:request].respond_to?(:to_ary)
+            request =
+              HTTPAdapter.adapt_request(options[:request], options[:adapter])
+          end
+          method, uri, headers, body = request
+        else
+          method = options[:method] || 'GET'
+          uri = options[:uri]
+          headers = options[:headers] || []
+          body = options[:body] || ''
+        end
+        headers = headers.to_a if headers.kind_of?(Hash)
+        request_components = {
+          :method => method,
+          :uri => uri,
+          :headers => headers,
+          :body => body
+        }
+        # Verify that we have all pieces required to return an HTTP request
+        request_components.each do |(key, value)|
+          unless value
+            raise ArgumentError, "Missing :#{key} parameter."
+          end
+        end
+        if !body.kind_of?(String) && body.respond_to?(:each)
+          # Just in case we get a chunked body
+          merged_body = StringIO.new
+          body.each do |chunk|
+            merged_body.write(chunk)
+          end
+          body = merged_body.string
+        end
+        if !body.kind_of?(String)
+          raise TypeError, "Expected String, got #{body.class}."
+        end
+        method = method.to_s.upcase
+        headers << [
+          'Authorization',
+          ::Signet::OAuth2.generate_bearer_authorization_header(
+            self.access_token,
+            options[:realm] ? ['realm', options[:realm]] : nil
+          )
+        ]
+        headers << ['Cache-Control', 'no-store']
+        return [method, uri.to_str, headers, [body]]
+      end
+
+      ##
+      # Transmits a request for a protected resource.
+      #
+      # @param [Hash] options
+      #   The configuration parameters for the request.
+      #   - <code>:request</code> —
+      #     A pre-constructed request.  An OAuth 2 Authorization header
+      #     will be added to it, as well as an explicit Cache-Control
+      #     `no-store` directive.
+      #   - <code>:method</code> —
+      #     The HTTP method for the request.  Defaults to 'GET'.
+      #   - <code>:uri</code> —
+      #     The URI for the request.
+      #   - <code>:headers</code> —
+      #     The HTTP headers for the request.
+      #   - <code>:body</code> —
+      #     The HTTP body for the request.
+      #   - <code>:realm</code> —
+      #     The Authorization realm.  See RFC 2617.
+      #   - <code>:adapter</code> —
+      #     The HTTP adapter.
+      #     Defaults to <code>HTTPAdapter::NetHTTPRequestAdapter</code>.
+      #   - <code>:connection</code> —
+      #     An open, manually managed HTTP connection.
+      #     Must be of type <code>HTTPAdapter::Connection</code> and the
+      #     internal connection representation must match the HTTP adapter
+      #     being used.
+      #
+      # @example
+      #   # Using Net::HTTP
+      #   response = client.fetch_protected_resource(
+      #     :uri => 'http://www.example.com/protected/resource'
+      #   )
+      #   status, headers, body = response
+      #
+      # @example
+      #   # Using Typhoeus
+      #   response = client.fetch_protected_resource(
+      #     :request => Typhoeus::Request.new(
+      #       'http://www.example.com/protected/resource'
+      #     ),
+      #     :adapter => HTTPAdapter::TyphoeusRequestAdapter,
+      #     :connection => connection
+      #   )
+      #   status, headers, body = response
+      #
+      # @return [Array] The response object.
+      def fetch_protected_resource(options={})
+        adapter = options[:adapter]
+        unless adapter
+          require 'httpadapter'
+          require 'httpadapter/adapters/net_http'
+          adapter = HTTPAdapter::NetHTTPRequestAdapter
+        end
+        connection = options[:connection]
+        request = self.generate_authenticated_request(options)
+        response = HTTPAdapter.transmit(request, adapter, connection)
+        status, headers, body = response
+        merged_body = StringIO.new
+        body.each do |chunk|
+          merged_body.write(chunk)
+        end
+        body = merged_body.string
+        if status.to_i == 401
+          # When accessing a protected resource, we only want to raise an
+          # error for 401 responses.
+          message = 'Authorization failed.'
+          if body.strip.length > 0
+            message += "  Server message:\n#{body.strip}"
+          end
+          raise ::Signet::AuthorizationError.new(
+            message, :request => request, :response => response
+          )
+        else
+          return response
+        end
       end
     end
   end

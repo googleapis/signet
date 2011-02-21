@@ -557,6 +557,7 @@ module Signet
           )
         ]
         headers = [authorization_header]
+        headers << ['Cache-Control', 'no-store']
         if method == 'POST'
           headers << ['Content-Type', 'application/x-www-form-urlencoded']
         end
@@ -731,6 +732,7 @@ module Signet
           )
         ]
         headers = [authorization_header]
+        headers << ['Cache-Control', 'no-store']
         if method == 'POST'
           headers << ['Content-Type', 'application/x-www-form-urlencoded']
         end
@@ -965,6 +967,7 @@ module Signet
           )
         ]
         headers << authorization_header
+        headers << ['Cache-Control', 'no-store']
         return [method, uri.to_str, headers, [body]]
       end
 

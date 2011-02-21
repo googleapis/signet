@@ -101,6 +101,32 @@ module Signet #:nodoc:
     end
 
     ##
+    # Generates a Basic Authorization header from a client identifier and a
+    # client password.
+    #
+    # @param [String] client_id
+    #   The client identifier.
+    # @param [String] client_password
+    #   The client password.
+    #
+    # @return [String]
+    #   The value for the HTTP Basic Authorization header.
+    def self.generate_bearer_authorization_header(
+        access_token, auth_params=nil)
+      # TODO: escaping?
+      header = "OAuth #{access_token}"
+      if auth_params && !auth_params.empty?
+        header += (", " +
+          auth_params.inject('') do |accu, (key, value)|
+            accu += "#{key}=\"#{value}\""
+            accu
+          end
+        )
+      end
+      return header
+    end
+
+    ##
     # Appends the necessary OAuth parameters to
     # the base authorization endpoint URI.
     #
