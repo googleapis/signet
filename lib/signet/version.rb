@@ -14,11 +14,11 @@
 
 # Used to prevent the class/module from being loaded more than once
 unless defined? Signet::VERSION
-  module Signet #:nodoc:
-    module VERSION #:nodoc:
+  module Signet
+    module VERSION
       MAJOR = 0
-      MINOR = 1
-      TINY  = 4
+      MINOR = 2
+      TINY  = 0
 
       STRING = [MAJOR, MINOR, TINY].join('.')
     end

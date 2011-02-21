@@ -1,3 +1,7 @@
+== 0.2.0
+
+* Added support for OAuth 2.0 draft 10
+
 == 0.1.4
 
 * Added support for a two-legged authorization flow
