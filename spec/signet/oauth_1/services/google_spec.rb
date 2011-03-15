@@ -15,6 +15,7 @@
 require 'spec_helper'
 
 require 'signet/oauth_1/client'
+require 'httpadapter'
 require 'httpadapter/adapters/typhoeus'
 require 'stringio'
 
@@ -63,7 +64,7 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
         :join => [:run, [], nil]
       )
       @client.fetch_temporary_credential!(
-        :adapter => HTTPAdapter::TyphoeusRequestAdapter,
+        :adapter => HTTPAdapter::TyphoeusAdapter.new,
         :connection => connection,
         :additional_parameters => {
           :scope => 'https://www.google.com/m8/feeds/'
@@ -131,7 +132,7 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
     @client.temporary_credential_secret = '8E1BF0J6ovMva0j87atj/tTG'
     @client.fetch_token_credential!(
       :verifier => 'XbVKagBShNsAGBRJWoC4gtFR',
-      :adapter => HTTPAdapter::TyphoeusRequestAdapter,
+      :adapter => HTTPAdapter::TyphoeusAdapter.new,
       :connection => connection,
       :additional_parameters => {
         :scope => 'https://www.google.com/m8/feeds/'
@@ -162,7 +163,7 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
       @client.temporary_credential_secret = '8E1BF0J6ovMva0j87atj/tTG'
       @client.fetch_token_credential!(
         :verifier => 'XbVKagBShNsAGBRJWoC4gtFR',
-        :adapter => HTTPAdapter::TyphoeusRequestAdapter,
+        :adapter => HTTPAdapter::TyphoeusAdapter.new,
         :connection => connection,
         :additional_parameters => {
           :scope => 'https://www.google.com/m8/feeds/'
@@ -190,7 +191,7 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
       '1/YFw6UH2Dn7W691-qAbCfsmqEHQrPb7ptIvYx9m6YkUQ'
     @client.token_credential_secret = 'Ew3YHAY4bcBryiOUvbdHGa57'
     response = @client.fetch_protected_resource(
-      :adapter => HTTPAdapter::TyphoeusRequestAdapter,
+      :adapter => HTTPAdapter::TyphoeusAdapter.new,
       :connection => connection,
       :uri =>
         'http://www-opensocial.googleusercontent.com/api/people/@me/@self'
@@ -221,7 +222,7 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
       '1/YFw6UH2Dn7W691-qAbCfsmqEHQrPb7ptIvYx9m6YkUQ'
     @client.token_credential_secret = 'Ew3YHAY4bcBryiOUvbdHGa57'
     response = @client.fetch_protected_resource(
-      :adapter => HTTPAdapter::TyphoeusRequestAdapter,
+      :adapter => HTTPAdapter::TyphoeusAdapter.new,
       :connection => connection,
       :request => Typhoeus::Request.new(
         'http://www-opensocial.googleusercontent.com/api/people/@me/@self',

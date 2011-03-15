@@ -587,7 +587,7 @@ module Signet
       #     The Authorization realm.  See RFC 2617.
       #   - <code>:adapter</code> —
       #     The HTTP adapter.
-      #     Defaults to <code>HTTPAdapter::NetHTTPRequestAdapter</code>.
+      #     Defaults to <code>HTTPAdapter::NetHTTPAdapter.new</code>.
       #   - <code>:connection</code> —
       #     An open, manually managed HTTP connection.
       #     Must be of type <code>HTTPAdapter::Connection</code> and the
@@ -607,11 +607,11 @@ module Signet
         unless adapter
           require 'httpadapter'
           require 'httpadapter/adapters/net_http'
-          adapter = HTTPAdapter::NetHTTPRequestAdapter
+          adapter = HTTPAdapter::NetHTTPAdapter.new
         end
         connection = options[:connection]
         request = self.generate_temporary_credential_request(options)
-        response = HTTPAdapter.transmit(request, adapter, connection)
+        response = adapter.transmit(request, connection)
         status, headers, body = response
         merged_body = StringIO.new
         body.each do |chunk|
@@ -657,7 +657,7 @@ module Signet
       #     The Authorization realm.  See RFC 2617.
       #   - <code>:adapter</code> —
       #     The HTTP adapter.
-      #     Defaults to <code>HTTPAdapter::NetHTTPRequestAdapter</code>.
+      #     Defaults to <code>HTTPAdapter::NetHTTPAdapter.new</code>.
       #   - <code>:connection</code> —
       #     An open, manually managed HTTP connection.
       #     Must be of type <code>HTTPAdapter::Connection</code> and the
@@ -762,7 +762,7 @@ module Signet
       #     The Authorization realm.  See RFC 2617.
       #   - <code>:adapter</code> —
       #     The HTTP adapter.
-      #     Defaults to <code>HTTPAdapter::NetHTTPRequestAdapter</code>.
+      #     Defaults to <code>HTTPAdapter::NetHTTPAdapter.new</code>.
       #   - <code>:connection</code> —
       #     An open, manually managed HTTP connection.
       #     Must be of type <code>HTTPAdapter::Connection</code> and the
@@ -780,11 +780,11 @@ module Signet
         unless adapter
           require 'httpadapter'
           require 'httpadapter/adapters/net_http'
-          adapter = HTTPAdapter::NetHTTPRequestAdapter
+          adapter = HTTPAdapter::NetHTTPAdapter.new
         end
         connection = options[:connection]
         request = self.generate_token_credential_request(options)
-        response = HTTPAdapter.transmit(request, adapter, connection)
+        response = adapter.transmit(request, connection)
         status, headers, body = response
         merged_body = StringIO.new
         body.each do |chunk|
@@ -830,7 +830,7 @@ module Signet
       #     The Authorization realm.  See RFC 2617.
       #   - <code>:adapter</code> —
       #     The HTTP adapter.
-      #     Defaults to <code>HTTPAdapter::NetHTTPRequestAdapter</code>.
+      #     Defaults to <code>HTTPAdapter::NetHTTPAdapter.new</code>.
       #   - <code>:connection</code> —
       #     An open, manually managed HTTP connection.
       #     Must be of type <code>HTTPAdapter::Connection</code> and the
@@ -895,9 +895,8 @@ module Signet
         if options[:request]
           if options[:request].kind_of?(Array)
             request = options[:request]
-          elsif options[:adapter] || options[:request].respond_to?(:to_ary)
-            request =
-              HTTPAdapter.adapt_request(options[:request], options[:adapter])
+          elsif options[:adapter]
+            request = options[:adapter].adapt_request(options[:request])
           end
           method, uri, headers, body = request
         else
@@ -992,7 +991,7 @@ module Signet
       #     The Authorization realm.  See RFC 2617.
       #   - <code>:adapter</code> —
       #     The HTTP adapter.
-      #     Defaults to <code>HTTPAdapter::NetHTTPRequestAdapter</code>.
+      #     Defaults to <code>HTTPAdapter::NetHTTPAdapter.new</code>.
       #   - <code>:connection</code> —
       #     An open, manually managed HTTP connection.
       #     Must be of type <code>HTTPAdapter::Connection</code> and the
@@ -1012,7 +1011,7 @@ module Signet
       #     :request => Typhoeus::Request.new(
       #       'http://www.example.com/protected/resource'
       #     ),
-      #     :adapter => HTTPAdapter::TyphoeusRequestAdapter,
+      #     :adapter => HTTPAdapter::TyphoeusAdapter.new,
       #     :connection => connection
       #   )
       #   status, headers, body = response
@@ -1023,11 +1022,11 @@ module Signet
         unless adapter
           require 'httpadapter'
           require 'httpadapter/adapters/net_http'
-          adapter = HTTPAdapter::NetHTTPRequestAdapter
+          adapter = HTTPAdapter::NetHTTPAdapter.new
         end
         connection = options[:connection]
         request = self.generate_authenticated_request(options)
-        response = HTTPAdapter.transmit(request, adapter, connection)
+        response = adapter.transmit(request, connection)
         status, headers, body = response
         merged_body = StringIO.new
         body.each do |chunk|
