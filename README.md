@@ -47,4 +47,4 @@ Signet is an OAuth 1.0 / OAuth 2.0 implementation.
 
 `sudo gem install signet`
 
-Be sure http://rubygems.org/ is in your gem sources.
+Be sure `http://rubygems.org/` is in your gem sources.
