@@ -198,19 +198,13 @@ module Signet
         unless options[:response_type]
           options[:response_type] = :code
         end
+        options[:client_id] ||= self.client_id
+        options[:redirect_uri] ||= self.redirect_uri
         unless options[:client_id]
-          if self.client_id
-            options[:client_id] = self.client_id
-          else
-            raise ArgumentError, "Missing required client identifier."
-          end
+          raise ArgumentError, "Missing required client identifier."
         end
         unless options[:redirect_uri]
-          if self.redirect_uri
-            options[:redirect_uri] = self.redirect_uri
-          else
-            raise ArgumentError, "Missing required redirect URI."
-          end
+          raise ArgumentError, "Missing required redirect URI."
         end
         if !options[:scope] && self.scope
           options[:scope] = self.scope.join(' ')
