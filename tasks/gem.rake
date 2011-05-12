@@ -19,8 +19,8 @@ namespace :gem do
     s.files = PKG_FILES.to_a
 
     s.has_rdoc = true
-    s.extra_rdoc_files = %w( README )
-    s.rdoc_options.concat ["--main",  "README"]
+    s.extra_rdoc_files = %w( README.md )
+    s.rdoc_options.concat ["--main",  "README.md"]
 
     s.add_runtime_dependency("httpadapter", "~> 1.0.0")
     s.add_runtime_dependency("addressable", "~> 2.2.1")
