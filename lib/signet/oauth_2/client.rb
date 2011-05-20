@@ -165,6 +165,8 @@ module Signet
       #     The current access token for this client.
       #   - <code>:expires_in</code> —
       #     The current access token for this client.
+      #   - <code>:issued_at</code> —
+      #     The timestamp that the token was issued at.
       #
       # @example
       #   client.update!(
@@ -184,6 +186,7 @@ module Signet
         self.refresh_token = options["refresh_token"]
         self.access_token = options["access_token"]
         self.expires_in = options["expires_in"]
+        self.issued_at = options["issued_at"] if options["issued_at"]
         return self
       end
 

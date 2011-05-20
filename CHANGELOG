@@ -1,3 +1,7 @@
+== 0.2.3
+
+* Added :issued_at option to #update_token! method.
+
 == 0.2.2
 
 * Lowered requirements for json gem
