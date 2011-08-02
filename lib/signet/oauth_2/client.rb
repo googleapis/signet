@@ -520,8 +520,12 @@ module Signet
       # @param [String] new_expires_in
       #   The access token lifetime.
       def expires_in=(new_expires_in)
-        @expires_in = new_expires_in.to_i
-        @issued_at = Time.now
+        if new_expires_in != nil
+          @expires_in = new_expires_in.to_i
+          @issued_at = Time.now
+        else
+          @expires_in, @issued_at = nil, nil
+        end
       end
 
       ##
