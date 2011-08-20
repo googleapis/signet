@@ -20,7 +20,7 @@ unless defined? Signet::VERSION
       MINOR = 2
       TINY  = 3
 
-      STRING = [MAJOR, MINOR, TINY].join('.')
+      STRING = [MAJOR, MINOR, TINY, 'sf'].join('.')
     end
   end
 end
