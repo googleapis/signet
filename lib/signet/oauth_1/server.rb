@@ -18,17 +18,24 @@ module Signet
 
       def initialize(options={})
         (GENERATE_PROCS + LOOKUP_PROCS).each do |attr|
-          if(options[attr] && options[attr].instance_of?(Proc))
-            instance_method_set("@#{attr}", options[attr])
-          end
+          instance_variable_set("@#{attr}", options[attr])
         end
         self.two_legged = options[:two_legged] || false
       end
 
+      # Fixed values-per-server(?):
+      # Authorization URI
+      # OAuth callback
+      # A Proc is supplied to lookup these values:
+      # client_key
+      # client_secret
+      # if a nonce/timestamp pair is valid
+      # A Proc is supplied to GENERATE these values:
+      # (remember oauth_1/credential.rb)
+      # Token credential
+      # Temporary token credential
+      
       # -A overall method to parse the OAuth header
-      # -A method for the dev. to submit a proc/callback for verifying
-      # a nonce/timestamp.
-
 
       ##
       # Returns whether the server is in two-legged mode.
@@ -57,16 +64,34 @@ module Signet
       # Returns a boolean if the supplied nonce/timestamp pair is valid
       # @param [String, #to_str] The supplied nonce
       # @param [String, #to_str] The supplied timestamp
-      def validate_nonce(nonce, timestamp)
-        @nonce_validator.call(nonce, timestamp)
+      # @return [Boolean] 'True' the supplied nonce/timestamp pair valid?
+      def validate_nonce_timestamp(nonce, timestamp)
+        # TODO: should we provide separate callbacks for nonce and timestamp?
+        @nonce_timestamp.nil? ? false : @nonce_timestamp.call(nonce, timestamp)
       end
       def find_client_credential_key(key)
-        @client_credential_key.nil? ? nil : @client_credential_key.call(key)
+        @client_credential_key.call(key) if @client_credential_key.respond_to?(:call)
       end
       def find_client_credential_secret(key)
-        @client_credential_secret.nil? ? nil : @client_credential_secret.call(key)
+        @client_credential_secret.call(key) if @client_credential_secret.respond_to?(:call)
+      end
+      def find_token_credential_key(key)
+        @token_credential_key.call(key) if @token_credential_key.respond_to?(:call)
+      end
+      def find_token_credential_secret(key)
+        @token_credential_secret.call(key) if @token_credential_secret.respond_to?(:call)
       end
 
+      def generate_temporary_credential(options={})
+        #required:
+        #    oauth_token
+        #    oauth_token_secret
+        #    oauth_callback_confirmed = 'true'
+        
+      end
+      def generate_token_credential(options={})
+        
+      end
       # If we have both the consumer_key and _signature
       def authenticate_request(options={})
         # method, uri, headers, body
@@ -142,11 +167,18 @@ module Signet
         return false if(auth_header.nil? || auth_header[1] == '')
         auth_hash = ::Signet::OAuth1.parse_authorization_header(
           auth_header[1]).inject({}) {|acc, (k,v)| acc[k] = v; acc}
-        auth_token = auth_hash['oauth_token']
-        return false if(auth_token.nil? && !self.two_legged)
-        token_credential_secret = nil # TODO
 
-        return false unless validate_nonce(auth_header['oauth_nonce'], auth_header['oauth_timestamp'])
+        auth_token = auth_hash['oauth_token']
+        token_credential_secret = nil
+        unless(self.two_legged)
+          return false if(auth_token.nil?)
+          return false unless(find_token_credential_key(auth_token))
+        end
+        token_credential_secret = find_token_credential_secret(auth_token)
+
+        return false unless(find_client_credential_key(auth_hash['oauth_consumer_key']))
+
+        return false unless validate_nonce_timestamp(auth_hash['oauth_nonce'], auth_hash['oauth_timestamp'])
 
         if(method == ('POST' || 'PUT') && 
            media_type == 'application/x-www-form-urlencoded')
@@ -155,11 +187,10 @@ module Signet
           post_parameters.each {|param| param[1] = "" if param[1].nil?}
           # If the auth header doesn't have the same params as the body, it
           # can't have been signed correctly(sec 3.4.1.3)
-          return false unless(post_parameters == auth_header.reject{|x| x[0].index('oauth_')})
+          return false unless(post_parameters == auth_hash.reject{|k,v| k.index('oauth_')}.to_a)
         end
 
-        client_credential_key = find_client_credential_key(auth_hash['oauth_consumer_key'])
-        client_credential_secret = find_client_credential_secret(auth_hash['oauth_signature'])
+        client_credential_secret = find_client_credential_secret(auth_hash['oauth_consumer_key'])
 
         
         computed_signature = ::Signet::OAuth1.sign_parameters(method, uri, auth_hash.to_a, client_credential_secret, token_credential_secret)
