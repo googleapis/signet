@@ -164,7 +164,9 @@ module Signet
         end
 
         auth_header = headers.find{|x| x[0] == 'Authorization'}
-        return false if(auth_header.nil? || auth_header[1] == '')
+        if(auth_header.nil? || auth_header[1] == '')
+          raise MalformedAuthorizationError.new('Authorization header is missing') 
+        end
         auth_hash = ::Signet::OAuth1.parse_authorization_header(
           auth_header[1]).inject({}) {|acc, (k,v)| acc[k] = v; acc}
 
@@ -187,7 +189,11 @@ module Signet
           post_parameters.each {|param| param[1] = "" if param[1].nil?}
           # If the auth header doesn't have the same params as the body, it
           # can't have been signed correctly(sec 3.4.1.3)
-          return false unless(post_parameters == auth_hash.reject{|k,v| k.index('oauth_')}.to_a)
+          #return false unless(post_parameters == auth_hash.reject{|k,v| k.index('oauth_')}.to_a)
+          unless(post_parameters == auth_hash.reject{|k,v| k.index('oauth_')}.to_a)
+            raise MalformedAuthorizationError.new( 
+              'Request is of type application/x-www-form-urlencoded but Authentication header did not include form values')
+          end
         end
 
         client_credential_secret = find_client_credential_secret(auth_hash['oauth_consumer_key'])

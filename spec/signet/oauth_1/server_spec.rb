@@ -153,6 +153,17 @@ describe Signet::OAuth1::Server, 'configured' do
     end).should raise_error(ArgumentError)
   end
 
+  it 'should raise an error if no Authentication header is provided' do
+    (lambda do
+      @server.authenticate_request(
+        :method => 'GET',
+        :uri => 'https://photos.example.net/photos',
+        :headers => [['Authorization', '']],
+        :body => ''
+      )
+    end).should raise_error(Signet::MalformedAuthorizationError)
+  end
+
   it 'should raise an error if no URI is provided' do
     (lambda do
       @server.authenticate_request(
@@ -221,14 +232,16 @@ describe Signet::OAuth1::Server, 'configured' do
     @server.two_legged = true
     @server.authenticate_request(:request=>req).should == true
   end
-  it 'should reject a request that is x-www-form-encoded but does not send form parameters in signature' do
+  it 'should raise an error if signature is x-www-form-encoded but does not send form parameters in signature' do
     req = make_2_legged_request(
       :method=>'POST',
       :headers=>{'Content-Type'=>'application/x-www-form-urlencoded'},
       :body=>'c2&a3=2+q')
     req[2].find {|x| x[0] == "Authorization"}[1].gsub!(/c2=\"\", a3=\"2%20q\", /, '')
     @server.two_legged = true
-    @server.authenticate_request(:request=>req).should == false
+    (lambda do 
+      @server.authenticate_request(:request=>req)
+    end).should raise_error(Signet::MalformedAuthorizationError)
   end
 
   it 'should return a redirect if oauth_token is not present and not in two-legged mode'

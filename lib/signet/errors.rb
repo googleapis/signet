@@ -27,6 +27,12 @@ module Signet
   end
 
   ##
+  # An error indicating that the server considers the Authorization header to
+  # be malformed(missing/unsupported/invalid parameters).
+  class MalformedAuthorizationError < StandardError
+  end
+
+  ##
   # An error indicating the server refused to authorize the client.
   class AuthorizationError < StandardError
     ##
