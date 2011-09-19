@@ -30,30 +30,28 @@ module Signet
 
       ##
       # Returns a boolean if the supplied nonce/timestamp pair is valid
-      # @param [String, #to_str] The supplied nonce
-      # @param [String, #to_str] The supplied timestamp
-      # @return [Boolean] 'True' the supplied nonce/timestamp pair valid?
+      # @param [String, #to_str] Nonce from the request
+      # @param [String, #to_str] Timestamp from the request
+      # @return [Boolean] 'True' if the @nonce_timestamp Proc returns anything
+      # other than nil or false.
       def validate_nonce_timestamp(nonce, timestamp)
-        # TODO: should we provide separate callbacks for nonce and timestamp?
-        @nonce_timestamp.nil? ? false : @nonce_timestamp.call(nonce, timestamp)
+        nonce = @nonce_timestamp.call(nonce, timestamp) if @nonce_timestamp.respond_to?(:call)
+        nonce ? true : false
       end
       def find_client_credential(key)
-        # The Proc should return EITHER a Signet credential,
-        # or a key/secret pair(in which case we should make a client credential from
-        # them.
-        @client_credential.call(key) if @client_credential.respond_to?(:call)
+        cred = @client_credential.call(key) if @client_credential.respond_to?(:call)
+        nil if cred.nil?
+        nil unless cred.instance_of?(Enumerable)
+        cred.instance_of?(::Signet::OAuth1::Credential) ? cred : ::Signet::OAuth1::Credential.new(cred)
       end
       def find_token_credential(key)
-        # The Proc should return EITHER a Signet credential,
-        # or a key/secret pair(in which case we should make a token credential from
-        # them.
-        @token_credential.call(key) if @token_credential.respond_to?(:call)
+        cred = @token_credential.call(key) if @token_credential.respond_to?(:call)
+        nil if cred.nil?
+        nil unless cred.instance_of?(Enumerable)
+        cred.instance_of?(::Signet::OAuth1::Credential) ? cred : ::Signet::OAuth1::Credential.new(cred)
       end
 
       def find_temporary_credential(key)
-        # The Proc should return EITHER a Signet credential,
-        # or a key/secret pair(in which case we should make a temporary credential from
-        # them.
         cred = @temporary_credential.call(key) if @temporary_credential.respond_to?(:call)
         nil if cred.nil?
         nil unless cred.instance_of?(Enumerable)
@@ -62,7 +60,8 @@ module Signet
 
       def find_verifier(verifier)
         # really only needs to return a Boolean
-        @verifier.call(verifier) if @verifier.respond_to?(:call)
+        veri = @verifier.call(verifier) if @verifier.respond_to?(:call)
+        veri ? true : false
       end
 
 
@@ -233,8 +232,8 @@ module Signet
         unless(options[:two_legged])
           return false if(auth_token.nil?)
           return false unless(token_credential = find_token_credential(auth_token))
+          token_credential_secret = token_credential.secret if token_credential
         end
-        token_credential_secret = token_credential.secret if token_credential
 
         return false unless(client_credential = find_client_credential(auth_hash['oauth_consumer_key']))
 
