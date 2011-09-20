@@ -158,14 +158,14 @@ describe Signet::OAuth1::Server, 'configured' do
   it 'should raise an error if the client credential Proc is not set' do
     @server.client_credential = nil
     (lambda do
-      @server.authenticate_request
+      @server.authenticate_resource_request
     end).should raise_error(ArgumentError)
   end
 
   it "should raise an error if the token credential Proc is not set" do
     @server.token_credential = nil
     (lambda do
-      @server.authenticate_request
+      @server.authenticate_resource_request
     end).should raise_error(ArgumentError)
   end
 
@@ -185,13 +185,13 @@ describe Signet::OAuth1::Server, 'configured' do
 
   it 'should raise an error if no request is provided' do
     (lambda do
-      @server.authenticate_request
+      @server.authenticate_resource_request
     end).should raise_error(ArgumentError)
   end
 
   it 'should raise an error if a bogus request is provided' do
     (lambda do
-      @server.authenticate_request(
+      @server.authenticate_resource_request(
         :request => []
       )
     end).should raise_error(ArgumentError)
@@ -199,7 +199,7 @@ describe Signet::OAuth1::Server, 'configured' do
 
   it 'should raise an error if no Authentication header is provided' do
     (lambda do
-      @server.authenticate_request(
+      @server.authenticate_resource_request(
         :method => 'GET',
         :uri => 'https://photos.example.net/photos',
         :headers => [['Authorization', '']],
@@ -210,7 +210,7 @@ describe Signet::OAuth1::Server, 'configured' do
 
   it 'should raise an error if no URI is provided' do
     (lambda do
-      @server.authenticate_request(
+      @server.authenticate_resource_request(
         :method => 'GET',
         :headers => [],
         :body => ''
@@ -222,7 +222,7 @@ describe Signet::OAuth1::Server, 'configured' do
   it 'should reject a request with the wrong signature method' do
     bad_method = 'FOO'
     (lambda do 
-      @server.authenticate_request(
+      @server.authenticate_resource_request(
         :method => 'GET',
         :uri => 'http://photos.example.net/photos',
         :headers=>make_oauth_token_header({'oauth_signature_method'=>bad_method})
@@ -478,7 +478,7 @@ describe Signet::OAuth1::Server, 'configured' do
 
   describe 'expecting a request for a protected resource' do
     it 'should not raise an error if a request body is chunked(as Array)' do
-      approved = @server.authenticate_request(
+      approved = @server.authenticate_resource_request(
         :method => 'POST',
         :uri => 'https://photos.example.net/photos',
         :body => ['A chunked body.'],
@@ -491,7 +491,7 @@ describe Signet::OAuth1::Server, 'configured' do
       chunked_body = StringIO.new
       chunked_body.write('A chunked body.')
       chunked_body.rewind
-      approved = @server.authenticate_request(
+      approved = @server.authenticate_resource_request(
         :method => 'POST',
         :uri => 'https://photos.example.net/photos',
         :body => chunked_body,
@@ -502,7 +502,7 @@ describe Signet::OAuth1::Server, 'configured' do
 
     it 'should raise an error if a request body is of a bogus type' do
       (lambda do
-        @server.authenticate_request(
+        @server.authenticate_resource_request(
           :method => 'POST',
           :uri => 'https://photos.example.net/photos',
           :body => 42,
@@ -515,7 +515,7 @@ describe Signet::OAuth1::Server, 'configured' do
         :method=>'POST',
         :headers=>{'Content-Type'=>'application/x-www-form-urlencoded'},
         :body=>'c2&a3=2+q')
-      @server.authenticate_request(:request=>req).should == true
+      @server.authenticate_resource_request(:request=>req).should == true
     end
     it 'should raise an error if signature is x-www-form-encoded ' + 
        'but does not send form parameters in header' do
@@ -526,7 +526,7 @@ describe Signet::OAuth1::Server, 'configured' do
       req[2].find {|x| x[0] == "Authorization"}[1].gsub!(/c2=\"\", a3=\"2%20q\", /, 
                                                          '')
       (lambda do 
-        @server.authenticate_request(:request=>req)
+        @server.authenticate_resource_request(:request=>req)
       end).should raise_error(Signet::MalformedAuthorizationError, 
             'Request is of type application/x-www-form-urlencoded but ' +
             'Authentication header did not include form values'
@@ -539,7 +539,9 @@ describe Signet::OAuth1::Server, 'configured' do
       ).and_return(true)
 
       @server.nonce_timestamp = nonce_callback
-      @server.authenticate_request(:request=>make_3_legged_request_with_token) 
+      @server.authenticate_resource_request(
+        :request=>make_3_legged_request_with_token
+      )
     end
     it 'should call a user-supplied Proc to fetch the client credential' do
       client_cred =  Signet::OAuth1::Credential.new(@client_credential_key, 
@@ -550,7 +552,9 @@ describe Signet::OAuth1::Server, 'configured' do
       ).and_return(client_cred)
 
       @server.client_credential = key_callback
-      @server.authenticate_request(:request=>make_3_legged_request_with_token) 
+      @server.authenticate_resource_request(
+        :request=>make_3_legged_request_with_token
+      ) 
     end
     it 'should call a user-supplied Proc to fetch the token credential' do
       token_cred = Signet::OAuth1::Credential.new(@token_credential_key, 
@@ -561,10 +565,12 @@ describe Signet::OAuth1::Server, 'configured' do
       ).and_return(token_cred)
 
       @server.token_credential = key_callback
-      @server.authenticate_request(:request=>make_3_legged_request_with_token) 
+      @server.authenticate_resource_request(
+        :request=>make_3_legged_request_with_token
+      ) 
     end
     it 'should return true for a valid request' do
-      @server.authenticate_request(
+      @server.authenticate_resource_request(
         :request=>make_3_legged_request_with_token
       ).should == true
     end
@@ -572,13 +578,13 @@ describe Signet::OAuth1::Server, 'configured' do
       bad_request = make_3_legged_request_with_token()
       bad_request[2][0][1].gsub!(/oauth_signature=\".+\"/, 
                                  "oauth_signature=\"foobar\"")
-      @server.authenticate_request(:request=>bad_request).should == false
+      @server.authenticate_resource_request(:request=>bad_request).should == false
     end
   end
 
   describe "expecting a two-legged request for a protected resource" do
     it 'should not raise an error if a request body is chunked(as Array)' do
-      approved = @server.authenticate_request(
+      approved = @server.authenticate_resource_request(
         :method => 'POST',
         :uri => 'https://photos.example.net/photos',
         :body => ['A chunked body.'],
@@ -592,7 +598,7 @@ describe Signet::OAuth1::Server, 'configured' do
       chunked_body = StringIO.new
       chunked_body.write('A chunked body.')
       chunked_body.rewind
-      approved = @server.authenticate_request(
+      approved = @server.authenticate_resource_request(
         :method => 'POST',
         :uri => 'https://photos.example.net/photos',
         :body => chunked_body,
@@ -604,7 +610,7 @@ describe Signet::OAuth1::Server, 'configured' do
 
     it 'should raise an error if a request body is of a bogus type' do
       (lambda do
-        @server.authenticate_request(
+        @server.authenticate_resource_request(
           :method => 'POST',
           :uri => 'https://photos.example.net/photos',
           :body => 42,
@@ -618,7 +624,9 @@ describe Signet::OAuth1::Server, 'configured' do
         :method=>'POST',
         :headers=>{'Content-Type'=>'application/x-www-form-urlencoded'},
         :body=>'c2&a3=2+q')
-      @server.authenticate_request(:request=>req, :two_legged=>true).should == true
+      @server.authenticate_resource_request(
+        :request=>req, :two_legged=>true
+      ).should == true
     end
     it 'should raise an error if signature is x-www-form-encoded '+ 
        'but does not send form parameters in header' do
@@ -629,7 +637,7 @@ describe Signet::OAuth1::Server, 'configured' do
       req[2].find {|x| x[0] == "Authorization"}[1].gsub!(/c2=\"\", a3=\"2%20q\", /, 
                                                          '')
       (lambda do 
-        @server.authenticate_request(:request=>req, :two_legged=>true)
+        @server.authenticate_resource_request(:request=>req, :two_legged=>true)
       end).should raise_error(Signet::MalformedAuthorizationError, 
             'Request is of type application/x-www-form-urlencoded but '+ 
             'Authentication header did not include form values'
@@ -642,7 +650,7 @@ describe Signet::OAuth1::Server, 'configured' do
       ).and_return(true)
 
       @server.nonce_timestamp = nonce_callback
-      @server.authenticate_request(
+      @server.authenticate_resource_request(
         :request=>make_2_legged_request, :two_legged=>true
       )
     end
@@ -655,12 +663,12 @@ describe Signet::OAuth1::Server, 'configured' do
       ).and_return(client_cred)
 
       @server.client_credential = key_callback
-      @server.authenticate_request(
+      @server.authenticate_resource_request(
         :request=>make_2_legged_request, :two_legged=>true
       )
     end
     it 'should authenticate a valid request' do
-      @server.authenticate_request(
+      @server.authenticate_resource_request(
         :request=>make_2_legged_request, :two_legged=>true
       ).should == true
     end
@@ -668,7 +676,7 @@ describe Signet::OAuth1::Server, 'configured' do
       bad_request = make_2_legged_request()
       bad_request[2][0][1].gsub!(/oauth_signature=\".+\"/, 
                                  "oauth_signature=\"foobar\"")
-      @server.authenticate_request(:request=>bad_request).should == false
+      @server.authenticate_resource_request(:request=>bad_request).should == false
     end
   end
 

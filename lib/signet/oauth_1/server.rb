@@ -175,8 +175,7 @@ module Signet
         (computed_signature == auth_hash['oauth_signature'])
       end
 
-      # authenticate_protected_resource_request
-      def authenticate_request(options={})
+      def authenticate_resource_request(options={})
         # method, uri, headers, body
         # <server_credential_secret>, <token_credential_secret>
         verifications = {
