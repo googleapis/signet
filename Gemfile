@@ -9,4 +9,7 @@ group :test do
   gem 'rspec', "1.3.2"
 end
 
-
+group :doc do
+  gem 'yard', '~>0.7.2'
+  gem 'rdiscount', '~>1.6.8'
+end
