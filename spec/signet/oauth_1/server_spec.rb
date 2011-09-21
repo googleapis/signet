@@ -435,7 +435,7 @@ describe Signet::OAuth1::Server, 'configured' do
         :request=>make_token_credential_request
       )
     end
-    it 'should authenticate a valid request' do
+    it 'should return true for a valid request' do
       @server.authenticate_token_credential_request(
         :request=>make_token_credential_request
       ).should == true
@@ -667,7 +667,7 @@ describe Signet::OAuth1::Server, 'configured' do
         :request=>make_2_legged_request, :two_legged=>true
       )
     end
-    it 'should authenticate a valid request' do
+    it 'should return true valid request' do
       @server.authenticate_resource_request(
         :request=>make_2_legged_request, :two_legged=>true
       ).should == true
