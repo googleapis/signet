@@ -24,7 +24,7 @@ module Signet
       #   @param [Proc] client_credential find a client credential.
       #   @param [Proc] token_credential find a token credential.
       #   @param [Proc] temporary_credential find a temporary credential.
-      #   @param [Proc] verifier find/validate a verifier value.
+      #   @param [Proc] verifier validate a verifier value.
       #
       # @example
       #   server = Signet::OAuth1::Server.new(
@@ -47,8 +47,8 @@ module Signet
       end
 
       ##
-      # Determine if the supplied nonce/timestamp pair is valid by calling the 
-      # :nonce_timestamp Proc.
+      # Determine if the supplied nonce/timestamp pair is valid by calling 
+      # the {#nonce_timestamp} Proc.
       #
       # @param [String, #to_str] Nonce value from the request
       # @param [String, #to_str] Timestamp value from the request
@@ -60,7 +60,8 @@ module Signet
       end
 
       ## 
-      # Find an appropriate client credential by calling the :client_credential Proc.
+      # Find the appropriate client credential by calling 
+      # the {#client_credential} Proc.
       #
       # @param [String] Key provided to the :client_credential Proc.
       # @return [Signet::OAuth1::Credential] The client credential.
@@ -73,7 +74,8 @@ module Signet
       end
 
       ## 
-      # Find an appropriate client credential by calling the :token_credential Proc.
+      # Find the appropriate client credential by calling 
+      # the {#token_credential} Proc.
       #
       # @param [String] Key provided to the :token_credential Proc.
       # @return [Signet::OAuth1::Credential] if the credential is found.
@@ -86,8 +88,8 @@ module Signet
       end
 
       ## 
-      # Find an appropriate client credential by calling the
-      # :temporary_credential Proc.
+      # Find the appropriate client credential by calling 
+      # the {#temporary_credential} Proc.
       #
       # @param [String] Key provided to the :temporary_credential Proc.
       # @return [Signet::OAuth1::Credential] if the credential is found.
@@ -100,8 +102,7 @@ module Signet
       end
 
       ## 
-      # Find an appropriate verification value by calling the 
-      # :verifier Proc.
+      #  Determine if the verifier is valid by calling the Proc in {#verifier}.
       #
       # @param [String] Key provided to the :verifier Proc.
       # @return [Boolean] verifier if if returns anything other than nil or false.
@@ -144,6 +145,7 @@ module Signet
           :uri => uri,
           :headers => headers
         }
+
         # Verify that we have all the pieces required to validate the HTTP request
         request_components.each do |(key, value)|
           unless value
@@ -155,9 +157,10 @@ module Signet
       end
 
       ##
-      # Verify HTTP Authorization header.
-      # @param [Array] Array of headers from HTTP request.
-      # @return [Hash] symbolized hash of Authorization header.
+      # Validate and normalize the HTTP Authorization header.
+      # 
+      # @param [Array] Headers from HTTP request.
+      # @return [Hash] Symbolized hash of Authorization header.
       def verify_auth_header_components(headers)
         auth_header = headers.find{|x| x[0] == 'Authorization'}
         if(auth_header.nil? || auth_header[1] == '')
@@ -169,7 +172,8 @@ module Signet
       end
 
       ##
-      # Authenticates a temporary credential request.
+      # Authenticates a temporary credential request. If no oauth_callback is
+      # present in the request, 'oob' will be returned.
       #
       # @overload authenticate_temporary_credential_request(options)
       #   @param [Hash] request The configuration parameters for the request.
@@ -178,8 +182,7 @@ module Signet
       #   @param [Hash, Array] headers the HTTP headers.
       #   @param [StringIO, String] body The HTTP body.
       #   @param [HTTPAdapter] adapter The HTTP adapter(optional).
-      # @return [String, false] The oauth_callback value
-      # , or false if the request is not valid
+      # @return [String, false] The oauth_callback value, or false if not valid.
       def authenticate_temporary_credential_request(options={})
         verifications = {
           :client_credential => 
@@ -202,11 +205,11 @@ module Signet
             :uri=>options[:uri], 
             :headers=>options[:headers] )
         end
+        # body should be blank; we don't care in any case.
         method = request_components[:method]
         uri = request_components[:uri]
         headers = request_components[:headers]
-        # body should be blank; we don't care in any case.
-        #body = request_components[:body]
+
         auth_hash = verify_auth_header_components(headers)
         return false unless(client_credential = find_client_credential(
                                                   auth_hash['oauth_consumer_key']) )
@@ -272,10 +275,11 @@ module Signet
             :body=>options[:body] 
           )
         end
+        # body should be blank; we don't care in any case.
         method = request_components[:method]
         uri = request_components[:uri]
         headers = request_components[:headers]
-        # body should be blank; we don't care in any case.
+ 
         auth_hash = verify_auth_header_components(headers)
         return false unless(
           client_credential = find_client_credential(auth_hash['oauth_consumer_key'])
@@ -392,7 +396,7 @@ module Signet
           post_parameters = Addressable::URI.form_unencode(body)
           post_parameters.each {|param| param[1] = "" if param[1].nil?}
           # If the auth header doesn't have the same params as the body, it
-          # can't have been signed correctly(sec 3.4.1.3)
+          # can't have been signed correctly(5849#3.4.1.3)
           unless(post_parameters == auth_hash.reject{|k,v| k.index('oauth_')}.to_a)
             raise MalformedAuthorizationError.new( 
               'Request is of type application/x-www-form-urlencoded ' + 
@@ -413,6 +417,7 @@ module Signet
 
         (computed_signature == auth_hash['oauth_signature'])
       end
+
     end
   end
 end
