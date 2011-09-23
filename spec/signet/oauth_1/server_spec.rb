@@ -230,6 +230,11 @@ describe Signet::OAuth1::Server, 'configured' do
                                        @temporary_credential_secret
                                       )
     end
+
+    it 'should return nil if the Proc does not provide a usable response' do
+      @server.temporary_credential = lambda {|x| nil }
+      @server.find_temporary_credential(@temporary_credential_key).should == nil
+    end
   end
 
 
@@ -262,6 +267,11 @@ describe Signet::OAuth1::Server, 'configured' do
       @server.find_client_credential(@client_credential_key).should == 
         Signet::OAuth1::Credential.new(@client_credential_key, 
                                        @client_credential_secret)
+    end
+
+    it 'should return nil if the Proc does not provide a usable response' do
+      @server.client_credential = lambda {|x| nil }
+      @server.find_client_credential(@client_credential_key).should == nil
     end
   end
 
@@ -297,6 +307,11 @@ describe Signet::OAuth1::Server, 'configured' do
       @server.find_token_credential(@token_credential_key).should == 
         Signet::OAuth1::Credential.new(@token_credential_key, 
                                        @token_credential_secret)
+    end
+
+    it 'should return nil if the Proc does not provide a usable response' do
+      @server.token_credential = lambda {|x| nil }
+      @server.find_token_credential(@token_credential_key).should == nil
     end
   end
 

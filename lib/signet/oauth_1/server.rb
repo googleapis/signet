@@ -74,44 +74,51 @@ module Signet
       # Find the appropriate client credential by calling 
       # the {#client_credential} Proc.
       #
-      # @param [String] Key provided to the {#client_credential} Proc.
+      # @param [String] key provided to the {#client_credential} Proc.
       # @return [Signet::OAuth1::Credential] The client credential.
       def find_client_credential(key)
-        cred = @client_credential.call(key) if 
-                @client_credential.respond_to?(:call)
-        nil if cred.nil?
-        nil unless cred.instance_of?(Enumerable)
-        cred.instance_of?(::Signet::OAuth1::Credential) ? cred 
-        : ::Signet::OAuth1::Credential.new(cred)
+        call_credential_lookup(@client_credential, key)
       end
 
       ## 
       # Find the appropriate client credential by calling 
       # the {#token_credential} Proc.
       #
-      # @param [String] Key provided to the {#token_credential} Proc.
+      # @param [String] key provided to the {#token_credential} Proc.
       # @return [Signet::OAuth1::Credential] if the credential is found.
       def find_token_credential(key)
-        cred = @token_credential.call(key) if @token_credential.respond_to?(:call)
-        nil if cred.nil?
-        nil unless cred.instance_of?(Enumerable)
-        cred.instance_of?(::Signet::OAuth1::Credential) ? cred 
-          : ::Signet::OAuth1::Credential.new(cred)
+        call_credential_lookup(@token_credential, key)
       end
 
       ## 
       # Find the appropriate client credential by calling 
       # the {#temporary_credential} Proc.
       #
-      # @param [String] Key provided to the {#temporary_credential} Proc.
+      # @param [String] key provided to the {#temporary_credential} Proc.
       # @return [Signet::OAuth1::Credential] if the credential is found.
       def find_temporary_credential(key)
-        cred = @temporary_credential.call(key) if 
-                @temporary_credential.respond_to?(:call)
-        nil if cred.nil?
-        nil unless cred.instance_of?(Enumerable)
-        cred.instance_of?(::Signet::OAuth1::Credential) ? cred 
-          : ::Signet::OAuth1::Credential.new(cred)
+        call_credential_lookup(@temporary_credential, key)
+      end
+
+      ## 
+      # Call a credential lookup, and cast the result to a proper Credential.
+      #
+      # @param [Proc] credential to call.
+      # @param [String] key provided to the Proc in <code>credential</code>
+      # @return [Signet::OAuth1::Credential] credential provided by 
+      #   <code>credential</code> (if any).
+      def call_credential_lookup(credential, key)
+        cred = credential.call(key) if 
+                credential.respond_to?(:call)
+        return nil if cred.nil?
+        return nil unless (cred.respond_to?(:to_str) || 
+                           cred.respond_to?(:to_ary) || 
+                           cred.respond_to?(:to_hash) ) 
+        if(cred.instance_of?(::Signet::OAuth1::Credential)) 
+          cred 
+        else
+          ::Signet::OAuth1::Credential.new(cred)
+        end
       end
 
       ## 
