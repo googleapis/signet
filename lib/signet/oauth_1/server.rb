@@ -60,8 +60,8 @@ module Signet
       # Determine if the supplied nonce/timestamp pair is valid by calling 
       # the {#nonce_timestamp} Proc.
       #
-      # @param [String, #to_str] Nonce value from the request
-      # @param [String, #to_str] Timestamp value from the request
+      # @param [String, #to_str] nonce value from the request
+      # @param [String, #to_str] timestamp value from the request
       # @return [Boolean] if the nonce/timestamp pair is valid.
       def validate_nonce_timestamp(nonce, timestamp)
         nonce = 
@@ -74,7 +74,7 @@ module Signet
       # Find the appropriate client credential by calling 
       # the {#client_credential} Proc.
       #
-      # @param [String] Key provided to the :client_credential Proc.
+      # @param [String] Key provided to the {#client_credential} Proc.
       # @return [Signet::OAuth1::Credential] The client credential.
       def find_client_credential(key)
         cred = @client_credential.call(key) if 
@@ -89,7 +89,7 @@ module Signet
       # Find the appropriate client credential by calling 
       # the {#token_credential} Proc.
       #
-      # @param [String] Key provided to the :token_credential Proc.
+      # @param [String] Key provided to the {#token_credential} Proc.
       # @return [Signet::OAuth1::Credential] if the credential is found.
       def find_token_credential(key)
         cred = @token_credential.call(key) if @token_credential.respond_to?(:call)
@@ -103,7 +103,7 @@ module Signet
       # Find the appropriate client credential by calling 
       # the {#temporary_credential} Proc.
       #
-      # @param [String] Key provided to the :temporary_credential Proc.
+      # @param [String] Key provided to the {#temporary_credential} Proc.
       # @return [Signet::OAuth1::Credential] if the credential is found.
       def find_temporary_credential(key)
         cred = @temporary_credential.call(key) if 
@@ -117,8 +117,9 @@ module Signet
       ## 
       #  Determine if the verifier is valid by calling the Proc in {#verifier}.
       #
-      # @param [String] Key provided to the :verifier Proc.
-      # @return [Boolean] verifier if if returns anything other than nil or false.
+      # @param [String] Key provided to the {#verifier} Proc.
+      # @return [Boolean] if the verifier Proc returns anything other than 
+      #   <code>nil</code> or <code>false</code>.
       def find_verifier(verifier)
         verified = @verifier.call(verifier) if @verifier.respond_to?(:call)
         verified ? true : false
@@ -129,7 +130,7 @@ module Signet
       # Validate and normalize the components from an HTTP request.
       # @overload verify_request_components(options)
       #   @param [Hash] request A pre-constructed request to verify.
-      #   @param [String] method the HTTP method , defaults to `GET`
+      #   @param [String] method the HTTP method , defaults to <code>GET</code>
       #   @param [Addressable::URI, String] uri the URI .
       #   @param [Hash, Array] headers the HTTP headers.
       #   @param [StringIO, String] body The HTTP body.
@@ -172,7 +173,7 @@ module Signet
       ##
       # Validate and normalize the HTTP Authorization header.
       # 
-      # @param [Array] headers of HTTP request.
+      # @param [Array] headers from HTTP request.
       # @return [Hash] Hash of Authorization header.
       def verify_auth_header_components(headers)
         auth_header = headers.find{|x| x[0] == 'Authorization'}
@@ -191,12 +192,12 @@ module Signet
       ##
       # @overload request_realm(options)
       #   @param [Hash] request A pre-constructed request to verify.
-      #   @param [String] method the HTTP method , defaults to `GET`
+      #   @param [String] method the HTTP method , defaults to <code>GET</code>
       #   @param [Addressable::URI, String] uri the URI .
       #   @param [Hash, Array] headers the HTTP headers.
       #   @param [StringIO, String] body The HTTP body.
       #   @param [HTTPAdapter] adapter The HTTP adapter(optional).
-      # @return [String] The Authorization realm of the request.
+      # @return [String] The Authorization realm(see RFC 2617) of the request.
       def request_realm(options={})
         if(options[:request])
           request_components = verify_request_components(
@@ -221,16 +222,16 @@ module Signet
 
       ##
       # Authenticates a temporary credential request. If no oauth_callback is
-      # present in the request, 'oob' will be returned.
+      # present in the request, <code>oob</code> will be returned.
       #
       # @overload authenticate_temporary_credential_request(options)
       #   @param [Hash] request The configuration parameters for the request.
-      #   @param [String] method the HTTP method , defaults to `GET`
+      #   @param [String] method the HTTP method , defaults to <code>GET</code>
       #   @param [Addressable::URI, String] uri the URI .
       #   @param [Hash, Array] headers the HTTP headers.
       #   @param [StringIO, String] body The HTTP body.
       #   @param [HTTPAdapter] adapter The HTTP adapter(optional).
-      # @return [String, false] The oauth_callback value, or false if not valid.
+      # @return [String, false] The oauth_callback value, or <code>false</code> if not valid.
       def authenticate_temporary_credential_request(options={})
         verifications = {
           :client_credential => 
@@ -289,7 +290,7 @@ module Signet
       # Authenticates a token credential request.
       # @overload authenticate_token_credential_request(options)
       #   @param [Hash] request The configuration parameters for the request.
-      #   @param [String] method the HTTP method , defaults to `GET`
+      #   @param [String] method the HTTP method , defaults to <code>GET</code>
       #   @param [Addressable::URI, String] uri the URI .
       #   @param [Hash, Array] headers the HTTP headers.
       #   @param [StringIO, String] body The HTTP body.
@@ -356,7 +357,7 @@ module Signet
       # Authenticates a request for a protected resource.
       # @overload authenticate_resource_request(options)
       #   @param [Hash] request The configuration parameters for the request.
-      #   @param [String] method the HTTP method , defaults to `GET`
+      #   @param [String] method the HTTP method , defaults to <code>GET</code>
       #   @param [Addressable::URI, String] uri the URI .
       #   @param [Hash, Array] headers the HTTP headers.
       #   @param [StringIO, String] body The HTTP body.
