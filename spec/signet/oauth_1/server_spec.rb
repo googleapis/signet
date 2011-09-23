@@ -42,54 +42,20 @@ def oauth_headers(real_headers={})
   headers['oauth_signature_method'] = 'HMAC-SHA1'
   headers['oauth_version'] = '1.0'
   headers.merge!(real_headers)
-  #headers.to_a
-  # TODO: send the realm?
   ['Authorization', ::Signet::OAuth1.generate_authorization_header(headers, nil)]
 end
 
-def make_temporary_credential_request(callback=nil, real_request={}, realm=nil)
-  client = Signet::OAuth1::Client.new(
-                       :client_credential_key=>@client_credential_key,
-                       :client_credential_secret=>@client_credential_secret,
-                       :temporary_credential_uri=>
-                         real_request[:uri] || 'http://photos.example.net/initiate',
-                       :callback=>callback)
-  
-  req = client.generate_temporary_credential_request(:realm=>realm)
-
-  if(real_request[:headers])
-    { :method=>req[0], 
-      :uri=>req[1], 
-      :headers=>real_request[:headers] || req[2], 
-      :body=>req[3]
-    }
-  else
-    req
-  end
+def make_temporary_credential_request(client, callback=nil, uri=nil, realm=nil)
+  client.callback = callback if callback
+  client.temporary_credential_uri = uri || 'http://photos.example.net/initiate' 
+  client.generate_temporary_credential_request(:realm=>realm)
 end
 
-def make_token_credential_request(real_request={}, realm=nil)
-  client = Signet::OAuth1::Client.new(
-                      :client_credential_key=>@client_credential_key,
-                      :client_credential_secret=>@client_credential_secret,
-                      :temporary_credential_key=>@temporary_credential_key,
-                      :temporary_credential_secret=>@temporary_credential_secret,
-                      :token_credential_uri=>
-                        real_request[:uri] || 'http://photos.example.net/token'
-                      )
-  req = client.generate_token_credential_request(
-                                      :verifier=>real_request[:verifier] || '12345',
-                                      :realm=>realm
-                                    )
-  if(real_request[:headers])
-    { :method=>req[0], 
-      :uri=>req[1], 
-      :headers=>real_request[:headers] || req[2], 
-      :body=>req[3]
-    }
-  else
-    req
-  end
+def make_token_credential_request(client, verifier=nil, realm=nil, uri=nil)
+  client.token_credential_uri = uri || 'http://photos.example.net/token'
+  client.generate_token_credential_request(:verifier=>verifier || '12345',
+                                           :realm=>realm
+                                          )
 end
 
 def make_resource_request(client, real_request={}, realm=nil)
@@ -218,7 +184,6 @@ describe Signet::OAuth1::Server, 'configured' do
     end).should raise_error(ArgumentError)
   end
 
-
   it 'should reject a request with the wrong signature method' do
     bad_method = 'FOO'
     (lambda do 
@@ -312,6 +277,7 @@ describe Signet::OAuth1::Server, 'configured' do
         Signet::OAuth1::Credential.new(@token_credential_key, 
                                        @token_credential_secret)
     end
+
     it 'should return a Signet credential if the Proc provides a key/secret pair' do
       @server.token_credential = 
         lambda do |x| 
@@ -321,6 +287,7 @@ describe Signet::OAuth1::Server, 'configured' do
         Signet::OAuth1::Credential.new(@token_credential_key, 
                                        @token_credential_secret)
     end
+
     it 'should return a Signet credential if the Proc provides ' + 
        'a key/secret Enumerable' do
       @server.token_credential = 
@@ -366,16 +333,24 @@ describe Signet::OAuth1::Server, 'configured' do
 
 
   describe 'expecting a request for a temporary credential' do
+    before do
+      @client = Signet::OAuth1::Client.new(
+                       :client_credential_key=>@client_credential_key,
+                       :client_credential_secret=>@client_credential_secret,
+                       :temporary_credential_uri=>
+                          'http://photos.example.net/initiate')
+    end
+
     it 'should raise an error if the client credential Proc is not set' do
       @server.client_credential = nil
       (lambda do
         @server.authenticate_temporary_credential_request(
-          :request=>make_temporary_credential_request
+          :request=>make_temporary_credential_request(@client)
         )
       end).should raise_error(ArgumentError)
     end
     it 'should reject an malformed request' do
-      bad_request = make_temporary_credential_request()
+      bad_request = make_temporary_credential_request(@client)
       bad_request[2][0][1].gsub!(/(OAuth)(.+)/, "#{$1}")
       (lambda do
         @server.authenticate_temporary_credential_request(
@@ -383,6 +358,7 @@ describe Signet::OAuth1::Server, 'configured' do
         )
       end).should raise_error(Signet::MalformedAuthorizationError)
     end
+
     it 'should call a user-supplied Proc to validate a nonce/timestamp pair' do
       nonce_callback = mock('nonce')
       nonce_callback.should_receive(:call).once.with(an_instance_of(String), 
@@ -391,11 +367,12 @@ describe Signet::OAuth1::Server, 'configured' do
 
       @server.nonce_timestamp = nonce_callback
       @server.authenticate_temporary_credential_request(
-                                        :request=>make_temporary_credential_request
+                                :request=>make_temporary_credential_request(@client)
       )
     end
+
     it "should return 'oob' for a valid request without an oauth_callback" do
-      bad_request = make_temporary_credential_request('')
+      bad_request = make_temporary_credential_request(@client)
       @server.authenticate_temporary_credential_request(
         :request=>bad_request
       ).should == 'oob'
@@ -404,11 +381,11 @@ describe Signet::OAuth1::Server, 'configured' do
        'with an oauth_callback' do
       callback = 'http://printer.example.com/ready'
       @server.authenticate_temporary_credential_request(
-        :request=>make_temporary_credential_request(callback)
+        :request=>make_temporary_credential_request(@client, callback)
       ).should == callback
     end
     it 'should return false for an unauthenticated request' do
-      bad_request = make_temporary_credential_request()
+      bad_request = make_temporary_credential_request(@client)
       bad_request[2][0][1].gsub!(/oauth_signature=\".+\"/, 
                                  "oauth_signature=\"foobar\"")
       @server.authenticate_temporary_credential_request(
@@ -416,31 +393,43 @@ describe Signet::OAuth1::Server, 'configured' do
       ).should == false
     end
     it 'should return nil from #request_realm if no realm is provided' do
-      req = make_temporary_credential_request()
+      req = make_temporary_credential_request(@client)
       @server.request_realm(
         :request=>req
       ).should == nil
     end
+
     describe 'with a Realm provided' do
       it 'should return the realm from #request_realm' do
-        req = make_temporary_credential_request(nil, {}, 'Photos')
+        req = make_temporary_credential_request(@client, nil, nil, 'Photos')
         @server.request_realm(
           :request=>req
         ).should == 'Photos'
       end
       it 'should return true with a valid request' do
-        req = make_temporary_credential_request(nil, {}, 'Photos')
+        req = make_temporary_credential_request(@client, nil, nil, 'Photos')
         @server.authenticate_temporary_credential_request(
           :request=>req
         ).should == 'oob'
       end
     end
+
   end
 
 
   describe 'expecting a request for a token credential' do
+    before do
+      @client = Signet::OAuth1::Client.new(
+                      :client_credential_key=>@client_credential_key,
+                      :client_credential_secret=>@client_credential_secret,
+                      :temporary_credential_key=>@temporary_credential_key,
+                      :temporary_credential_secret=>@temporary_credential_secret,
+                      :token_credential_uri=>'http://photos.example.net/token'
+                      )
+    end
+
     it 'should reject an malformed request' do
-      bad_request = make_token_credential_request()
+      bad_request = make_token_credential_request(@client)
       bad_request[2][0][1].gsub!(/(OAuth)(.+)/, "#{$1}")
       (lambda do
         @server.authenticate_token_credential_request(
@@ -455,16 +444,16 @@ describe Signet::OAuth1::Server, 'configured' do
       ).and_return(true)
       @server.nonce_timestamp = nonce_callback
       @server.authenticate_token_credential_request(
-        :request=>make_token_credential_request
+        :request=>make_token_credential_request(@client)
       )
     end
     it 'should return true for a valid request' do
       @server.authenticate_token_credential_request(
-        :request=>make_token_credential_request
+        :request=>make_token_credential_request(@client)
       ).should == true
     end
     it 'should return false for an unauthenticated request' do
-      bad_request = make_token_credential_request()
+      bad_request = make_token_credential_request(@client)
       bad_request[2][0][1].gsub!(/oauth_signature=\".+\"/, 
                                  "oauth_signature=\"foobar\"")
       @server.authenticate_token_credential_request(
@@ -481,9 +470,10 @@ describe Signet::OAuth1::Server, 'configured' do
 
       @server.client_credential = key_callback
       @server.authenticate_token_credential_request(
-        :request=>make_token_credential_request
+        :request=>make_token_credential_request(@client)
       )
     end
+
     it 'should call a user-supplied Proc to fetch the temporary token credential' do
       temp_cred = Signet::OAuth1::Credential.new(@temporary_credential_key, 
                                                  @temporary_credential_secret)
@@ -494,29 +484,31 @@ describe Signet::OAuth1::Server, 'configured' do
 
       @server.temporary_credential = temp_callback
       @server.authenticate_token_credential_request(
-        :request=>make_token_credential_request
+        :request=>make_token_credential_request(@client)
       )
     end
     it 'should return nil from #request_realm if no realm is provided' do
-      req = make_token_credential_request()
+      req = make_token_credential_request(@client)
       @server.request_realm(
         :request=>req
       ).should == nil
     end
+
     describe 'with a Realm provided' do
       it 'should return the realm from #request_realm' do
-        req = make_token_credential_request({}, 'Photos')
+        req = make_token_credential_request(@client, nil, 'Photos')
         @server.request_realm(
           :request=>req
         ).should == 'Photos'
       end
       it 'should return true with a valid request' do
-        req = make_token_credential_request({}, 'Photos')
+        req = make_token_credential_request(@client, nil, 'Photos')
         @server.authenticate_token_credential_request(
           :request=>req
         ).should == true
       end
     end
+
   end
 
 
@@ -573,13 +565,18 @@ describe Signet::OAuth1::Server, 'configured' do
     end
     it 'should raise an error if signature is x-www-form-encoded ' + 
        'but does not send form parameters in header' do
+
+      # Make a full request so that we can sign against the form parameters
+      # that will be removed.
       req = make_resource_request(
         @client,
         {:method=>'POST',
         :headers=>{'Content-Type'=>'application/x-www-form-urlencoded'},
         :body=>'c2&a3=2+q'})
-      req[2].find {|x| x[0] == "Authorization"}[1].gsub!(/c2=\"\", a3=\"2%20q\", /, 
-                                                         '')
+
+      auth_header = req[2].find {|x| x[0] == "Authorization"}
+      auth_header[1].gsub!(/c2=\"\", a3=\"2%20q\", /, '')
+
       (lambda do 
         @server.authenticate_resource_request(:request=>req)
       end).should raise_error(Signet::MalformedAuthorizationError, 
@@ -587,6 +584,7 @@ describe Signet::OAuth1::Server, 'configured' do
             'Authentication header did not include form values'
           )
     end
+
     it 'should call a user-supplied Proc to validate a nonce/timestamp pair' do
       nonce_callback = mock('nonce')
       nonce_callback.should_receive(:call).once.with(
@@ -598,6 +596,7 @@ describe Signet::OAuth1::Server, 'configured' do
         :request=>make_resource_request(@client)
       )
     end
+
     it 'should call a user-supplied Proc to fetch the client credential' do
       client_cred =  Signet::OAuth1::Credential.new(@client_credential_key, 
                                                     @client_credential_secret )
@@ -611,6 +610,7 @@ describe Signet::OAuth1::Server, 'configured' do
         :request=>make_resource_request(@client)
       ) 
     end
+
     it 'should call a user-supplied Proc to fetch the token credential' do
       token_cred = Signet::OAuth1::Credential.new(@token_credential_key, 
                                                   @token_credential_secret)
@@ -624,6 +624,7 @@ describe Signet::OAuth1::Server, 'configured' do
         :request=>make_resource_request(@client)
       ) 
     end
+
     it 'should return true for a valid request' do
       @server.authenticate_resource_request(
         :request=>make_resource_request(@client)
@@ -641,6 +642,7 @@ describe Signet::OAuth1::Server, 'configured' do
         :request=>req
       ).should == nil
     end
+
     describe 'with a Realm provided' do
       it 'should return the realm from #request_realm' do
         req = make_resource_request(@client, {}, 'Photos')
@@ -655,8 +657,8 @@ describe Signet::OAuth1::Server, 'configured' do
         ).should == true
       end
     end
-  end
 
+  end
 
 
   describe "expecting a two-legged request for a protected resource" do
@@ -715,14 +717,19 @@ describe Signet::OAuth1::Server, 'configured' do
     end
     it 'should raise an error if signature is x-www-form-encoded '+ 
        'but does not send form parameters in header' do
+
+      # Make a full request so that we can sign against the form parameters
+      # that will be removed.
       req = make_resource_request(
         @client,
         {:method=>'POST',
         :headers=>{'Content-Type'=>'application/x-www-form-urlencoded'},
         :body=>'c2&a3=2+q'}
       )
-      req[2].find {|x| x[0] == "Authorization"}[1].gsub!(/c2=\"\", a3=\"2%20q\", /, 
-                                                         '')
+
+      auth_header = req[2].find {|x| x[0] == "Authorization"}
+      auth_header[1].gsub!(/c2=\"\", a3=\"2%20q\", /, '')
+
       (lambda do 
         @server.authenticate_resource_request(:request=>req, :two_legged=>true)
       end).should raise_error(Signet::MalformedAuthorizationError, 
@@ -730,6 +737,7 @@ describe Signet::OAuth1::Server, 'configured' do
             'Authentication header did not include form values'
           )
     end
+
     it 'should call a user-supplied Proc to validate a nonce/timestamp pair' do
       nonce_callback = mock('nonce')
       nonce_callback.should_receive(:call).once.with(
@@ -741,6 +749,7 @@ describe Signet::OAuth1::Server, 'configured' do
         :request=>make_resource_request(@client), :two_legged=>true
       )
     end
+
     it 'should call a user-supplied Proc to fetch the client credential' do
       client_cred = Signet::OAuth1::Credential.new(@client_credential_key, 
                                                    @client_credential_secret )
@@ -754,6 +763,7 @@ describe Signet::OAuth1::Server, 'configured' do
         :request=>make_resource_request(@client), :two_legged=>true
       )
     end
+
     it 'should return true for a valid request' do
       @server.authenticate_resource_request(
         :request=>make_resource_request(@client), :two_legged=>true
@@ -785,6 +795,7 @@ describe Signet::OAuth1::Server, 'configured' do
         ).should == true
       end
     end
+
   end
 
 end

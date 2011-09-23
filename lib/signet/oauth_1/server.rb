@@ -274,8 +274,11 @@ module Signet
           nil
         )
         if(computed_signature == auth_hash['oauth_signature'])
-          auth_hash.fetch('oauth_callback', 'oob').empty? ? 'oob' 
-            : auth_hash.fetch('oauth_callback')
+          if(auth_hash.fetch('oauth_callback', 'oob').empty?)
+            'oob' 
+          else
+            auth_hash.fetch('oauth_callback')
+          end
         else
           false
         end
@@ -291,7 +294,7 @@ module Signet
       #   @param [Hash, Array] headers the HTTP headers.
       #   @param [StringIO, String] body The HTTP body.
       #   @param [HTTPAdapter] adapter The HTTP adapter(optional).
-      # @return [Boolean] the authenticity of the request(valid/not valid).
+      # @return [Boolean] the authenticity of the request.
       def authenticate_token_credential_request(options={})
         verifications = {
           :client_credential => 
@@ -360,7 +363,7 @@ module Signet
       #   @param [Boolean] two_legged skip the token_credential lookup?
       #   @param [HTTPAdapter] adapter The HTTP adapter(optional).
       #
-      # @return [Boolean] The authenticity of the request(valid/not valid).
+      # @return [Boolean] The authenticity of the request.
       def authenticate_resource_request(options={})
         verifications = {
           :client_credential => 
