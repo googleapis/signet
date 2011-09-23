@@ -24,12 +24,8 @@ module Signet
     class Server
 
       # @return [Proc] lookup the value from this Proc.
-      attr_accessor :nonce_timestamp, :client_credential, :token_credential, :temporary_credential, :verifier
-
-      # TODO: shouldn't :realm be a lookup Proc as well, to allow the main
-      # server to approve/reject?
-      # NOTE: 'realm' is optional(5849#3.5.1), and doesn't figure in the signature.
-
+      attr_accessor :nonce_timestamp, :client_credential, :token_credential, 
+                    :temporary_credential, :verifier
 
       ##
       # Creates an OAuth 1.0 server.
@@ -69,7 +65,8 @@ module Signet
       # @return [Boolean] if the nonce/timestamp pair is valid.
       def validate_nonce_timestamp(nonce, timestamp)
         nonce = 
-          @nonce_timestamp.call(nonce, timestamp) if @nonce_timestamp.respond_to?(:call)
+          @nonce_timestamp.call(nonce, timestamp) if 
+            @nonce_timestamp.respond_to?(:call)
         nonce ? true : false
       end
 
@@ -80,7 +77,8 @@ module Signet
       # @param [String] Key provided to the :client_credential Proc.
       # @return [Signet::OAuth1::Credential] The client credential.
       def find_client_credential(key)
-        cred = @client_credential.call(key) if @client_credential.respond_to?(:call)
+        cred = @client_credential.call(key) if 
+                @client_credential.respond_to?(:call)
         nil if cred.nil?
         nil unless cred.instance_of?(Enumerable)
         cred.instance_of?(::Signet::OAuth1::Credential) ? cred 
@@ -108,7 +106,8 @@ module Signet
       # @param [String] Key provided to the :temporary_credential Proc.
       # @return [Signet::OAuth1::Credential] if the credential is found.
       def find_temporary_credential(key)
-        cred = @temporary_credential.call(key) if @temporary_credential.respond_to?(:call)
+        cred = @temporary_credential.call(key) if 
+                @temporary_credential.respond_to?(:call)
         nil if cred.nil?
         nil unless cred.instance_of?(Enumerable)
         cred.instance_of?(::Signet::OAuth1::Credential) ? cred 
@@ -173,18 +172,42 @@ module Signet
       ##
       # Validate and normalize the HTTP Authorization header.
       # 
-      # @param [Array] Headers from HTTP request.
-      # @return [Hash] Symbolized hash of Authorization header.
+      # @param [Array] headers of HTTP request.
+      # @return [Hash] Hash of Authorization header.
       def verify_auth_header_components(headers)
         auth_header = headers.find{|x| x[0] == 'Authorization'}
         if(auth_header.nil? || auth_header[1] == '')
           raise MalformedAuthorizationError.new('Authorization header is missing') 
         end
         auth_hash = ::Signet::OAuth1.parse_authorization_header(
-          auth_header[1] ).inject({}) {|acc, (key,val)| acc[key] = val; acc}
+          auth_header[1] ).inject({}) {|acc, (key,val)| acc[key.downcase] = val; acc}
+
+        # Realm isn't used, and will throw the signature off.
+        auth_hash.delete("realm")
         auth_hash
       end
 
+      def oauth_realm(options={})
+        if(options[:request])
+          request_components = verify_request_components(
+            :request=>options[:request], 
+            :adapter=>options[:adapter] )
+        else
+          request_components = verify_request_components(
+            :method=>options[:method], 
+            :uri=>options[:uri], 
+            :headers=>options[:headers], 
+            :body=>options[:body] )
+        end
+        
+        auth_header = request_components[:headers].find{|x| x[0] == 'Authorization'}
+        if(auth_header.nil? || auth_header[1] == '')
+          raise MalformedAuthorizationError.new('Authorization header is missing') 
+        end
+        auth_hash = ::Signet::OAuth1.parse_authorization_header(
+          auth_header[1] ).inject({}) {|acc, (key,val)| acc[key.downcase] = val; acc}
+        auth_hash['realm']
+      end
       ##
       # Authenticates a temporary credential request. If no oauth_callback is
       # present in the request, 'oob' will be returned.
@@ -269,7 +292,7 @@ module Signet
                                                          'Temporary credential secret') 
                    },
           :verifier => 
-            lambda {|x| false }
+            lambda {|x| 'Verifier' }
         }
         verifications.each do |(key, value)|
           unless self.send(key)
