@@ -415,16 +415,16 @@ describe Signet::OAuth1::Server, 'configured' do
         :request=>bad_request
       ).should == false
     end
-    it 'should return nil from #oauth_realm if no realm is provided' do
+    it 'should return nil from #request_realm if no realm is provided' do
       req = make_temporary_credential_request()
-      @server.oauth_realm(
+      @server.request_realm(
         :request=>req
       ).should == nil
     end
     describe 'with a Realm provided' do
-      it 'should return the realm from #oauth_realm' do
+      it 'should return the realm from #request_realm' do
         req = make_temporary_credential_request(nil, {}, 'Photos')
-        @server.oauth_realm(
+        @server.request_realm(
           :request=>req
         ).should == 'Photos'
       end
@@ -497,16 +497,16 @@ describe Signet::OAuth1::Server, 'configured' do
         :request=>make_token_credential_request
       )
     end
-    it 'should return nil from #oauth_realm if no realm is provided' do
+    it 'should return nil from #request_realm if no realm is provided' do
       req = make_token_credential_request()
-      @server.oauth_realm(
+      @server.request_realm(
         :request=>req
       ).should == nil
     end
     describe 'with a Realm provided' do
-      it 'should return the realm from #oauth_realm' do
+      it 'should return the realm from #request_realm' do
         req = make_token_credential_request({}, 'Photos')
-        @server.oauth_realm(
+        @server.request_realm(
           :request=>req
         ).should == 'Photos'
       end
@@ -635,16 +635,16 @@ describe Signet::OAuth1::Server, 'configured' do
                                  "oauth_signature=\"foobar\"")
       @server.authenticate_resource_request(:request=>bad_request).should == false
     end
-    it 'should return nil from #oauth_realm if no realm is provided' do
+    it 'should return nil from #request_realm if no realm is provided' do
       req = make_resource_request(@client)
-      @server.oauth_realm(
+      @server.request_realm(
         :request=>req
       ).should == nil
     end
     describe 'with a Realm provided' do
-      it 'should return the realm from #oauth_realm' do
+      it 'should return the realm from #request_realm' do
         req = make_resource_request(@client, {}, 'Photos')
-        @server.oauth_realm(
+        @server.request_realm(
           :request=>req
         ).should == 'Photos'
       end
@@ -765,16 +765,16 @@ describe Signet::OAuth1::Server, 'configured' do
                                  "oauth_signature=\"foobar\"")
       @server.authenticate_resource_request(:request=>bad_request).should == false
     end
-    it 'should return nil from #oauth_realm if no realm is provided' do
+    it 'should return nil from #request_realm if no realm is provided' do
       req = make_resource_request(@client)
-      @server.oauth_realm(
+      @server.request_realm(
         :request=>req
       ).should == nil
     end
     describe 'with a Realm provided' do
-      it 'should return the realm from #oauth_realm' do
+      it 'should return the realm from #request_realm' do
         req = make_resource_request(@client, {}, 'Photos')
-        @server.oauth_realm(
+        @server.request_realm(
           :request=>req, :two_legged=>true
         ).should == 'Photos'
       end

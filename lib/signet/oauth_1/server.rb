@@ -187,7 +187,17 @@ module Signet
         auth_hash
       end
 
-      def oauth_realm(options={})
+
+      ##
+      # @overload request_realm(options)
+      #   @param [Hash] request A pre-constructed request to verify.
+      #   @param [String] method the HTTP method , defaults to `GET`
+      #   @param [Addressable::URI, String] uri the URI .
+      #   @param [Hash, Array] headers the HTTP headers.
+      #   @param [StringIO, String] body The HTTP body.
+      #   @param [HTTPAdapter] adapter The HTTP adapter(optional).
+      # @return [String] The Authorization realm of the request.
+      def request_realm(options={})
         if(options[:request])
           request_components = verify_request_components(
             :request=>options[:request], 
@@ -208,6 +218,7 @@ module Signet
           auth_header[1] ).inject({}) {|acc, (key,val)| acc[key.downcase] = val; acc}
         auth_hash['realm']
       end
+
       ##
       # Authenticates a temporary credential request. If no oauth_callback is
       # present in the request, 'oob' will be returned.
