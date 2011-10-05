@@ -190,8 +190,6 @@ module Signet
         auth_hash = ::Signet::OAuth1.parse_authorization_header(
           auth_header[1] ).inject({}) {|acc, (key,val)| acc[key.downcase] = val; acc}
 
-        # Realm isn't used, and will throw the signature off.
-        auth_hash.delete("realm")
         auth_hash
       end
 
@@ -238,7 +236,7 @@ module Signet
       #   @param [Hash, Array] headers the HTTP headers.
       #   @param [StringIO, String] body The HTTP body.
       #   @param [HTTPAdapter] adapter The HTTP adapter(optional).
-      # @return [String, false] The oauth_callback value, or <code>false</code> if not valid.
+      # @return [String] The oauth_callback value, or <code>false</code> if not valid.
       def authenticate_temporary_credential_request(options={})
         verifications = {
           :client_credential => 
@@ -277,7 +275,8 @@ module Signet
         computed_signature = ::Signet::OAuth1.sign_parameters(
           method, 
           uri, 
-          auth_hash.to_a, 
+          # Realm isn't used, and will throw the signature off.
+          auth_hash.reject{|k,v| k=='realm'}.to_a, 
           client_credential_secret, 
           nil
         )
@@ -302,7 +301,8 @@ module Signet
       #   @param [Hash, Array] headers the HTTP headers.
       #   @param [StringIO, String] body The HTTP body.
       #   @param [HTTPAdapter] adapter The HTTP adapter(optional).
-      # @return [Boolean] the authenticity of the request.
+      # @return [Hash] A hash of credentials and realm for a valid request,
+      #   or <code>nil</code> if not valid.
       def authenticate_token_credential_request(options={})
         verifications = {
           :client_credential => 
@@ -352,12 +352,20 @@ module Signet
         computed_signature = ::Signet::OAuth1.sign_parameters(
           method, 
           uri, 
-          auth_hash.to_a, 
+          # Realm isn't used, and will throw the signature off.
+          auth_hash.reject{|k,v| k=='realm'}.to_a, 
           client_credential.secret, 
           temporary_credential.secret
         )
 
-        (computed_signature == auth_hash['oauth_signature'])
+        if(computed_signature == auth_hash['oauth_signature'])
+          {:client_credential=>client_credential,
+            :temporary_credential=>temporary_credential,
+            :realm=>auth_hash['realm']
+          }
+        else
+          nil
+        end
       end
 
       ##
@@ -371,7 +379,8 @@ module Signet
       #   @param [Boolean] two_legged skip the token_credential lookup?
       #   @param [HTTPAdapter] adapter The HTTP adapter(optional).
       #
-      # @return [Boolean] The authenticity of the request.
+      # @return [Hash] A hash of the credentials and realm for a valid request, 
+      #   or <code>nil</code> if not valid.
       def authenticate_resource_request(options={})
         verifications = {
           :client_credential => 
@@ -437,16 +446,17 @@ module Signet
 
         auth_token = auth_hash['oauth_token']
 
+
         unless(options[:two_legged])
-          return false if(auth_token.nil?)
-          return false unless(token_credential = find_token_credential(auth_token))
+          return nil if(auth_token.nil?)
+          return nil unless(token_credential = find_token_credential(auth_token))
           token_credential_secret = token_credential.secret if token_credential
         end
 
-        return false unless(client_credential = 
+        return nil unless(client_credential = 
                             find_client_credential(auth_hash['oauth_consumer_key']))
 
-        return false unless validate_nonce_timestamp(auth_hash['oauth_nonce'], 
+        return nil unless validate_nonce_timestamp(auth_hash['oauth_nonce'], 
                                                      auth_hash['oauth_timestamp'])
 
         if(method == ('POST' || 'PUT') && 
@@ -469,12 +479,20 @@ module Signet
         computed_signature = ::Signet::OAuth1.sign_parameters(
           method, 
           uri, 
-          auth_hash.to_a, 
+          # Realm isn't used, and will throw the signature off.
+          auth_hash.reject{|k,v| k=='realm'}.to_a, 
           client_credential_secret, 
           token_credential_secret
         )
 
-        (computed_signature == auth_hash['oauth_signature'])
+        if(computed_signature == auth_hash['oauth_signature'])
+          {:client_credential=>client_credential,
+           :token_credential=>token_credential,
+           :realm=>auth_hash['realm']
+          }
+        else
+          nil
+        end
       end
 
     end

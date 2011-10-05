@@ -421,7 +421,7 @@ describe Signet::OAuth1::Server, 'configured' do
           :request=>req
         ).should == 'Photos'
       end
-      it 'should return true with a valid request' do
+      it 'should return "oob" with a valid request without an oauth_callback' do
         req = make_temporary_credential_request(@client, nil, nil, 'Photos')
         @server.authenticate_temporary_credential_request(
           :request=>req
@@ -441,6 +441,10 @@ describe Signet::OAuth1::Server, 'configured' do
                       :temporary_credential_secret=>@temporary_credential_secret,
                       :token_credential_uri=>'http://photos.example.net/token'
                       )
+      @return_hash = {:client_credential=>Signet::OAuth1::Credential.new(@client_credential_key, @client_credential_secret),
+                      :temporary_credential=>Signet::OAuth1::Credential.new(@temporary_credential_key, @temporary_credential_secret),
+                      :realm=>nil
+      }
     end
 
     it 'should reject an malformed request' do
@@ -462,18 +466,18 @@ describe Signet::OAuth1::Server, 'configured' do
         :request=>make_token_credential_request(@client)
       )
     end
-    it 'should return true for a valid request' do
+    it 'should return an informational hash for a valid request' do
       @server.authenticate_token_credential_request(
         :request=>make_token_credential_request(@client)
-      ).should == true
+      ).should == @return_hash
     end
-    it 'should return false for an unauthenticated request' do
+    it 'should return nil for an unauthenticated request' do
       bad_request = make_token_credential_request(@client)
       bad_request[2][0][1].gsub!(/oauth_signature=\".+\"/, 
                                  "oauth_signature=\"foobar\"")
       @server.authenticate_token_credential_request(
         :request=>bad_request
-      ).should == false
+      ).should == nil
     end
     it 'should call a user-supplied Proc to fetch the client credential' do
       client_cred = Signet::OAuth1::Credential.new(@client_credential_key, 
@@ -510,17 +514,21 @@ describe Signet::OAuth1::Server, 'configured' do
     end
 
     describe 'with a Realm provided' do
+      before do
+        @realm = 'Photos'
+        @return_hash[:realm] = @realm
+      end
       it 'should return the realm from #request_realm' do
-        req = make_token_credential_request(@client, nil, 'Photos')
+        req = make_token_credential_request(@client, nil, @realm)
         @server.request_realm(
           :request=>req
-        ).should == 'Photos'
+        ).should == @realm
       end
-      it 'should return true with a valid request' do
-        req = make_token_credential_request(@client, nil, 'Photos')
+      it 'should an informational hash with a valid request' do
+        req = make_token_credential_request(@client, nil, @realm)
         @server.authenticate_token_credential_request(
           :request=>req
-        ).should == true
+        ).should == @return_hash
       end
     end
 
@@ -535,6 +543,10 @@ describe Signet::OAuth1::Server, 'configured' do
                                :token_credential_key=>@token_credential_key,
                                :token_credential_secret=>@token_credential_secret
                               )
+      @return_hash = {:client_credential=>Signet::OAuth1::Credential.new(@client_credential_key, @client_credential_secret),
+                      :token_credential=>Signet::OAuth1::Credential.new(@token_credential_key, @token_credential_secret),
+                      :realm=>nil
+      }
     end
 
     it 'should not raise an error if a request body is chunked(as Array)' do
@@ -544,7 +556,7 @@ describe Signet::OAuth1::Server, 'configured' do
         :body => ['A chunked body.'],
         :headers => make_oauth_signature_header
       )
-      approved.should == false
+      approved.should == nil
     end
 
     it 'should not raise an error if a request body is chunked(as StringIO)' do
@@ -557,7 +569,7 @@ describe Signet::OAuth1::Server, 'configured' do
         :body => chunked_body,
         :headers => make_oauth_signature_header
       )
-      approved.should == false
+      approved.should == nil
     end
 
     it 'should raise an error if a request body is of a bogus type' do
@@ -576,7 +588,7 @@ describe Signet::OAuth1::Server, 'configured' do
         {:method=>'POST',
         :headers=>{'Content-Type'=>'application/x-www-form-urlencoded'},
         :body=>'c2&a3=2+q'})
-      @server.authenticate_resource_request(:request=>req).should == true
+      @server.authenticate_resource_request(:request=>req).should == @return_hash
     end
     it 'should raise an error if signature is x-www-form-encoded ' + 
        'but does not send form parameters in header' do
@@ -640,16 +652,16 @@ describe Signet::OAuth1::Server, 'configured' do
       ) 
     end
 
-    it 'should return true for a valid request' do
+    it 'should return a Hash for a valid request' do
       @server.authenticate_resource_request(
         :request=>make_resource_request(@client)
-      ).should == true
+      ).should == @return_hash
     end
-    it 'should return false for a unauthenticated request' do
+    it 'should return nil for a unauthenticated request' do
       bad_request = make_resource_request(@client)
       bad_request[2][0][1].gsub!(/oauth_signature=\".+\"/, 
                                  "oauth_signature=\"foobar\"")
-      @server.authenticate_resource_request(:request=>bad_request).should == false
+      @server.authenticate_resource_request(:request=>bad_request).should == nil
     end
     it 'should return nil from #request_realm if no realm is provided' do
       req = make_resource_request(@client)
@@ -659,17 +671,21 @@ describe Signet::OAuth1::Server, 'configured' do
     end
 
     describe 'with a Realm provided' do
+      before do
+        @realm = 'Photos'
+        @return_hash[:realm] = @realm
+      end
       it 'should return the realm from #request_realm' do
-        req = make_resource_request(@client, {}, 'Photos')
+        req = make_resource_request(@client, {}, @realm)
         @server.request_realm(
           :request=>req
-        ).should == 'Photos'
+        ).should == @realm
       end
-      it 'should return true with a valid request' do
-        req = make_resource_request(@client, {}, 'Photos')
+      it 'should return a hash containing the realm with a valid request' do
+        req = make_resource_request(@client, {}, @realm)
         @server.authenticate_resource_request(
           :request=>req
-        ).should == true
+        ).should == @return_hash
       end
     end
 
@@ -682,6 +698,11 @@ describe Signet::OAuth1::Server, 'configured' do
                                :client_credential_key=>@client_credential_key,
                                :client_credential_secret=>@client_credential_secret,
                                :two_legged=>true)
+
+      @return_hash = {:client_credential=>Signet::OAuth1::Credential.new(@client_credential_key, @client_credential_secret),
+                      :token_credential=>nil,
+                      :realm=>nil
+      }
     end
     it 'should not raise an error if a request body is chunked(as Array)' do
       approved = @server.authenticate_resource_request(
@@ -691,7 +712,7 @@ describe Signet::OAuth1::Server, 'configured' do
         :headers => make_oauth_signature_header,
         :two_legged=>true
       )
-      approved.should == false
+      approved.should == nil
     end
 
     it 'should not raise an error if a request body is chunked(as StringIO)' do
@@ -705,7 +726,7 @@ describe Signet::OAuth1::Server, 'configured' do
         :headers => make_oauth_signature_header,
         :two_legged=>true
       )
-      approved.should == false
+      approved.should == nil
     end
 
     it 'should raise an error if a request body is of a bogus type' do
@@ -728,7 +749,7 @@ describe Signet::OAuth1::Server, 'configured' do
       )
       @server.authenticate_resource_request(
         :request=>req, :two_legged=>true
-      ).should == true
+      ).should == @return_hash
     end
     it 'should raise an error if signature is x-www-form-encoded '+ 
        'but does not send form parameters in header' do
@@ -779,16 +800,16 @@ describe Signet::OAuth1::Server, 'configured' do
       )
     end
 
-    it 'should return true for a valid request' do
+    it 'should return a informational hash for a valid request' do
       @server.authenticate_resource_request(
         :request=>make_resource_request(@client), :two_legged=>true
-      ).should == true
+      ).should == @return_hash
     end
     it 'should return false for a unauthenticated request' do
       bad_request = make_resource_request(@client)
       bad_request[2][0][1].gsub!(/oauth_signature=\".+\"/, 
                                  "oauth_signature=\"foobar\"")
-      @server.authenticate_resource_request(:request=>bad_request).should == false
+      @server.authenticate_resource_request(:request=>bad_request).should == nil
     end
     it 'should return nil from #request_realm if no realm is provided' do
       req = make_resource_request(@client)
@@ -797,17 +818,22 @@ describe Signet::OAuth1::Server, 'configured' do
       ).should == nil
     end
     describe 'with a Realm provided' do
+      before do
+        @realm = 'Photos'
+        @return_hash[:realm] = @realm
+      end
       it 'should return the realm from #request_realm' do
-        req = make_resource_request(@client, {}, 'Photos')
+        req = make_resource_request(@client, {}, @realm)
         @server.request_realm(
           :request=>req, :two_legged=>true
-        ).should == 'Photos'
+        ).should == @realm
       end
-      it 'should return true with a valid request' do
-        req = make_resource_request(@client, {}, 'Photos')
+
+      it 'should return a hash containing the realm with a valid request' do
+        req = make_resource_request(@client, {}, @realm)
         @server.authenticate_resource_request(
           :request=>req, :two_legged=>true
-        ).should == true
+        ).should == @return_hash
       end
     end
 
