@@ -183,10 +183,20 @@ module Signet
           accu[key.to_s] = value
           accu
         end
-        self.refresh_token = options["refresh_token"]
+
         self.access_token = options["access_token"]
         self.expires_in = options["expires_in"]
-        self.issued_at = options["issued_at"] if options["issued_at"]
+
+        if options["refresh_token"]
+          # The refresh token may not be returned in a token response.
+          # In which case, the old one should continue to be used.
+          self.refresh_token = options["refresh_token"]
+        end
+        if options["issued_at"]
+          # By default, the token is issued at `Time.now` when `expires_in` is
+          # set, but this can be used to supply a more precise time.
+          self.issued_at = options["issued_at"]
+        end
         return self
       end
 
@@ -563,7 +573,7 @@ module Signet
       # @return [TrueClass, FalseClass]
       #   The expiration state of the access token.
       def expired?
-        return Time.now >= self.expires_at
+        return self.expires_at == nil || Time.now >= self.expires_at
       end
 
       ##
@@ -608,11 +618,6 @@ module Signet
         if self.client_secret == nil
           raise ArgumentError, 'Missing client secret.'
         end
-        if self.redirect_uri && !self.code
-          # Grant type can be assumed to be `authorization_code` because of
-          # the presence of the redirect URI.
-          raise ArgumentError, 'Missing authorization code.'
-        end
         method = 'POST'
         parameters = {"grant_type" => self.grant_type}
         case self.grant_type
@@ -627,6 +632,12 @@ module Signet
           parameters['assertion'] = self.assertion
         when 'refresh_token'
           parameters['refresh_token'] = self.refresh_token
+        else
+          if self.redirect_uri
+            # Grant type was intended to be `authorization_code` because of
+            # the presence of the redirect URI.
+            raise ArgumentError, 'Missing authorization code.'
+          end
         end
         parameters['client_id'] = self.client_id
         parameters['client_secret'] = self.client_secret
