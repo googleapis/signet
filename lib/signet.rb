@@ -42,8 +42,7 @@ module Signet #:nodoc:
         raise ParseError,
           "Unexpected auth param format: '#{auth_param_string}'."
       end
-      pair = match.captures[0]
-      auth_param_pairs << pair
+      auth_param_pairs << match.captures[0] # Appending pair
       remainder = match.post_match
       last_match = match
     end
