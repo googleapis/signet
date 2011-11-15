@@ -17,6 +17,7 @@ require 'addressable/uri'
 require 'signet'
 require 'signet/errors'
 require 'signet/oauth_2'
+require 'jwt'
 
 module Signet
   module OAuth2
@@ -61,6 +62,8 @@ module Signet
       #     to be refreshed.
       #   - <code>:access_token</code> —
       #     The current access token for this client.
+      #   - <code>:id_token</code> —
+      #     The current ID token for this client.
       #
       # @example
       #   client = Signet::OAuth2::Client.new(
@@ -119,6 +122,8 @@ module Signet
       #     to be refreshed.
       #   - <code>:access_token</code> —
       #     The current access token for this client.
+      #   - <code>:id_token</code> —
+      #     The current ID token for this client.
       #   - <code>:expires_in</code> —
       #     The current access token for this client.
       #
@@ -163,6 +168,8 @@ module Signet
       #     to be refreshed.
       #   - <code>:access_token</code> —
       #     The current access token for this client.
+      #   - <code>:id_token</code> —
+      #     The current ID token for this client.
       #   - <code>:expires_in</code> —
       #     The current access token for this client.
       #   - <code>:issued_at</code> —
@@ -184,19 +191,25 @@ module Signet
           accu
         end
 
-        self.access_token = options["access_token"]
-        self.expires_in = options["expires_in"]
+        self.access_token = options["access_token"] if options["access_token"]
+        self.expires_in = options["expires_in"] if options["expires_in"]
 
+        # The refresh token may not be returned in a token response.
+        # In which case, the old one should continue to be used.
         if options["refresh_token"]
-          # The refresh token may not be returned in a token response.
-          # In which case, the old one should continue to be used.
           self.refresh_token = options["refresh_token"]
         end
+        # The ID token may not be returned in a token response.
+        # In which case, the old one should continue to be used.
+        if options["id_token"]
+          self.id_token = options["id_token"]
+        end
+        # By default, the token is issued at `Time.now` when `expires_in` is
+        # set, but this can be used to supply a more precise time.
         if options["issued_at"]
-          # By default, the token is issued at `Time.now` when `expires_in` is
-          # set, but this can be used to supply a more precise time.
           self.issued_at = options["issued_at"]
         end
+
         return self
       end
 
@@ -486,7 +499,7 @@ module Signet
       #
       # @return [String] The refresh token.
       def refresh_token
-        return @refresh_token
+        return @refresh_token ||= nil
       end
 
       ##
@@ -503,7 +516,7 @@ module Signet
       #
       # @return [String] The access token.
       def access_token
-        return @access_token
+        return @access_token ||= nil
       end
 
       ##
@@ -513,6 +526,35 @@ module Signet
       #   The access token.
       def access_token=(new_access_token)
         @access_token = new_access_token
+      end
+
+      ##
+      # Returns the ID token associated with this client.
+      #
+      # @return [String] The ID token.
+      def id_token
+        return @id_token ||= nil
+      end
+
+      ##
+      # Sets the ID token associated with this client.
+      #
+      # @param [String] new_id_token
+      #   The ID token.
+      def id_token=(new_id_token)
+        @id_token = new_id_token
+      end
+
+      ##
+      # Returns the decoded ID token associated with this client.
+      #
+      # @param [OpenSSL::PKey::RSA, Object] public_key
+      #   The public key to use to verify the ID token. Skips verification if
+      #   omitted.
+      #
+      # @return [String] The decoded ID token.
+      def decoded_id_token(public_key=nil)
+        JWT.decode(self.id_token, public_key, !!public_key)
       end
 
       ##
