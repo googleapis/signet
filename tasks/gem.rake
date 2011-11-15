@@ -25,6 +25,7 @@ namespace :gem do
     s.add_runtime_dependency("httpadapter", "~> 1.0.0")
     s.add_runtime_dependency("addressable", "~> 2.2.1")
     s.add_runtime_dependency("json", ">= 1.4.6")
+    s.add_runtime_dependency("jwt", ">= 0.1.4")
 
     s.add_development_dependency("rake", "~> 0.8.3")
     s.add_development_dependency("rspec", "~> 1.1.11")
@@ -39,6 +40,21 @@ namespace :gem do
     p.gem_spec = GEM_SPEC
     p.need_tar = true
     p.need_zip = true
+  end
+
+  desc "Generates .gemspec file"
+  task :gemspec do
+    spec_string = GEM_SPEC.to_ruby
+
+    begin
+      Thread.new { eval("$SAFE = 3\n#{spec_string}", binding) }.join
+    rescue
+      abort "unsafe gemspec: #{$!}"
+    else
+      File.open("#{GEM_SPEC.name}.gemspec", 'w') do |file|
+        file.write spec_string
+      end
+    end
   end
 
   desc "Show information about the gem"
