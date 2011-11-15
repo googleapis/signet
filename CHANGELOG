@@ -1,5 +1,6 @@
 == 0.2.3
 
+* Added support for JWT-formatted ID tokens.
 * Added :issued_at option to #update_token! method.
 
 == 0.2.2
