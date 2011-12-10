@@ -224,6 +224,13 @@ module Signet
         unless options[:response_type]
           options[:response_type] = :code
         end
+        unless options[:access_type]
+          options[:access_type] = :offline
+        end
+        unless options[:approval_prompt]
+          # This default will likely change in the future.
+          options[:approval_prompt] = :force
+        end
         options[:client_id] ||= self.client_id
         options[:redirect_uri] ||= self.redirect_uri
         unless options[:client_id]
