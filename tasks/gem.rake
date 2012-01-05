@@ -24,7 +24,7 @@ namespace :gem do
 
     s.add_runtime_dependency("httpadapter", "~> 1.0.0")
     s.add_runtime_dependency("addressable", "~> 2.2.1")
-    s.add_runtime_dependency("json", ">= 1.4.6")
+    s.add_runtime_dependency('multi_json', '>= 1.0.0')
     s.add_runtime_dependency("jwt", ">= 0.1.4")
 
     s.add_development_dependency("rake", "~> 0.8.3")

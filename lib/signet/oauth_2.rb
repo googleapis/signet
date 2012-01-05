@@ -14,7 +14,7 @@
 
 require 'base64'
 require 'signet'
-require 'json'
+require 'multi_json'
 
 module Signet #:nodoc:
   ##
@@ -76,7 +76,7 @@ module Signet #:nodoc:
       if !body.kind_of?(String)
         raise TypeError, "Expected String, got #{body.class}."
       end
-      return JSON.parse(body)
+      return MultiJson.decode(body)
     end
 
     ##
