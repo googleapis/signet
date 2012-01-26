@@ -12,6 +12,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+gem 'faraday', '~> 0.7.0'
+require 'faraday'
+require 'faraday/utils'
+
 require 'stringio'
 require 'addressable/uri'
 require 'signet'
@@ -536,7 +540,7 @@ module Signet
           :additional_parameters => [],
           :realm => nil
         }.merge(options)
-        method = 'POST'
+        method = :post
         parameters = ::Signet::OAuth1.unsigned_temporary_credential_parameters(
           :client_credential_key => self.client_credential_key,
           :callback => self.callback,
@@ -557,15 +561,14 @@ module Signet
           )
         ]
         headers = [authorization_header]
-        if method == 'POST'
+        if method == :post
           headers << ['Content-Type', 'application/x-www-form-urlencoded']
+          headers << ['Content-Length', '0']
         end
-        return [
-          method,
-          self.temporary_credential_uri.to_str,
-          headers,
-          ['']
-        ]
+        return Faraday::Request.create(method.to_s.downcase.to_sym) do |req|
+          req.url(Addressable::URI.parse(self.temporary_credential_uri.to_str))
+          req.headers = Faraday::Utils::Headers.new(headers)
+        end
       end
       alias_method(
         :generate_request_token_request,
@@ -584,14 +587,9 @@ module Signet
       #     Non-standard additional parameters.
       #   - <code>:realm</code> —
       #     The Authorization realm.  See RFC 2617.
-      #   - <code>:adapter</code> —
-      #     The HTTP adapter.
-      #     Defaults to <code>HTTPAdapter::NetHTTPAdapter.new</code>.
       #   - <code>:connection</code> —
-      #     An open, manually managed HTTP connection.
-      #     Must be of type <code>HTTPAdapter::Connection</code> and the
-      #     internal connection representation must match the HTTP adapter
-      #     being used.
+      #     The HTTP connection to use.
+      #     Must be of type <code>Faraday::Connection</code>.
       #
       # @return [Signet::OAuth1::Credential] The temporary credential.
       #
@@ -602,35 +600,24 @@ module Signet
       #     }
       #   )
       def fetch_temporary_credential(options={})
-        adapter = options[:adapter]
-        unless adapter
-          require 'httpadapter'
-          require 'httpadapter/adapters/net_http'
-          adapter = HTTPAdapter::NetHTTPAdapter.new
-        end
-        connection = options[:connection]
+        options[:connection] ||= Faraday.default_connection
         request = self.generate_temporary_credential_request(options)
-        response = adapter.transmit(request, connection)
-        status, headers, body = response
-        merged_body = StringIO.new
-        body.each do |chunk|
-          merged_body.write(chunk)
-        end
-        body = merged_body.string
-        if status.to_i == 200
-          return ::Signet::OAuth1.parse_form_encoded_credentials(body)
-        elsif [400, 401, 403].include?(status.to_i)
+        request_env = request.to_env(options[:connection])
+        response = options[:connection].app.call(request_env)
+        if response.status.to_i == 200
+          return ::Signet::OAuth1.parse_form_encoded_credentials(response.body)
+        elsif [400, 401, 403].include?(response.status.to_i)
           message = 'Authorization failed.'
-          if body.strip.length > 0
-            message += "  Server message:\n#{body.strip}"
+          if response.body.to_s.strip.length > 0
+            message += "  Server message:\n#{response.body.to_s.strip}"
           end
           raise ::Signet::AuthorizationError.new(
             message, :request => request, :response => response
           )
         else
-          message = "Unexpected status code: #{status}."
-          if body.strip.length > 0
-            message += "  Server message:\n#{body.strip}"
+          message = "Unexpected status code: #{response.status}."
+          if response.body.to_s.strip.length > 0
+            message += "  Server message:\n#{response.body.to_s.strip}"
           end
           raise ::Signet::AuthorizationError.new(
             message, :request => request, :response => response
@@ -654,14 +641,9 @@ module Signet
       #     Non-standard additional parameters.
       #   - <code>:realm</code> —
       #     The Authorization realm.  See RFC 2617.
-      #   - <code>:adapter</code> —
-      #     The HTTP adapter.
-      #     Defaults to <code>HTTPAdapter::NetHTTPAdapter.new</code>.
       #   - <code>:connection</code> —
-      #     An open, manually managed HTTP connection.
-      #     Must be of type <code>HTTPAdapter::Connection</code> and the
-      #     internal connection representation must match the HTTP adapter
-      #     being used.
+      #     The HTTP connection to use.
+      #     Must be of type <code>Faraday::Connection</code>.
       #
       # @return [Signet::OAuth1::Credential] The temporary credential.
       #
@@ -709,7 +691,7 @@ module Signet
           :signature_method => 'HMAC-SHA1',
           :realm => nil
         }.merge(options)
-        method = 'POST'
+        method = :post
         parameters = ::Signet::OAuth1.unsigned_token_credential_parameters(
           :client_credential_key => self.client_credential_key,
           :temporary_credential_key => self.temporary_credential_key,
@@ -732,15 +714,14 @@ module Signet
         ]
         headers = [authorization_header]
         headers << ['Cache-Control', 'no-store']
-        if method == 'POST'
+        if method == :post
           headers << ['Content-Type', 'application/x-www-form-urlencoded']
+          headers << ['Content-Length', '0']
         end
-        return [
-          method,
-          self.token_credential_uri.to_str,
-          headers,
-          ['']
-        ]
+        return Faraday::Request.create(method.to_s.downcase.to_sym) do |req|
+          req.url(Addressable::URI.parse(self.token_credential_uri.to_str))
+          req.headers = Faraday::Utils::Headers.new(headers)
+        end
       end
       alias_method(
         :generate_access_token_request,
@@ -759,14 +740,9 @@ module Signet
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
       #   - <code>:realm</code> —
       #     The Authorization realm.  See RFC 2617.
-      #   - <code>:adapter</code> —
-      #     The HTTP adapter.
-      #     Defaults to <code>HTTPAdapter::NetHTTPAdapter.new</code>.
       #   - <code>:connection</code> —
-      #     An open, manually managed HTTP connection.
-      #     Must be of type <code>HTTPAdapter::Connection</code> and the
-      #     internal connection representation must match the HTTP adapter
-      #     being used.
+      #     The HTTP connection to use.
+      #     Must be of type <code>Faraday::Connection</code>.
       #
       # @return [Signet::OAuth1::Credential] The token credential.
       #
@@ -775,35 +751,24 @@ module Signet
       #     :verifier => '12345'
       #   )
       def fetch_token_credential(options={})
-        adapter = options[:adapter]
-        unless adapter
-          require 'httpadapter'
-          require 'httpadapter/adapters/net_http'
-          adapter = HTTPAdapter::NetHTTPAdapter.new
-        end
-        connection = options[:connection]
+        options[:connection] ||= Faraday.default_connection
         request = self.generate_token_credential_request(options)
-        response = adapter.transmit(request, connection)
-        status, headers, body = response
-        merged_body = StringIO.new
-        body.each do |chunk|
-          merged_body.write(chunk)
-        end
-        body = merged_body.string
-        if status.to_i == 200
-          return ::Signet::OAuth1.parse_form_encoded_credentials(body)
-        elsif [400, 401, 403].include?(status.to_i)
+        request_env = request.to_env(options[:connection])
+        response = options[:connection].app.call(request_env)
+        if response.status.to_i == 200
+          return ::Signet::OAuth1.parse_form_encoded_credentials(response.body)
+        elsif [400, 401, 403].include?(response.status.to_i)
           message = 'Authorization failed.'
-          if body.strip.length > 0
-            message += "  Server message:\n#{body.strip}"
+          if response.body.to_s.strip.length > 0
+            message += "  Server message:\n#{response.body.to_s.strip}"
           end
           raise ::Signet::AuthorizationError.new(
             message, :request => request, :response => response
           )
         else
-          message = "Unexpected status code: #{status}."
-          if body.strip.length > 0
-            message += "  Server message:\n#{body.strip}"
+          message = "Unexpected status code: #{response.status}."
+          if response.body.to_s.strip.length > 0
+            message += "  Server message:\n#{response.body.to_s.strip}"
           end
           raise ::Signet::AuthorizationError.new(
             message, :request => request, :response => response
@@ -827,14 +792,9 @@ module Signet
       #     Non-standard additional parameters.
       #   - <code>:realm</code> —
       #     The Authorization realm.  See RFC 2617.
-      #   - <code>:adapter</code> —
-      #     The HTTP adapter.
-      #     Defaults to <code>HTTPAdapter::NetHTTPAdapter.new</code>.
       #   - <code>:connection</code> —
-      #     An open, manually managed HTTP connection.
-      #     Must be of type <code>HTTPAdapter::Connection</code> and the
-      #     internal connection representation must match the HTTP adapter
-      #     being used.
+      #     The HTTP connection to use.
+      #     Must be of type <code>Faraday::Connection</code>.
       #
       # @return [Signet::OAuth1::Credential] The token credential.
       #
@@ -857,7 +817,7 @@ module Signet
       #   - <code>:request</code> —
       #     A pre-constructed request to sign.
       #   - <code>:method</code> —
-      #     The HTTP method for the request.  Defaults to 'GET'.
+      #     The HTTP method for the request.  Defaults to :get.
       #   - <code>:uri</code> —
       #     The URI for the request.
       #   - <code>:headers</code> —
@@ -893,13 +853,21 @@ module Signet
         }.merge(options)
         if options[:request]
           if options[:request].kind_of?(Array)
-            request = options[:request]
-          elsif options[:adapter]
-            request = options[:adapter].adapt_request(options[:request])
+            method, uri, headers, body = options[:request]
+          elsif options[:request].kind_of?(Faraday::Request)
+            unless options[:connection]
+              raise ArgumentError,
+                "Faraday::Request used, requires a connection to be provided."
+            end
+            method = options[:request].method.to_s.downcase.to_sym
+            uri = options[:connection].build_url(
+              options[:request].path, options[:request].params
+            )
+            headers = options[:request].headers || {}
+            body = options[:request].body || ''
           end
-          method, uri, headers, body = request
         else
-          method = options[:method] || 'GET'
+          method = options[:method] || :get
           uri = options[:uri]
           headers = options[:headers] || []
           body = options[:body] || ''
@@ -928,7 +896,7 @@ module Signet
         if !body.kind_of?(String)
           raise TypeError, "Expected String, got #{body.class}."
         end
-        method = method.to_s.upcase
+        method = method.to_s.downcase.to_sym
         parameters = ::Signet::OAuth1.unsigned_resource_parameters(
           :client_credential_key => self.client_credential_key,
           :token_credential_key => self.token_credential_key,
@@ -941,7 +909,7 @@ module Signet
             media_type = value.gsub(/^([^;]+)(;.*?)?$/, '\1')
           end
         end
-        if method == 'POST' &&
+        if method == :post &&
             media_type == 'application/x-www-form-urlencoded'
           post_parameters = Addressable::URI.form_unencode(body)
         else
@@ -966,7 +934,11 @@ module Signet
         ]
         headers << authorization_header
         headers << ['Cache-Control', 'no-store']
-        return [method, uri.to_str, headers, [body]]
+        return Faraday::Request.create(method.to_s.downcase.to_sym) do |req|
+          req.url(Addressable::URI.parse(uri))
+          req.headers = Faraday::Utils::Headers.new(headers)
+          req.body = body
+        end
       end
 
       ##
@@ -977,7 +949,7 @@ module Signet
       #   - <code>:request</code> —
       #     A pre-constructed request to sign.
       #   - <code>:method</code> —
-      #     The HTTP method for the request.  Defaults to 'GET'.
+      #     The HTTP method for the request.  Defaults to :get.
       #   - <code>:uri</code> —
       #     The URI for the request.
       #   - <code>:headers</code> —
@@ -988,21 +960,15 @@ module Signet
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
       #   - <code>:realm</code> —
       #     The Authorization realm.  See RFC 2617.
-      #   - <code>:adapter</code> —
-      #     The HTTP adapter.
-      #     Defaults to <code>HTTPAdapter::NetHTTPAdapter.new</code>.
       #   - <code>:connection</code> —
-      #     An open, manually managed HTTP connection.
-      #     Must be of type <code>HTTPAdapter::Connection</code> and the
-      #     internal connection representation must match the HTTP adapter
-      #     being used.
+      #     The HTTP connection to use.
+      #     Must be of type <code>Faraday::Connection</code>.
       #
       # @example
       #   # Using Net::HTTP
       #   response = client.fetch_protected_resource(
       #     :uri => 'http://www.example.com/protected/resource'
       #   )
-      #   status, headers, body = response
       #
       # @example
       #   # Using Typhoeus
@@ -1010,34 +976,21 @@ module Signet
       #     :request => Typhoeus::Request.new(
       #       'http://www.example.com/protected/resource'
       #     ),
-      #     :adapter => HTTPAdapter::TyphoeusAdapter.new,
       #     :connection => connection
       #   )
-      #   status, headers, body = response
       #
       # @return [Array] The response object.
       def fetch_protected_resource(options={})
-        adapter = options[:adapter]
-        unless adapter
-          require 'httpadapter'
-          require 'httpadapter/adapters/net_http'
-          adapter = HTTPAdapter::NetHTTPAdapter.new
-        end
-        connection = options[:connection]
+        options[:connection] ||= Faraday.default_connection
         request = self.generate_authenticated_request(options)
-        response = adapter.transmit(request, connection)
-        status, headers, body = response
-        merged_body = StringIO.new
-        body.each do |chunk|
-          merged_body.write(chunk)
-        end
-        body = merged_body.string
-        if status.to_i == 401
+        request_env = request.to_env(options[:connection])
+        response = options[:connection].app.call(request_env)
+        if response.status.to_i == 401
           # When accessing a protected resource, we only want to raise an
           # error for 401 responses.
           message = 'Authorization failed.'
-          if body.strip.length > 0
-            message += "  Server message:\n#{body.strip}"
+          if response.body.to_s.strip.length > 0
+            message += "  Server message:\n#{response.body.to_s.strip}"
           end
           raise ::Signet::AuthorizationError.new(
             message, :request => request, :response => response

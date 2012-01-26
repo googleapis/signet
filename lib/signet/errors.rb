@@ -37,9 +37,9 @@ module Signet
     # @param [Hash] options
     #   The configuration parameters for the request.
     #   - <code>:request</code> —
-    #     A tuple of method, uri, headers, and body.  Optional.
+    #     A Faraday::Request object.  Optional.
     #   - <code>:response</code> —
-    #     A tuple of status, headers, and body.  Optional.
+    #     A Faraday::Response object.  Optional.
     #   - <code>:code</code> —
     #     An error code.
     #   - <code>:description</code> —

@@ -40,8 +40,6 @@ Signet is an OAuth 1.0 / OAuth 2.0 implementation.
     response = client.fetch_protected_resource(
       :uri => 'https://mail.google.com/mail/feed/atom'
     )
-    # The Rack response format is used here
-    status, headers, body = response
 
 ## Install
 

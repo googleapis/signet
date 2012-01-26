@@ -1,3 +1,10 @@
+== 0.3.0
+
+* Replaced httpadapter gem dependency with faraday
+* Replaced json gem dependency with multi_json
+* Updated to OAuth 2.0 draft 22
+* Complete test coverage
+
 == 0.2.4
 
 * Updated to incorporate changes to the Google OAuth endpoints
@@ -25,18 +32,18 @@
 
 == 0.1.3
 
-* fixed issue with headers passed in as a Hash
-* fixed incompatibilities with Ruby 1.8.6
+* Fixed issue with headers passed in as a Hash
+* Fixed incompatibilities with Ruby 1.8.6
 
 == 0.1.2
 
-* fixed bug with overzealous normalization
+* Fixed bug with overzealous normalization
 
 == 0.1.1
 
-* fixed bug with missing StringIO require
-* fixed issue with dependency on unreleased features of addressable
+* Fixed bug with missing StringIO require
+* Fixed issue with dependency on unreleased features of addressable
 
 == 0.1.0
 
-* initial release
+* Initial release

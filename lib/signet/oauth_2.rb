@@ -114,13 +114,13 @@ module Signet #:nodoc:
     def self.generate_bearer_authorization_header(
         access_token, auth_params=nil)
       # TODO: escaping?
-      header = "OAuth #{access_token}"
+      header = "Bearer #{access_token}"
       if auth_params && !auth_params.empty?
         header += (", " +
-          auth_params.inject('') do |accu, (key, value)|
-            accu += "#{key}=\"#{value}\""
+          (auth_params.inject([]) do |accu, (key, value)|
+            accu << "#{key}=\"#{value}\""
             accu
-          end
+          end).join(", ")
         )
       end
       return header

@@ -15,8 +15,7 @@
 require 'spec_helper'
 
 require 'signet/oauth_1/client'
-require 'httpadapter'
-require 'httpadapter/adapters/typhoeus'
+require 'faraday'
 require 'stringio'
 
 def merge_body(chunked_body)
@@ -48,29 +47,23 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
   end
 
   it 'should raise an error if the server gives an unexpected status' do
+    stubs = Faraday::Adapter::Test::Stubs.new do |stub|
+      stub.post('/accounts/OAuthGetRequestToken') do
+        [509, {}, 'Rate limit hit or something.']
+      end
+    end
     (lambda do
-      hydra = Typhoeus::Hydra.new
-      stubbed_response = Typhoeus::Response.new(
-        :code => 999,
-        :headers => '',
-        :body => 'Rate limit hit or something.'
-      )
-      hydra.stub(
-        :post,
-        'https://www.google.com/accounts/OAuthGetRequestToken'
-      ).and_return(stubbed_response)
-      connection = HTTPAdapter::Connection.new(
-        'www.google.com', 443, hydra,
-        :join => [:run, [], nil]
-      )
+      connection = Faraday.new(:url => 'https://www.google.com') do |builder|
+        builder.adapter(:test, stubs)
+      end
       @client.fetch_temporary_credential!(
-        :adapter => HTTPAdapter::TyphoeusAdapter.new,
         :connection => connection,
         :additional_parameters => {
           :scope => 'https://www.google.com/m8/feeds/'
         }
       )
     end).should raise_error(Signet::AuthorizationError)
+    stubs.verify_stubbed_calls
   end
 
   it 'should be able to obtain temporary credentials for the Contacts API' do
@@ -111,28 +104,23 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
   # We have to stub responses for the token credentials
 
   it 'should be able to obtain token credentials for the Contacts API' do
-    hydra = Typhoeus::Hydra.new
-    stubbed_response = Typhoeus::Response.new(
-      :code => 200,
-      :headers => '',
-      :body => (
-        'oauth_token=1%2FYFw6UH2Dn7W691-qAbCfsmqEHQrPb7ptIvYx9m6YkUQ&' +
-        'oauth_token_secret=Ew3YHAY4bcBryiOUvbdHGa57'
-      )
-    )
-    hydra.stub(
-      :post,
-      'https://www.google.com/accounts/OAuthGetAccessToken'
-    ).and_return(stubbed_response)
-    connection = HTTPAdapter::Connection.new(
-      'www.google.com', 443, hydra,
-      :join => [:run, [], nil]
-    )
+    stubs = Faraday::Adapter::Test::Stubs.new do |stub|
+      stub.post('/accounts/OAuthGetAccessToken') do
+        [
+          200,
+          {},
+          'oauth_token=1%2FYFw6UH2Dn7W691-qAbCfsmqEHQrPb7ptIvYx9m6YkUQ&' +
+          'oauth_token_secret=Ew3YHAY4bcBryiOUvbdHGa57'
+        ]
+      end
+    end
+    connection = Faraday.new(:url => 'https://www.google.com') do |builder|
+      builder.adapter(:test, stubs)
+    end
     @client.temporary_credential_key = '4/oegn2eP-3yswD7HiESnJOB-8oh2i'
     @client.temporary_credential_secret = '8E1BF0J6ovMva0j87atj/tTG'
     @client.fetch_token_credential!(
       :verifier => 'XbVKagBShNsAGBRJWoC4gtFR',
-      :adapter => HTTPAdapter::TyphoeusAdapter.new,
       :connection => connection,
       :additional_parameters => {
         :scope => 'https://www.google.com/m8/feeds/'
@@ -141,99 +129,89 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
     @client.token_credential_key.should ==
       '1/YFw6UH2Dn7W691-qAbCfsmqEHQrPb7ptIvYx9m6YkUQ'
     @client.token_credential_secret.should == 'Ew3YHAY4bcBryiOUvbdHGa57'
+    stubs.verify_stubbed_calls
   end
 
   it 'should raise an error if the server gives an unexpected status' do
+    stubs = Faraday::Adapter::Test::Stubs.new do |stub|
+      stub.post('/accounts/OAuthGetAccessToken') do
+        [509, {}, 'Rate limit hit or something.']
+      end
+    end
     (lambda do
-      hydra = Typhoeus::Hydra.new
-      stubbed_response = Typhoeus::Response.new(
-        :code => 999,
-        :headers => '',
-        :body => 'Rate limit hit or something.'
-      )
-      hydra.stub(
-        :post,
-        'https://www.google.com/accounts/OAuthGetAccessToken'
-      ).and_return(stubbed_response)
-      connection = HTTPAdapter::Connection.new(
-        'www.google.com', 443, hydra,
-        :join => [:run, [], nil]
-      )
+      connection = Faraday.new(:url => 'https://www.google.com') do |builder|
+        builder.adapter(:test, stubs)
+      end
       @client.temporary_credential_key = '4/oegn2eP-3yswD7HiESnJOB-8oh2i'
       @client.temporary_credential_secret = '8E1BF0J6ovMva0j87atj/tTG'
       @client.fetch_token_credential!(
         :verifier => 'XbVKagBShNsAGBRJWoC4gtFR',
-        :adapter => HTTPAdapter::TyphoeusAdapter.new,
         :connection => connection,
         :additional_parameters => {
           :scope => 'https://www.google.com/m8/feeds/'
         }
       )
     end).should raise_error(Signet::AuthorizationError)
+    stubs.verify_stubbed_calls
   end
 
   it 'should correctly fetch the protected resource' do
-    hydra = Typhoeus::Hydra.new
-    stubbed_response = Typhoeus::Response.new(
-      :code => 200,
-      :headers => "Content-Type: application/json\r\n",
-      :body => '{"data":"goes here"}'
-    )
-    hydra.stub(
-      :get,
-      'http://www-opensocial.googleusercontent.com/api/people/@me/@self'
-    ).and_return(stubbed_response)
-    connection = HTTPAdapter::Connection.new(
-      'www.google.com', 443, hydra,
-      :join => [:run, [], nil]
-    )
+    stubs = Faraday::Adapter::Test::Stubs.new do |stub|
+      stub.get('/api/people/@me/@self') do
+        [
+          200,
+          {'Content-Type' => 'application/json'},
+          '{"data":"goes here"}'
+        ]
+      end
+    end
+    connection = Faraday.new(
+      :url => 'http://www-opensocial.googleusercontent.com'
+    ) do |builder|
+      builder.adapter(:test, stubs)
+    end
     @client.token_credential_key =
       '1/YFw6UH2Dn7W691-qAbCfsmqEHQrPb7ptIvYx9m6YkUQ'
     @client.token_credential_secret = 'Ew3YHAY4bcBryiOUvbdHGa57'
     response = @client.fetch_protected_resource(
-      :adapter => HTTPAdapter::TyphoeusAdapter.new,
       :connection => connection,
       :uri =>
         'http://www-opensocial.googleusercontent.com/api/people/@me/@self'
     )
-    status, headers, body = response
-    status.should == 200
-    headers = headers.inject({}) { |h,(k,v)| h[k]=v; h }
-    headers['Content-Type'].should == 'application/json'
-    merge_body(body).should == '{"data":"goes here"}'
+    response.status.should == 200
+    response.headers['Content-Type'].should == 'application/json'
+    response.body.should == '{"data":"goes here"}'
   end
 
   it 'should correctly fetch the protected resource' do
-    hydra = Typhoeus::Hydra.new
-    stubbed_response = Typhoeus::Response.new(
-      :code => 200,
-      :headers => "Content-Type: application/json\r\n",
-      :body => '{"data":"goes here"}'
-    )
-    hydra.stub(
-      :get,
-      'http://www-opensocial.googleusercontent.com/api/people/@me/@self'
-    ).and_return(stubbed_response)
-    connection = HTTPAdapter::Connection.new(
-      'www.google.com', 443, hydra,
-      :join => [:run, [], nil]
-    )
+    stubs = Faraday::Adapter::Test::Stubs.new do |stub|
+      stub.get('/api/people/@me/@self') do
+        [
+          200,
+          {'Content-Type' => 'application/json'},
+          '{"data":"goes here"}'
+        ]
+      end
+    end
+    connection = Faraday.new(
+      :url => 'http://www-opensocial.googleusercontent.com'
+    ) do |builder|
+      builder.adapter(:test, stubs)
+    end
     @client.token_credential_key =
       '1/YFw6UH2Dn7W691-qAbCfsmqEHQrPb7ptIvYx9m6YkUQ'
     @client.token_credential_secret = 'Ew3YHAY4bcBryiOUvbdHGa57'
     response = @client.fetch_protected_resource(
-      :adapter => HTTPAdapter::TyphoeusAdapter.new,
       :connection => connection,
-      :request => Typhoeus::Request.new(
-        'http://www-opensocial.googleusercontent.com/api/people/@me/@self',
-        :method => :get
-      )
+      :request => Faraday::Request.create(:get) do |req|
+        req.url(
+          'http://www-opensocial.googleusercontent.com/api/people/@me/@self'
+        )
+      end
     )
-    status, headers, body = response
-    status.should == 200
-    headers = headers.inject({}) { |h,(k,v)| h[k]=v; h }
-    headers['Content-Type'].should == 'application/json'
-    merge_body(body).should == '{"data":"goes here"}'
+    response.status.should == 200
+    response.headers['Content-Type'].should == 'application/json'
+    response.body.should == '{"data":"goes here"}'
   end
 end
 

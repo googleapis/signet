@@ -19,6 +19,9 @@ require 'addressable/uri'
 require 'stringio'
 
 def merge_body(chunked_body)
+  if chunked_body == nil
+    raise ArgumentError, "Expected chunked body, got nil."
+  end
   merged_body = StringIO.new
   chunked_body.each do |chunk|
     merged_body.write(chunk)
@@ -513,6 +516,16 @@ describe Signet::OAuth1::Client, 'configured' do
     end).should raise_error(ArgumentError)
   end
 
+  it 'should raise an error if a request is provided without a connection' do
+    (lambda do
+      @client.generate_authenticated_request(
+        :request => Faraday::Request.new(:get) do |req|
+          req.url('http://www.example.com/')
+        end
+      )
+    end).should raise_error(ArgumentError)
+  end
+
   it 'should raise an error if no URI is provided' do
     (lambda do
       @client.generate_authenticated_request(
@@ -529,8 +542,8 @@ describe Signet::OAuth1::Client, 'configured' do
       :uri => 'https://photos.example.net/photos',
       :body => ['A chunked body.']
     )
-    method, uri, headers, body = request
-    merge_body(body).should == 'A chunked body.'
+    request.should be_kind_of(Faraday::Request)
+    request.body.should == 'A chunked body.'
   end
 
   it 'should not raise an error if a request body is chunked' do
@@ -542,8 +555,8 @@ describe Signet::OAuth1::Client, 'configured' do
       :uri => 'https://photos.example.net/photos',
       :body => chunked_body
     )
-    method, uri, headers, body = request
-    merge_body(body).should == 'A chunked body.'
+    request.should be_kind_of(Faraday::Request)
+    request.body.should == 'A chunked body.'
   end
 
   it 'should raise an error if a request body is of a bogus type' do
@@ -560,13 +573,9 @@ describe Signet::OAuth1::Client, 'configured' do
     # Repeat this because signatures change from test to test
     10.times do
       request = @client.generate_temporary_credential_request
-      method, uri, headers, body = request
-      method.should == 'POST'
-      uri.should == 'http://example.com/temporary_credentials'
-      authorization_header = nil
-      headers.each do |(header, value)|
-        authorization_header = value if header == 'Authorization'
-      end
+      request.method.should == :post
+      request.path.should === 'http://example.com/temporary_credentials'
+      authorization_header = request.headers['Authorization']
       parameters = ::Signet::OAuth1.parse_authorization_header(
         authorization_header
       ).inject({}) { |h,(k,v)| h[k]=v; h }
@@ -589,13 +598,9 @@ describe Signet::OAuth1::Client, 'configured' do
       request = @client.generate_token_credential_request(
         :verifier => '473f82d3'
       )
-      method, uri, headers, body = request
-      method.should == 'POST'
-      uri.should == 'http://example.com/token_credentials'
-      authorization_header = nil
-      headers.each do |(header, value)|
-        authorization_header = value if header == 'Authorization'
-      end
+      request.method.should == :post
+      request.path.should === 'http://example.com/token_credentials'
+      authorization_header = request.headers['Authorization']
       parameters = ::Signet::OAuth1.parse_authorization_header(
         authorization_header
       ).inject({}) { |h,(k,v)| h[k]=v; h }
@@ -625,15 +630,11 @@ describe Signet::OAuth1::Client, 'configured' do
       signed_request = @client.generate_authenticated_request(
         :request => original_request
       )
-      method, uri, headers, body = signed_request
-      method.should == 'GET'
-      uri.should ==
+      signed_request.method.should == :get
+      signed_request.path.should ===
         'https://photos.example.net/photos?file=vacation.jpg&size=original'
-      authorization_header = nil
-      headers.each do |(header, value)|
-        authorization_header = value if header == 'Authorization'
-      end
-      merge_body(body).should == ''
+      authorization_header = signed_request.headers['Authorization']
+      signed_request.body.should == ''
       parameters = ::Signet::OAuth1.parse_authorization_header(
         authorization_header
       ).inject({}) { |h,(k,v)| h[k]=v; h }
@@ -667,15 +668,11 @@ describe Signet::OAuth1::Client, 'configured' do
       signed_request = @client.generate_authenticated_request(
         :request => original_request
       )
-      method, uri, headers, body = signed_request
-      method.should == 'POST'
-      uri.should ==
+      signed_request.method.should == :post
+      signed_request.path.should ===
         'https://photos.example.net/photos'
-      authorization_header = nil
-      headers.each do |(header, value)|
-        authorization_header = value if header == 'Authorization'
-      end
-      merge_body(body).should == 'file=vacation.jpg&size=original'
+      authorization_header = signed_request.headers['Authorization']
+      signed_request.body.should == 'file=vacation.jpg&size=original'
       parameters = ::Signet::OAuth1.parse_authorization_header(
         authorization_header
       ).inject({}) { |h,(k,v)| h[k]=v; h }

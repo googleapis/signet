@@ -55,8 +55,13 @@ namespace :spec do
   namespace :rcov do
     desc "Browse the code coverage report."
     task :browse => "spec:rcov" do
+      coverage_path = File.expand_path(
+        File.join(File.dirname(__FILE__), '../coverage/'))
       require "launchy"
-      Launchy.open("coverage/index.html")
+      require "addressable/uri"
+      Launchy.open(
+        Addressable::URI.convert_path(File.join(coverage_path, "index.html"))
+      )
     end
   end
 end

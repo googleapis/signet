@@ -12,11 +12,17 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+gem 'faraday', '~> 0.7.0'
+require 'faraday'
+require 'faraday/utils'
+
 require 'stringio'
 require 'addressable/uri'
 require 'signet'
 require 'signet/errors'
 require 'signet/oauth_2'
+
+gem 'jwt', '~> 0.1.4'
 require 'jwt'
 
 module Signet
@@ -52,11 +58,6 @@ module Signet
       #     The resource owner's username.
       #   - <code>:password</code> —
       #     The resource owner's password.
-      #   - <code>:assertion_type</code> —
-      #     The format of the assertion as defined by the
-      #     authorization server. The value must be an absolute URI.
-      #   - <code>:assertion</code> —
-      #     The raw assertion value.
       #   - <code>:refresh_token</code> —
       #     The refresh token associated with the access token
       #     to be refreshed.
@@ -64,6 +65,9 @@ module Signet
       #     The current access token for this client.
       #   - <code>:id_token</code> —
       #     The current ID token for this client.
+      #   - <code>:extension_parameters</code> —
+      #     When using an extension grant type, this the set of parameters used
+      #     by that extension.
       #
       # @example
       #   client = Signet::OAuth2::Client.new(
@@ -112,11 +116,6 @@ module Signet
       #     The resource owner's username.
       #   - <code>:password</code> —
       #     The resource owner's password.
-      #   - <code>:assertion_type</code> —
-      #     The format of the assertion as defined by the
-      #     authorization server. The value must be an absolute URI.
-      #   - <code>:assertion</code> —
-      #     The raw assertion value.
       #   - <code>:refresh_token</code> —
       #     The refresh token associated with the access token
       #     to be refreshed.
@@ -124,8 +123,9 @@ module Signet
       #     The current access token for this client.
       #   - <code>:id_token</code> —
       #     The current ID token for this client.
-      #   - <code>:expires_in</code> —
-      #     The current access token for this client.
+      #   - <code>:extension_parameters</code> —
+      #     When using an extension grant type, this the set of parameters used
+      #     by that extension.
       #
       # @example
       #   client.update!(
@@ -138,10 +138,7 @@ module Signet
       # @see Signet::OAuth2::Client#update_token!
       def update!(options={})
         # Normalize key to String to allow indifferent access.
-        options = options.inject({}) do |accu, (key, value)|
-          accu[key.to_s] = value
-          accu
-        end
+        options = options.inject({}) { |accu, (k, v)| accu[k.to_s] = v; accu }
         self.authorization_uri = options["authorization_uri"]
         self.token_credential_uri = options["token_credential_uri"]
         self.client_id = options["client_id"]
@@ -152,8 +149,7 @@ module Signet
         self.redirect_uri = options["redirect_uri"]
         self.username = options["username"]
         self.password = options["password"]
-        self.assertion_type = options["assertion_type"]
-        self.assertion = options["assertion"]
+        self.extension_parameters = options["extension_parameters"] || {}
         self.update_token!(options)
         return self
       end
@@ -171,7 +167,7 @@ module Signet
       #   - <code>:id_token</code> —
       #     The current ID token for this client.
       #   - <code>:expires_in</code> —
-      #     The current access token for this client.
+      #     The time in seconds until access token expiration.
       #   - <code>:issued_at</code> —
       #     The timestamp that the token was issued at.
       #
@@ -186,10 +182,7 @@ module Signet
       # @see Signet::OAuth2::Client#update!
       def update_token!(options={})
         # Normalize key to String to allow indifferent access.
-        options = options.inject({}) do |accu, (key, value)|
-          accu[key.to_s] = value
-          accu
-        end
+        options = options.inject({}) { |accu, (k, v)| accu[k.to_s] = v; accu }
 
         self.access_token = options["access_token"] if options["access_token"]
         self.expires_in = options["expires_in"] if options["expires_in"]
@@ -233,7 +226,7 @@ module Signet
         end
         options[:client_id] ||= self.client_id
         options[:redirect_uri] ||= self.redirect_uri
-        unless options[:client_id]
+        if !options[:client_id]
           raise ArgumentError, "Missing required client identifier."
         end
         unless options[:redirect_uri]
@@ -348,7 +341,7 @@ module Signet
         when Array
           new_scope.each do |scope|
             if scope.include?(' ')
-              raise Signet::ParseError,
+              raise ArgumentError,
                 "Individual scopes cannot contain the space character."
             end
           end
@@ -459,46 +452,27 @@ module Signet
       end
 
       ##
-      # Returns the assertion type associated with this client.
-      # Used only by the assertion access grant type.
+      # Returns the set of extension parameters used by the client.
+      # Used only by extension access grant types.
       #
-      # @return [String] The assertion type.
-      def assertion_type
-        return @assertion_type
+      # @return [Hash] The extension parameters.
+      def extension_parameters
+        return @extension_parameters ||= {}
       end
 
       ##
-      # Sets the assertion type associated with this client.
-      # Used only by the assertion access grant type.
+      # Sets extension parameters used by the client.
+      # Used only by extension access grant types.
       #
-      # @param [String] new_assertion_type
-      #   The password.
-      def assertion_type=(new_assertion_type)
-        new_assertion_type = Addressable::URI.parse(new_assertion_type)
-        if new_assertion_type == nil || new_assertion_type.absolute?
-          @assertion_type = new_assertion_type
+      # @param [Hash] new_extension_parameters
+      #   The parameters.
+      def extension_parameters=(new_extension_parameters)
+        if new_extension_parameters.respond_to?(:to_hash)
+          @extension_parameters = new_extension_parameters.to_hash
         else
-          raise ArgumentError, "Assertion type must be an absolute URI."
+          raise TypeError,
+            "Expected Hash, got #{new_extension_parameters.class}."
         end
-      end
-
-      ##
-      # Returns the assertion associated with this client.
-      # Used only by the assertion access grant type.
-      #
-      # @return [String] The assertion.
-      def assertion
-        return @assertion
-      end
-
-      ##
-      # Sets the assertion associated with this client.
-      # Used only by the assertion access grant type.
-      #
-      # @param [String] new_assertion
-      #   The assertion.
-      def assertion=(new_assertion)
-        @assertion = new_assertion
       end
 
       ##
@@ -622,7 +596,7 @@ module Signet
       # @return [TrueClass, FalseClass]
       #   The expiration state of the access token.
       def expired?
-        return self.expires_at == nil || Time.now >= self.expires_at
+        return self.expires_at != nil && Time.now >= self.expires_at
       end
 
       ##
@@ -633,18 +607,31 @@ module Signet
       # @return [String]
       #   The inferred grant type.
       def grant_type
-        if self.code && self.redirect_uri
-          return 'authorization_code'
-        elsif self.assertion && self.assertion_type
-          return 'assertion'
-        elsif self.refresh_token
-          return 'refresh_token'
-        elsif self.username && self.password
-          return 'password'
+        if @grant_type
+          return @grant_type
         else
-          # We don't have sufficient auth information, assume an out-of-band
-          # authorization arrangement between the client and server.
-          return 'none'
+          if self.code && self.redirect_uri
+            'authorization_code'
+          elsif self.refresh_token
+            'refresh_token'
+          elsif self.username && self.password
+            'password'
+          else
+            # We don't have sufficient auth information, assume an out-of-band
+            # authorization arrangement between the client and server, or an
+            # extension grant type.
+            nil
+          end
+        end
+      end
+
+      def grant_type=(new_grant_type)
+        case new_grant_type
+        when 'authorization_code', 'refresh_token',
+            'password', 'client_credentials'
+          @grant_type = new_grant_type
+        else
+          @grant_type = Addressable::URI.parse(new_grant_type)
         end
       end
 
@@ -657,7 +644,7 @@ module Signet
       #     The authorization code.
       #
       # @return [Array] The request object.
-      def generate_access_token_request
+      def generate_access_token_request(options={})
         if self.token_credential_uri == nil
           raise ArgumentError, 'Missing token endpoint URI.'
         end
@@ -676,9 +663,6 @@ module Signet
         when 'password'
           parameters['username'] = self.username
           parameters['password'] = self.password
-        when 'assertion'
-          parameters['assertion_type'] = self.assertion_type
-          parameters['assertion'] = self.assertion
         when 'refresh_token'
           parameters['refresh_token'] = self.refresh_token
         else
@@ -694,44 +678,32 @@ module Signet
           ['Cache-Control', 'no-store'],
           ['Content-Type', 'application/x-www-form-urlencoded']
         ]
-        return [
-          method,
-          self.token_credential_uri.to_str,
-          headers,
-          [Addressable::URI.form_encode(parameters)]
-        ]
+        return Faraday::Request.create(method.to_s.downcase.to_sym) do |req|
+          req.url(Addressable::URI.parse(self.token_credential_uri))
+          req.headers = Faraday::Utils::Headers.new(headers)
+          req.body = Addressable::URI.form_encode(parameters)
+        end
       end
 
       def fetch_access_token(options={})
-        adapter = options[:adapter]
-        unless adapter
-          require 'httpadapter'
-          require 'httpadapter/adapters/net_http'
-          adapter = HTTPAdapter::NetHTTPAdapter.new
-        end
-        connection = options[:connection]
-        request = self.generate_access_token_request
-        response = adapter.transmit(request, connection)
-        status, headers, body = response
-        merged_body = StringIO.new
-        body.each do |chunk|
-          merged_body.write(chunk)
-        end
-        body = merged_body.string
-        if status.to_i == 200
-          return ::Signet::OAuth2.parse_json_credentials(body)
-        elsif [400, 401, 403].include?(status.to_i)
+        options[:connection] ||= Faraday.default_connection
+        request = self.generate_access_token_request(options)
+        request_env = request.to_env(options[:connection])
+        response = options[:connection].app.call(request_env)
+        if response.status.to_i == 200
+          return ::Signet::OAuth2.parse_json_credentials(response.body)
+        elsif [400, 401, 403].include?(response.status.to_i)
           message = 'Authorization failed.'
-          if body.strip.length > 0
-            message += "  Server message:\n#{body.strip}"
+          if response.body.to_s.strip.length > 0
+            message += "  Server message:\n#{response.body.to_s.strip}"
           end
           raise ::Signet::AuthorizationError.new(
             message, :request => request, :response => response
           )
         else
-          message = "Unexpected status code: #{status}."
-          if body.strip.length > 0
-            message += "  Server message:\n#{body.strip}"
+          message = "Unexpected status code: #{response.status}."
+          if response.body.to_s.strip.length > 0
+            message += "  Server message:\n#{response.body.to_s.strip}"
           end
           raise ::Signet::AuthorizationError.new(
             message, :request => request, :response => response
@@ -782,13 +754,21 @@ module Signet
         }.merge(options)
         if options[:request]
           if options[:request].kind_of?(Array)
-            request = options[:request]
-          elsif options[:adapter]
-            request = options[:adapter].adapt_request(options[:request])
+            method, uri, headers, body = options[:request]
+          elsif options[:request].kind_of?(Faraday::Request)
+            unless options[:connection]
+              raise ArgumentError,
+                "Faraday::Request used, requires a connection to be provided."
+            end
+            method = options[:request].method.to_s.downcase.to_sym
+            uri = options[:connection].build_url(
+              options[:request].path, options[:request].params
+            )
+            headers = options[:request].headers || {}
+            body = options[:request].body || ''
           end
-          method, uri, headers, body = request
         else
-          method = options[:method] || 'GET'
+          method = options[:method] || :get
           uri = options[:uri]
           headers = options[:headers] || []
           body = options[:body] || ''
@@ -817,16 +797,20 @@ module Signet
         if !body.kind_of?(String)
           raise TypeError, "Expected String, got #{body.class}."
         end
-        method = method.to_s.upcase
+        method = method.to_s.downcase.to_sym
         headers << [
           'Authorization',
           ::Signet::OAuth2.generate_bearer_authorization_header(
             self.access_token,
-            options[:realm] ? ['realm', options[:realm]] : nil
+            options[:realm] ? [['realm', options[:realm]]] : nil
           )
         ]
         headers << ['Cache-Control', 'no-store']
-        return [method, uri.to_str, headers, [body]]
+        return Faraday::Request.create(method.to_s.downcase.to_sym) do |req|
+          req.url(Addressable::URI.parse(uri))
+          req.headers = Faraday::Utils::Headers.new(headers)
+          req.body = body
+        end
       end
 
       ##
@@ -848,21 +832,15 @@ module Signet
       #     The HTTP body for the request.
       #   - <code>:realm</code> —
       #     The Authorization realm.  See RFC 2617.
-      #   - <code>:adapter</code> —
-      #     The HTTP adapter.
-      #     Defaults to <code>HTTPAdapter::NetHTTPAdapter.new</code>.
       #   - <code>:connection</code> —
-      #     An open, manually managed HTTP connection.
-      #     Must be of type <code>HTTPAdapter::Connection</code> and the
-      #     internal connection representation must match the HTTP adapter
-      #     being used.
+      #     The HTTP connection to use.
+      #     Must be of type <code>Faraday::Connection</code>.
       #
       # @example
       #   # Using Net::HTTP
       #   response = client.fetch_protected_resource(
       #     :uri => 'http://www.example.com/protected/resource'
       #   )
-      #   status, headers, body = response
       #
       # @example
       #   # Using Typhoeus
@@ -873,31 +851,19 @@ module Signet
       #     :adapter => HTTPAdapter::TyphoeusAdapter.new,
       #     :connection => connection
       #   )
-      #   status, headers, body = response
       #
       # @return [Array] The response object.
       def fetch_protected_resource(options={})
-        adapter = options[:adapter]
-        unless adapter
-          require 'httpadapter'
-          require 'httpadapter/adapters/net_http'
-          adapter = HTTPAdapter::NetHTTPAdapter.new
-        end
-        connection = options[:connection]
+        options[:connection] ||= Faraday.default_connection
         request = self.generate_authenticated_request(options)
-        response = adapter.transmit(request, connection)
-        status, headers, body = response
-        merged_body = StringIO.new
-        body.each do |chunk|
-          merged_body.write(chunk)
-        end
-        body = merged_body.string
-        if status.to_i == 401
+        request_env = request.to_env(options[:connection])
+        response = options[:connection].app.call(request_env)
+        if response.status.to_i == 401
           # When accessing a protected resource, we only want to raise an
           # error for 401 responses.
           message = 'Authorization failed.'
-          if body.strip.length > 0
-            message += "  Server message:\n#{body.strip}"
+          if response.body.to_s.strip.length > 0
+            message += "  Server message:\n#{response.body.to_s.strip}"
           end
           raise ::Signet::AuthorizationError.new(
             message, :request => request, :response => response

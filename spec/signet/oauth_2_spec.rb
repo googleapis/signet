@@ -161,4 +161,26 @@ describe Signet::OAuth2 do
       ).should == 'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=='
     end
   end
+
+  describe 'when parsing a token response body' do
+    it 'should correctly handle just an access token' do
+      Signet::OAuth2.parse_json_credentials(
+        '{"access_token": "12345"}'
+      ).should == {"access_token" => "12345"}
+    end
+
+    it 'should raise an error for an invalid body' do
+      (lambda do
+        Signet::OAuth2.parse_json_credentials(
+          'This is not JSON.'
+        )
+      end).should raise_error(MultiJson::DecodeError)
+    end
+
+    it 'should raise an error for a bogus body' do
+      (lambda do
+        Signet::OAuth2.parse_json_credentials(:bogus)
+      end).should raise_error(TypeError)
+    end
+  end
 end
