@@ -607,6 +607,7 @@ module Signet
       # @return [String]
       #   The inferred grant type.
       def grant_type
+        @grant_type ||= nil
         if @grant_type
           return @grant_type
         else
@@ -756,10 +757,7 @@ module Signet
           if options[:request].kind_of?(Array)
             method, uri, headers, body = options[:request]
           elsif options[:request].kind_of?(Faraday::Request)
-            unless options[:connection]
-              raise ArgumentError,
-                "Faraday::Request used, requires a connection to be provided."
-            end
+            options[:connection] ||= Faraday.default_connection
             method = options[:request].method.to_s.downcase.to_sym
             uri = options[:connection].build_url(
               options[:request].path, options[:request].params

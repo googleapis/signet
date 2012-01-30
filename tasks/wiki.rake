@@ -20,6 +20,7 @@ begin
       yardoc.name = 'reference'
       yardoc.options = [
         '--verbose',
+        '--markup', 'markdown',
         '-e', 'yard/lib/yard-google-code.rb',
         '-p', 'yard/templates',
         '-f', 'wiki',
