@@ -535,7 +535,14 @@ module Signet
       #
       # @return [String] The decoded ID token.
       def decoded_id_token(public_key=nil)
-        JWT.decode(self.id_token, public_key, !!public_key)
+        decoded = JWT.decode(self.id_token, public_key, !!public_key)
+        if !decoded.has_key?('aud')
+          raise Signet::UnsafeOperationError, 'No ID token audience declared.'
+        elsif decoded['aud'] != self.client_id
+          raise Signet::UnsafeOperationError,
+            'ID token audience did not match Client ID.'
+        end
+        return decoded
       end
 
       ##

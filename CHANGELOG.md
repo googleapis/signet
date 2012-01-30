@@ -1,3 +1,7 @@
+# 0.3.2
+
+* Added audience security check for ID tokens
+
 # 0.3.1
 
 * Fixed a warning while determining grant type
