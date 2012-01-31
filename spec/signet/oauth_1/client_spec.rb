@@ -513,17 +513,18 @@ describe Signet::OAuth1::Client, 'configured' do
       @client.generate_authenticated_request(
         :request => []
       )
-    end).should raise_error(ArgumentError)
+    end).should raise_error
   end
 
-  it 'should raise an error if a request is provided without a connection' do
+  it 'should not raise an error if a request is ' +
+      'provided without a connection' do
     (lambda do
       @client.generate_authenticated_request(
         :request => Faraday::Request.new(:get) do |req|
           req.url('http://www.example.com/')
         end
       )
-    end).should raise_error(ArgumentError)
+    end).should_not raise_error(ArgumentError)
   end
 
   it 'should raise an error if no URI is provided' do

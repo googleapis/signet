@@ -460,7 +460,8 @@ JSON
     request.headers['Authorization'].should == 'Bearer 12345, realm="Example"'
   end
 
-  it 'should raise an error if Faraday::Request is used without connection' do
+  it 'should not raise an error if a request is ' +
+      'provided without a connection' do
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     @client.access_token = '12345'
@@ -471,7 +472,7 @@ JSON
           req.url('https://www.googleapis.com/oauth2/v1/userinfo?alt=json')
         end
       )
-    end).should raise_error(ArgumentError)
+    end).should_not raise_error
   end
 
   it 'should raise an error if not enough information ' +
@@ -554,7 +555,7 @@ JSON
     stubs.verify_stubbed_calls
   end
 
-  it 'should correctly handle an id token' do
+  it 'should correctly handle an ID token' do
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
@@ -564,14 +565,11 @@ JSON
           'refresh_token' => '54321',
           'expires_in' => '3600',
           'id_token' => (
-            'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiY' +
-            'XVkIjoiMTA2MDM1Nzg5MTY4OC5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSI' +
-            'sImNpZCI6IjEwNjAzNTc4OTE2ODguYXBwcy5nb29nbGV1c2VyY29udGVudC5jb' +
-            '20iLCJpZCI6IjExNjQ1MjgyNDMwOTg1Njc4MjE2MyIsInRva2VuX2hhc2giOiJ' +
-            '0Z2hEOUo4bjhWME4ydmN3NmVNaWpnIiwiaWF0IjoxMzIwNjcwOTc4LCJleHAiO' +
-            'jEzMjA2NzQ4Nzh9.D8x_wirkxDElqKdJBcsIws3Ogesk38okz6MN7zqC7nEAA7' +
-            'wcy1PxsROY1fmBvXSer0IQesAqOW-rPOCNReSn-eY8d53ph1x2HAF-AzEi3GOl' +
-            '6hFycH8wj7Su6JqqyEbIVLxE7q7DkAZGaMPkxbTHs1EhSd5_oaKQ6O4xO3ZnnT4'
+            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl9oYXNoIjoidGdoRD' +
+            'lKN244VjBOMnZjdzZlTWlqZyIsImF1ZCI6ImNsaWVudC0xMjM0NSIsImlkIjoiM' +
+            'TIzNDUiLCJpYXQiOjEzMjA2NzA5NzgsImV4cCI6MTMyMDY3NDg3OCwiY2lkIjoi' +
+            'Y2xpZW50LTEyMzQ1IiwiaXNzIjoiZXhhbXBsZS5jb20ifQ.tsF3srlBaAh6pV3U' +
+            'wfRrHSA3-jwnvOw6MMsQ6sO4kjc'
           )
         })]
       end
@@ -585,15 +583,84 @@ JSON
     @client.access_token.should == '12345'
     @client.refresh_token.should == '54321'
     @client.decoded_id_token.should == {
-      "token_hash" => "tghD9J8n8V0N2vcw6eMijg",
-      "id" => "116452824309856782163",
-      "aud" => "1060357891688.apps.googleusercontent.com",
+      "token_hash" => "tghD9J7n8V0N2vcw6eMijg",
+      "id" => "12345",
+      "aud" => "client-12345",
       "iat" => 1320670978,
       "exp" => 1320674878,
-      "cid" => "1060357891688.apps.googleusercontent.com",
-      "iss" => "accounts.google.com"
+      "cid" => "client-12345",
+      "iss" => "example.com"
     }
     @client.expires_in.should == 3600
+    stubs.verify_stubbed_calls
+  end
+
+  it 'should raise an error decoding an ID token if ' +
+      'audience does not match client ID' do
+    @client.client_id = 'client-54321'
+    @client.client_secret = 'secret-12345'
+    stubs = Faraday::Adapter::Test::Stubs.new do |stub|
+      stub.post('/o/oauth2/token') do
+        [200, {}, MultiJson.encode({
+          'access_token' => '12345',
+          'refresh_token' => '54321',
+          'expires_in' => '3600',
+          'id_token' => (
+            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl9oYXNoIjoidGdoRD' +
+            'lKN244VjBOMnZjdzZlTWlqZyIsImF1ZCI6ImNsaWVudC0xMjM0NSIsImlkIjoiM' +
+            'TIzNDUiLCJpYXQiOjEzMjA2NzA5NzgsImV4cCI6MTMyMDY3NDg3OCwiY2lkIjoi' +
+            'Y2xpZW50LTEyMzQ1IiwiaXNzIjoiZXhhbXBsZS5jb20ifQ.tsF3srlBaAh6pV3U' +
+            'wfRrHSA3-jwnvOw6MMsQ6sO4kjc'
+          )
+        })]
+      end
+    end
+    connection = Faraday.new(:url => 'https://www.google.com') do |builder|
+      builder.adapter(:test, stubs)
+    end
+    @client.fetch_access_token!(
+      :connection => connection
+    )
+    @client.access_token.should == '12345'
+    @client.refresh_token.should == '54321'
+    @client.expires_in.should == 3600
+    (lambda do
+      @client.decoded_id_token
+    end).should raise_error(Signet::UnsafeOperationError)
+    stubs.verify_stubbed_calls
+  end
+
+  it 'should raise an error decoding an ID token if ' +
+      'audience is missing' do
+    @client.client_id = 'client-12345'
+    @client.client_secret = 'secret-12345'
+    stubs = Faraday::Adapter::Test::Stubs.new do |stub|
+      stub.post('/o/oauth2/token') do
+        [200, {}, MultiJson.encode({
+          'access_token' => '12345',
+          'refresh_token' => '54321',
+          'expires_in' => '3600',
+          'id_token' => (
+            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl9oYXNoIjoidGdoRD' +
+            'lKN244VjBOMnZjdzZlTWlqZyIsImlkIjoiMTIzNDUiLCJpYXQiOjEzMjA2NzA5N' +
+            'zgsImV4cCI6MTMyMDY3NDg3OCwiY2lkIjoiY2xpZW50LTEyMzQ1IiwiaXNzIjoi' +
+            'ZXhhbXBsZS5jb20ifQ.7qj85CKbQyVdDe5y2ScdJAZNkEeKMPW9LIonLxG1vu8'
+          )
+        })]
+      end
+    end
+    connection = Faraday.new(:url => 'https://www.google.com') do |builder|
+      builder.adapter(:test, stubs)
+    end
+    @client.fetch_access_token!(
+      :connection => connection
+    )
+    @client.access_token.should == '12345'
+    @client.refresh_token.should == '54321'
+    @client.expires_in.should == 3600
+    (lambda do
+      @client.decoded_id_token
+    end).should raise_error(Signet::UnsafeOperationError)
     stubs.verify_stubbed_calls
   end
 
