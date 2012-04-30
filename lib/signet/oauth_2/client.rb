@@ -656,12 +656,7 @@ module Signet
         if self.token_credential_uri == nil
           raise ArgumentError, 'Missing token endpoint URI.'
         end
-        if self.client_id == nil
-          raise ArgumentError, 'Missing client identifier.'
-        end
-        if self.client_secret == nil
-          raise ArgumentError, 'Missing client secret.'
-        end
+
         method = 'POST'
         parameters = {"grant_type" => self.grant_type}
         case self.grant_type
@@ -679,9 +674,10 @@ module Signet
             # the presence of the redirect URI.
             raise ArgumentError, 'Missing authorization code.'
           end
+          parameters.merge!(self.extension_parameters)
         end
-        parameters['client_id'] = self.client_id
-        parameters['client_secret'] = self.client_secret
+        parameters['client_id'] = self.client_id unless self.client_id.nil?
+        parameters['client_secret'] = self.client_secret unless self.client_secret.nil?
         headers = [
           ['Cache-Control', 'no-store'],
           ['Content-Type', 'application/x-www-form-urlencoded']
