@@ -484,20 +484,6 @@ JSON
     end).should raise_error(ArgumentError)
   end
 
-  it 'should raise an error if a bogus request body is supplied' do
-    @client.client_id = 'client-12345'
-    @client.client_secret = 'secret-12345'
-    @client.access_token = '12345'
-    (lambda do
-      @client.generate_authenticated_request(
-        :realm => 'Example',
-        :method => 'POST',
-        :uri => 'http://www.example.com/',
-        :body => :bogus
-      )
-    end).should raise_error(TypeError)
-  end
-
   it 'should raise an error if the client does not have an access token' do
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
