@@ -690,4 +690,90 @@ describe Signet::OAuth1::Client, 'configured' do
       parameters['oauth_version'].should == '1.0'
     end
   end
+  
+  describe 'with Faraday requests' do
+    
+    it 'should correctly get the protected resource' do
+      # Repeat this because signatures change from test to test
+      10.times do
+        original_request = Faraday::Request.create(:get) do |req|
+          req.url(Addressable::URI.parse('https://photos.example.net/photos?file=vacation.jpg&size=original'))
+          req.headers = Faraday::Utils::Headers.new([['Host', 'photos.example.net']])
+          req.body = ''
+        end
+        
+        signed_request = @client.generate_authenticated_request(
+          :request => original_request
+        )
+
+        # Should be same request object
+        original_request['Authorization'].should == signed_request['Authorization']
+        
+        signed_request.method.should == :get
+        signed_request.path.should ===
+          'https://photos.example.net/photos?file=vacation.jpg&size=original'
+        authorization_header = signed_request.headers['Authorization']
+        signed_request.body.should == ''
+        parameters = ::Signet::OAuth1.parse_authorization_header(
+          authorization_header
+        ).inject({}) { |h,(k,v)| h[k]=v; h }
+        parameters.should_not have_key('oauth_client_credential_key')
+        parameters.should_not have_key('oauth_temporary_credential_key')
+        parameters.should_not have_key('oauth_token_credential_key')
+        parameters.should_not have_key('oauth_callback')
+        parameters['oauth_nonce'].should =~ /^\w+$/
+        parameters['oauth_timestamp'].should =~ /^\d+$/
+        parameters['oauth_signature_method'].should == 'HMAC-SHA1'
+        parameters['oauth_consumer_key'].should == @client.client_credential_key
+        parameters['oauth_token'].should == @client.token_credential_key
+        parameters['oauth_signature'].should =~ /^[a-zA-Z0-9\=\/\+]+$/
+        parameters['oauth_version'].should == '1.0'
+      end
+    end
+    
+    it 'should correctly post the protected resource' do
+      # Repeat this because signatures change from test to test
+      10.times do
+        original_request = Faraday::Request.create(:post) do |req|
+          req.url(Addressable::URI.parse('https://photos.example.net/photos'))
+          req.headers = Faraday::Utils::Headers.new([
+            ['Host', 'photos.example.net'],
+            ['Content-Type', 'application/x-www-form-urlencoded; charset=utf-8'],
+            ['Content-Length', '31'],
+          ])
+          req.body = {
+            'file' => 'vacation.jpg',
+            'size' => 'original'
+          }
+        end
+          
+        signed_request = @client.generate_authenticated_request(
+          :request => original_request
+        )
+
+        # Should be same request object
+        original_request['Authorization'].should == signed_request['Authorization']
+
+        signed_request.method.should == :post
+        signed_request.path.should ===
+          'https://photos.example.net/photos'
+        authorization_header = signed_request.headers['Authorization']
+        signed_request.body.should == 'file=vacation.jpg&size=original'
+        parameters = ::Signet::OAuth1.parse_authorization_header(
+          authorization_header
+        ).inject({}) { |h,(k,v)| h[k]=v; h }
+        parameters.should_not have_key('oauth_client_credential_key')
+        parameters.should_not have_key('oauth_temporary_credential_key')
+        parameters.should_not have_key('oauth_token_credential_key')
+        parameters.should_not have_key('oauth_callback')
+        parameters['oauth_nonce'].should =~ /^\w+$/
+        parameters['oauth_timestamp'].should =~ /^\d+$/
+        parameters['oauth_signature_method'].should == 'HMAC-SHA1'
+        parameters['oauth_consumer_key'].should == @client.client_credential_key
+        parameters['oauth_token'].should == @client.token_credential_key
+        parameters['oauth_signature'].should =~ /^[a-zA-Z0-9\=\/\+]+$/
+        parameters['oauth_version'].should == '1.0'
+      end
+    end
+  end
 end

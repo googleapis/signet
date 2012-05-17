@@ -748,7 +748,7 @@ module Signet
       #   - <code>:realm</code> —
       #     The Authorization realm.  See RFC 2617.
       #
-      # @return [Array] The request object.
+      # @return [Faraday::Request] The request object.
       def generate_authenticated_request(options={})
         if self.access_token == nil
           raise ArgumentError, 'Missing access token.'
@@ -756,62 +756,44 @@ module Signet
         options = {
           :realm => nil
         }.merge(options)
-        if options[:request]
+        if options[:request].kind_of?(Faraday::Request)
+          request = options[:request]
+        else
           if options[:request].kind_of?(Array)
             method, uri, headers, body = options[:request]
-          elsif options[:request].kind_of?(Faraday::Request)
-            options[:connection] ||= Faraday.default_connection
-            method = options[:request].method.to_s.downcase.to_sym
-            uri = options[:connection].build_url(
-              options[:request].path, options[:request].params
-            )
-            headers = options[:request].headers || {}
-            body = options[:request].body || ''
+          else
+            method = options[:method] || :get
+            uri = options[:uri]
+            headers = options[:headers] || []
+            body = options[:body] || ''
           end
-        else
-          method = options[:method] || :get
-          uri = options[:uri]
-          headers = options[:headers] || []
-          body = options[:body] || ''
-        end
-        headers = headers.to_a if headers.kind_of?(Hash)
-        request_components = {
-          :method => method,
-          :uri => uri,
-          :headers => headers,
-          :body => body
-        }
-        # Verify that we have all pieces required to return an HTTP request
-        request_components.each do |(key, value)|
-          unless value
-            raise ArgumentError, "Missing :#{key} parameter."
+          headers = headers.to_a if headers.kind_of?(Hash)
+          request_components = {
+            :method => method,
+            :uri => uri,
+            :headers => headers,
+            :body => body
+          }
+          # Verify that we have all pieces required to return an HTTP request
+          request_components.each do |(key, value)|
+            unless value
+              raise ArgumentError, "Missing :#{key} parameter."
+            end
+          end
+          method = method.to_s.downcase.to_sym
+          request = Faraday::Request.create(method.to_s.downcase.to_sym) do |req|
+            req.url(Addressable::URI.parse(uri))
+            req.headers = Faraday::Utils::Headers.new(headers)
+            req.body = body
           end
         end
-        if !body.kind_of?(String) && body.respond_to?(:each)
-          # Just in case we get a chunked body
-          merged_body = StringIO.new
-          body.each do |chunk|
-            merged_body.write(chunk)
-          end
-          body = merged_body.string
-        end
-        if !body.kind_of?(String)
-          raise TypeError, "Expected String, got #{body.class}."
-        end
-        method = method.to_s.downcase.to_sym
-        headers << [
-          'Authorization',
-          ::Signet::OAuth2.generate_bearer_authorization_header(
-            self.access_token,
-            options[:realm] ? [['realm', options[:realm]]] : nil
-          )
-        ]
-        headers << ['Cache-Control', 'no-store']
-        return Faraday::Request.create(method.to_s.downcase.to_sym) do |req|
-          req.url(Addressable::URI.parse(uri))
-          req.headers = Faraday::Utils::Headers.new(headers)
-          req.body = body
-        end
+        
+        request['Authorization'] = ::Signet::OAuth2.generate_bearer_authorization_header(
+          self.access_token,
+          options[:realm] ? [['realm', options[:realm]]] : nil
+        )
+        request['Cache-Control'] = 'no-store'
+        return request
       end
 
       ##
