@@ -1,3 +1,10 @@
+# 0.3.3
+
+* Request objects no longer recreated during processing
+* Faraday middleware now supported
+* Streamed requests now supported
+* Fixed assertion profiles; client ID/secret omission no longer an error
+
 # 0.3.2
 
 * Added audience security check for ID tokens
