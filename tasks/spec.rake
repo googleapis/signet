@@ -16,6 +16,7 @@ namespace :spec do
     end
     t.rcov_opts = [
       '--exclude', 'lib\\/compat',
+      '--exclude', 'lib\\/signet\\/ssl_config\\.rb',
       '--exclude', 'spec',
       '--exclude', '\\.rvm\\/gems',
       '--exclude', '1\\.8\\/gems',
