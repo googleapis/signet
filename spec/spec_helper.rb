@@ -7,4 +7,5 @@ $:.unshift(lib_dir)
 $:.unshift(compat_dir)
 $:.uniq!
 
+require 'rubygems'
 require 'signet'
