@@ -690,9 +690,9 @@ describe Signet::OAuth1::Client, 'configured' do
       parameters['oauth_version'].should == '1.0'
     end
   end
-  
+
   describe 'with Faraday requests' do
-    
+
     it 'should correctly get the protected resource' do
       # Repeat this because signatures change from test to test
       10.times do
@@ -701,14 +701,14 @@ describe Signet::OAuth1::Client, 'configured' do
           req.headers = Faraday::Utils::Headers.new([['Host', 'photos.example.net']])
           req.body = ''
         end
-        
+
         signed_request = @client.generate_authenticated_request(
           :request => original_request
         )
 
         # Should be same request object
         original_request['Authorization'].should == signed_request['Authorization']
-        
+
         signed_request.method.should == :get
         signed_request.path.should ===
           'https://photos.example.net/photos?file=vacation.jpg&size=original'
@@ -730,7 +730,7 @@ describe Signet::OAuth1::Client, 'configured' do
         parameters['oauth_version'].should == '1.0'
       end
     end
-    
+
     it 'should correctly post the protected resource' do
       # Repeat this because signatures change from test to test
       10.times do
@@ -746,7 +746,7 @@ describe Signet::OAuth1::Client, 'configured' do
             'size' => 'original'
           }
         end
-          
+
         signed_request = @client.generate_authenticated_request(
           :request => original_request
         )
