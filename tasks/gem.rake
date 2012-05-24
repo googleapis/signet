@@ -1,4 +1,4 @@
-require "rake/gempackagetask"
+require "rubygems/package_task"
 
 namespace :gem do
   GEM_SPEC = Gem::Specification.new do |s|
@@ -14,7 +14,6 @@ namespace :gem do
     s.homepage = PKG_HOMEPAGE
     s.summary = PKG_SUMMARY
     s.description = PKG_DESCRIPTION
-    s.rubyforge_project = RUBY_FORGE_PROJECT
 
     s.files = PKG_FILES.to_a
 
@@ -34,7 +33,7 @@ namespace :gem do
     s.require_path = "lib"
   end
 
-  Rake::GemPackageTask.new(GEM_SPEC) do |p|
+  Gem::PackageTask.new(GEM_SPEC) do |p|
     p.gem_spec = GEM_SPEC
     p.need_tar = true
     p.need_zip = true
