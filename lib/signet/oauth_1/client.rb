@@ -849,93 +849,90 @@ module Signet
         end
         options = {
           :signature_method => 'HMAC-SHA1',
-          :realm => nil
+          :realm => nil,
+          :connection => Faraday.default_connection
         }.merge(options)
-        if options[:request]
+        
+        if options[:request].kind_of?(Faraday::Request)
+          request = options[:request]
+        else
           if options[:request].kind_of?(Array)
             method, uri, headers, body = options[:request]
-          elsif options[:request].kind_of?(Faraday::Request)
-            options[:connection] ||= Faraday.default_connection
-            method = options[:request].method.to_s.downcase.to_sym
-            uri = options[:connection].build_url(
-              options[:request].path, options[:request].params
-            )
-            headers = options[:request].headers || {}
-            body = options[:request].body || ''
+          else
+            method = options[:method] || :get
+            uri = options[:uri]
+            headers = options[:headers] || []
+            body = options[:body] || ''
           end
-        else
-          method = options[:method] || :get
-          uri = options[:uri]
-          headers = options[:headers] || []
-          body = options[:body] || ''
-        end
-        headers = headers.to_a if headers.kind_of?(Hash)
-        request_components = {
-          :method => method,
-          :uri => uri,
-          :headers => headers,
-          :body => body
-        }
-        # Verify that we have all pieces required to return an HTTP request
-        request_components.each do |(key, value)|
-          unless value
-            raise ArgumentError, "Missing :#{key} parameter."
+          headers = headers.to_a if headers.kind_of?(Hash)
+          request_components = {
+            :method => method,
+            :uri => uri,
+            :headers => headers,
+            :body => body
+          }
+          # Verify that we have all pieces required to return an HTTP request
+          request_components.each do |(key, value)|
+            unless value
+              raise ArgumentError, "Missing :#{key} parameter."
+            end
+          end
+          if !body.kind_of?(String) && body.respond_to?(:each)
+            # Just in case we get a chunked body
+            merged_body = StringIO.new
+            body.each do |chunk|
+              merged_body.write(chunk)
+            end
+            body = merged_body.string
+          end
+          if !body.kind_of?(String)
+            raise TypeError, "Expected String, got #{body.class}."
+          end
+          method = method.to_s.downcase.to_sym
+          
+          request = Faraday::Request.create(method) do |req|
+            req.url(Addressable::URI.parse(uri))
+            req.headers = Faraday::Utils::Headers.new(headers)
+            req.body = body
           end
         end
-        if !body.kind_of?(String) && body.respond_to?(:each)
-          # Just in case we get a chunked body
-          merged_body = StringIO.new
-          body.each do |chunk|
-            merged_body.write(chunk)
-          end
-          body = merged_body.string
-        end
-        if !body.kind_of?(String)
-          raise TypeError, "Expected String, got #{body.class}."
-        end
-        method = method.to_s.downcase.to_sym
+        
         parameters = ::Signet::OAuth1.unsigned_resource_parameters(
           :client_credential_key => self.client_credential_key,
           :token_credential_key => self.token_credential_key,
           :signature_method => options[:signature_method],
           :two_legged => self.two_legged
         )
-        media_type = nil
-        headers.each do |(header, value)|
-          if header.downcase == 'Content-Type'.downcase
-            media_type = value.gsub(/^([^;]+)(;.*?)?$/, '\1')
-          end
+        
+        env = request.to_env(options[:connection])
+        
+        content_type = request['Content-Type'].to_s
+        content_type = content_type.split(';', 2).first if content_type.index(';')
+        if request.method == :post && content_type == 'application/x-www-form-urlencoded'
+          # Serializes the body in case a hash/array was passed. Noop if already string like
+          encoder = Faraday::Request::UrlEncoded.new(lambda { |env| })
+          encoder.call(env)
+          request.body = env[:body]
+
+          post_parameters = Addressable::URI.form_unencode(env[:body])
+          parameters = parameters.concat(post_parameters)
         end
-        if method == :post &&
-            media_type == 'application/x-www-form-urlencoded'
-          post_parameters = Addressable::URI.form_unencode(body)
-        else
-          post_parameters = []
-        end
-        parameters = parameters.concat(post_parameters)
+        
         # No need to attach URI query parameters, the .sign_parameters
         # method takes care of that automatically.
         signature = ::Signet::OAuth1.sign_parameters(
-          method,
-          uri,
+          env[:method],
+          env[:url],
           parameters,
           self.client_credential_secret,
           self.token_credential_secret
         )
+        
         parameters << ['oauth_signature', signature]
-        authorization_header = [
-          'Authorization',
-          ::Signet::OAuth1.generate_authorization_header(
-            parameters, options[:realm]
-          )
-        ]
-        headers << authorization_header
-        headers << ['Cache-Control', 'no-store']
-        return Faraday::Request.create(method.to_s.downcase.to_sym) do |req|
-          req.url(Addressable::URI.parse(uri))
-          req.headers = Faraday::Utils::Headers.new(headers)
-          req.body = body
-        end
+        request['Authorization'] =  ::Signet::OAuth1.generate_authorization_header(
+            parameters, options[:realm])
+        request['Cache-Control'] = 'no-store'
+        return request
       end
 
       ##
