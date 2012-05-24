@@ -191,6 +191,16 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     end).should raise_error(TypeError)
   end
 
+  it 'should include extension parameters in token request' do
+    @client.grant_type = 'urn:ietf:params:oauth:grant-type:saml2-bearer'
+    @client.extension_parameters['assertion'] =
+      'PEFzc2VydGlvbiBJc3N1ZUluc3RhbnQ9IjIwMTEtMDU'
+      
+    request = @client.generate_access_token_request
+    params = Addressable::URI.form_unencode(request.body)
+    params.should include(['assertion', 'PEFzc2VydGlvbiBJc3N1ZUluc3RhbnQ9IjIwMTEtMDU'])
+  end
+  
   it 'should allow the token to be updated' do
     issued_at = Time.now
     @client.update_token!(
@@ -243,20 +253,6 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
 
   it 'should raise an error if token credential URI is missing' do
     @client.token_credential_uri = nil
-    (lambda do
-      @client.fetch_access_token!
-    end).should raise_error(ArgumentError)
-  end
-
-  it 'should raise an error if client ID is missing' do
-    @client.client_secret = 'secret-12345'
-    (lambda do
-      @client.fetch_access_token!
-    end).should raise_error(ArgumentError)
-  end
-
-  it 'should raise an error if client secret is missing' do
-    @client.client_id = 'client-12345'
     (lambda do
       @client.fetch_access_token!
     end).should raise_error(ArgumentError)
@@ -486,20 +482,6 @@ JSON
         :method => 'POST'
       )
     end).should raise_error(ArgumentError)
-  end
-
-  it 'should raise an error if a bogus request body is supplied' do
-    @client.client_id = 'client-12345'
-    @client.client_secret = 'secret-12345'
-    @client.access_token = '12345'
-    (lambda do
-      @client.generate_authenticated_request(
-        :realm => 'Example',
-        :method => 'POST',
-        :uri => 'http://www.example.com/',
-        :body => :bogus
-      )
-    end).should raise_error(TypeError)
   end
 
   it 'should raise an error if the client does not have an access token' do
