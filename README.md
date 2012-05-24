@@ -7,6 +7,9 @@
   <dt>License</dt><dd>Apache 2.0</dd>
 </dl>
 
+[![Build Status](https://secure.travis-ci.org/google/signet.png)](http://travis-ci.org/google/signet)
+[![Dependency Status](https://gemnasium.com/google/signet.png)](https://gemnasium.com/google/signet)
+
 ## Description
 
 Signet is an OAuth 1.0 / OAuth 2.0 implementation.
