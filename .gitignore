@@ -1,9 +1,13 @@
 ._*
 .DS_Store
 .yardoc
+.bundle
+Gemfile.lock
 coverage
 doc
 heckling
 pkg
 specdoc
 wiki
+.google-api.yaml
+client_secrets.json
