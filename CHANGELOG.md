@@ -1,3 +1,7 @@
+# 0.3.4
+
+* Attempts to auto-detect CA cert location
+
 # 0.3.3
 
 * Request objects no longer recreated during processing
