@@ -4,7 +4,6 @@ $LOAD_PATH.unshift(
 $LOAD_PATH.unshift(File.expand_path('.'))
 $LOAD_PATH.uniq!
 
-require 'google/api_client'
 require 'rake'
 require 'rake/clean'
 
