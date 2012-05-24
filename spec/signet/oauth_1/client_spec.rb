@@ -742,8 +742,8 @@ describe Signet::OAuth1::Client, 'configured' do
             ['Content-Length', '31'],
           ])
           req.body = {
-            'file' => 'vacation.jpg',
-            'size' => 'original'
+            'size' => 'original',
+            'file' => 'vacation.jpg'
           }
         end
 
@@ -758,7 +758,9 @@ describe Signet::OAuth1::Client, 'configured' do
         signed_request.path.should ===
           'https://photos.example.net/photos'
         authorization_header = signed_request.headers['Authorization']
-        signed_request.body.should == 'file=vacation.jpg&size=original'
+        # Can't rely on the order post parameters are encoded in.
+        signed_request.body.should include('file=vacation.jpg')
+        signed_request.body.should include('size=original')
         parameters = ::Signet::OAuth1.parse_authorization_header(
           authorization_header
         ).inject({}) { |h,(k,v)| h[k]=v; h }
