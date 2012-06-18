@@ -19,6 +19,7 @@ Signet is an OAuth 1.0 / OAuth 2.0 implementation.
 - {Signet::OAuth1}
 - {Signet::OAuth1::Client}
 - {Signet::OAuth1::Credential}
+- {Signet::OAuth1::Server}
 - {Signet::OAuth2}
 - {Signet::OAuth2::Client}
 
