@@ -59,6 +59,7 @@ def make_token_credential_request(client, verifier=nil, realm=nil, uri=nil)
 end
 
 def make_resource_request(client, real_request={}, realm=nil)
+
   client.generate_authenticated_request(
                    :method => real_request[:method] || 'GET',
                    :uri => real_request[:uri] || 'http://photos.example.net/photos',
@@ -365,8 +366,8 @@ describe Signet::OAuth1::Server, 'configured' do
       end).should raise_error(ArgumentError)
     end
     it 'should reject an malformed request' do
-      bad_request = make_temporary_credential_request(@client)
-      bad_request[2][0][1].gsub!(/(OAuth)(.+)/, "#{$1}")
+      bad_request = make_temporary_credential_request(@client, nil, 'https://photos.example.net/photos')
+      bad_request.headers['Authorization'].gsub!(/(OAuth)(.+)/, "#{$1}")
       (lambda do
         @server.authenticate_temporary_credential_request(
           :request=>bad_request
@@ -401,8 +402,8 @@ describe Signet::OAuth1::Server, 'configured' do
     end
     it 'should return false for an unauthenticated request' do
       bad_request = make_temporary_credential_request(@client)
-      bad_request[2][0][1].gsub!(/oauth_signature=\".+\"/, 
-                                 "oauth_signature=\"foobar\"")
+      bad_request.headers["Authorization"].gsub!(/oauth_signature=\".+\"/, 
+                                                  "oauth_signature=\"foobar\"")
       @server.authenticate_temporary_credential_request(
         :request=>bad_request
       ).should == false
@@ -449,7 +450,8 @@ describe Signet::OAuth1::Server, 'configured' do
 
     it 'should reject an malformed request' do
       bad_request = make_token_credential_request(@client)
-      bad_request[2][0][1].gsub!(/(OAuth)(.+)/, "#{$1}")
+      bad_request.headers["Authorization"].gsub!(/(OAuth)(.+)/, "#{$1}") 
+
       (lambda do
         @server.authenticate_token_credential_request(
           :request=>bad_request
@@ -473,7 +475,7 @@ describe Signet::OAuth1::Server, 'configured' do
     end
     it 'should return nil for an unauthenticated request' do
       bad_request = make_token_credential_request(@client)
-      bad_request[2][0][1].gsub!(/oauth_signature=\".+\"/, 
+      bad_request.headers["Authorization"].gsub!(/oauth_signature=\".+\"/, 
                                  "oauth_signature=\"foobar\"")
       @server.authenticate_token_credential_request(
         :request=>bad_request
@@ -601,8 +603,7 @@ describe Signet::OAuth1::Server, 'configured' do
         :headers=>{'Content-Type'=>'application/x-www-form-urlencoded'},
         :body=>'c2&a3=2+q'})
 
-      auth_header = req[2].find {|x| x[0] == "Authorization"}
-      auth_header[1].gsub!(/c2=\"\", a3=\"2%20q\", /, '')
+      req.headers["Authorization"].gsub!(/c2=\"\", a3=\"2%20q\", /, '')
 
       (lambda do 
         @server.authenticate_resource_request(:request=>req)
@@ -659,7 +660,7 @@ describe Signet::OAuth1::Server, 'configured' do
     end
     it 'should return nil for a unauthenticated request' do
       bad_request = make_resource_request(@client)
-      bad_request[2][0][1].gsub!(/oauth_signature=\".+\"/, 
+      bad_request.headers["Authorization"].gsub!(/oauth_signature=\".+\"/, 
                                  "oauth_signature=\"foobar\"")
       @server.authenticate_resource_request(:request=>bad_request).should == nil
     end
@@ -763,8 +764,7 @@ describe Signet::OAuth1::Server, 'configured' do
         :body=>'c2&a3=2+q'}
       )
 
-      auth_header = req[2].find {|x| x[0] == "Authorization"}
-      auth_header[1].gsub!(/c2=\"\", a3=\"2%20q\", /, '')
+      req.headers["Authorization"].gsub!(/c2=\"\", a3=\"2%20q\", /, '')
 
       (lambda do 
         @server.authenticate_resource_request(:request=>req, :two_legged=>true)
@@ -807,7 +807,7 @@ describe Signet::OAuth1::Server, 'configured' do
     end
     it 'should return false for a unauthenticated request' do
       bad_request = make_resource_request(@client)
-      bad_request[2][0][1].gsub!(/oauth_signature=\".+\"/, 
+      bad_request.headers["Authorization"].gsub!(/oauth_signature=\".+\"/, 
                                  "oauth_signature=\"foobar\"")
       @server.authenticate_resource_request(:request=>bad_request).should == nil
     end

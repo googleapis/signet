@@ -11,6 +11,8 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
+#
+require 'faraday'
 
 require 'stringio'
 require 'addressable/uri'
@@ -136,7 +138,7 @@ module Signet
       ## 
       # Validate and normalize the components from an HTTP request.
       # @overload verify_request_components(options)
-      #   @param [Hash] request A pre-constructed request to verify.
+      #   @param [Faraday::Request] request A pre-constructed request to verify.
       #   @param [String] method the HTTP method , defaults to <code>GET</code>
       #   @param [Addressable::URI, String] uri the URI .
       #   @param [Hash, Array] headers the HTTP headers.
@@ -145,14 +147,17 @@ module Signet
       # @return [Hash] normalized request components
       def verify_request_components(options={})
         if options[:request]
-          if options[:request].kind_of?(Array)
+          if options[:request].kind_of?(Faraday::Request) || options[:request].kind_of?(Array)
             request = options[:request]
           elsif options[:adapter]
             request = options[:adapter].adapt_request(options[:request])
           end
-          method, uri, headers, body = request
+          method = request.method
+          uri = request.path
+          headers = request.headers
+          body = request.body
         else
-          method = options[:method] || 'GET'
+          method = options[:method] || :get
           uri = options[:uri]
           headers = options[:headers] || []
           body = options[:body] || ''
