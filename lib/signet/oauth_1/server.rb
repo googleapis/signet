@@ -26,7 +26,7 @@ module Signet
     class Server
 
       # @return [Proc] lookup the value from this Proc.
-      attr_accessor :nonce_timestamp, :client_credential, :token_credential, 
+      attr_accessor :nonce_timestamp, :client_credential, :token_credential,
                     :temporary_credential, :verifier
 
       ##
@@ -46,34 +46,34 @@ module Signet
       #       lambda { |key| ClientCredential.find_by_key(key).to_hash },
       #     :token_credential =>
       #       lambda { |key| TokenCredential.find_by_key(key).to_hash },
-      #     :temporary_credential => 
+      #     :temporary_credential =>
       #       lambda { |key| TemporaryCredential.find_by_key(key).to_hash },
-      #     :verifier => 
+      #     :verifier =>
       #       lambda {|verifier| Verifier.find_by_verifier(verifier).active? }
       #   )
       def initialize(options={})
-        [:nonce_timestamp, :client_credential, :token_credential, 
+        [:nonce_timestamp, :client_credential, :token_credential,
          :temporary_credential, :verifier].each do |attr|
            instance_variable_set("@#{attr}", options[attr])
         end
       end
 
       ##
-      # Determine if the supplied nonce/timestamp pair is valid by calling 
+      # Determine if the supplied nonce/timestamp pair is valid by calling
       # the {#nonce_timestamp} Proc.
       #
       # @param [String, #to_str] nonce value from the request
       # @param [String, #to_str] timestamp value from the request
       # @return [Boolean] if the nonce/timestamp pair is valid.
       def validate_nonce_timestamp(nonce, timestamp)
-        nonce = 
-          @nonce_timestamp.call(nonce, timestamp) if 
+        nonce =
+          @nonce_timestamp.call(nonce, timestamp) if
             @nonce_timestamp.respond_to?(:call)
         nonce ? true : false
       end
 
-      ## 
-      # Find the appropriate client credential by calling 
+      ##
+      # Find the appropriate client credential by calling
       # the {#client_credential} Proc.
       #
       # @param [String] key provided to the {#client_credential} Proc.
@@ -82,8 +82,8 @@ module Signet
         call_credential_lookup(@client_credential, key)
       end
 
-      ## 
-      # Find the appropriate client credential by calling 
+      ##
+      # Find the appropriate client credential by calling
       # the {#token_credential} Proc.
       #
       # @param [String] key provided to the {#token_credential} Proc.
@@ -92,8 +92,8 @@ module Signet
         call_credential_lookup(@token_credential, key)
       end
 
-      ## 
-      # Find the appropriate client credential by calling 
+      ##
+      # Find the appropriate client credential by calling
       # the {#temporary_credential} Proc.
       #
       # @param [String] key provided to the {#temporary_credential} Proc.
@@ -102,32 +102,32 @@ module Signet
         call_credential_lookup(@temporary_credential, key)
       end
 
-      ## 
+      ##
       # Call a credential lookup, and cast the result to a proper Credential.
       #
       # @param [Proc] credential to call.
       # @param [String] key provided to the Proc in <code>credential</code>
-      # @return [Signet::OAuth1::Credential] credential provided by 
+      # @return [Signet::OAuth1::Credential] credential provided by
       #   <code>credential</code> (if any).
       def call_credential_lookup(credential, key)
-        cred = credential.call(key) if 
+        cred = credential.call(key) if
                 credential.respond_to?(:call)
         return nil if cred.nil?
-        return nil unless (cred.respond_to?(:to_str) || 
-                           cred.respond_to?(:to_ary) || 
-                           cred.respond_to?(:to_hash) ) 
-        if(cred.instance_of?(::Signet::OAuth1::Credential)) 
-          cred 
+        return nil unless (cred.respond_to?(:to_str) ||
+                           cred.respond_to?(:to_ary) ||
+                           cred.respond_to?(:to_hash) )
+        if(cred.instance_of?(::Signet::OAuth1::Credential))
+          cred
         else
           ::Signet::OAuth1::Credential.new(cred)
         end
       end
 
-      ## 
+      ##
       #  Determine if the verifier is valid by calling the Proc in {#verifier}.
       #
       # @param [String] Key provided to the {#verifier} Proc.
-      # @return [Boolean] if the verifier Proc returns anything other than 
+      # @return [Boolean] if the verifier Proc returns anything other than
       #   <code>nil</code> or <code>false</code>.
       def find_verifier(verifier)
         verified = @verifier.call(verifier) if @verifier.respond_to?(:call)
@@ -135,7 +135,7 @@ module Signet
       end
 
 
-      ## 
+      ##
       # Validate and normalize the components from an HTTP request.
       # @overload verify_request_components(options)
       #   @param [Faraday::Request] request A pre-constructed request to verify.
@@ -184,13 +184,13 @@ module Signet
 
       ##
       # Validate and normalize the HTTP Authorization header.
-      # 
+      #
       # @param [Array] headers from HTTP request.
       # @return [Hash] Hash of Authorization header.
       def verify_auth_header_components(headers)
         auth_header = headers.find{|x| x[0] == 'Authorization'}
         if(auth_header.nil? || auth_header[1] == '')
-          raise MalformedAuthorizationError.new('Authorization header is missing') 
+          raise MalformedAuthorizationError.new('Authorization header is missing')
         end
         auth_hash = ::Signet::OAuth1.parse_authorization_header(
           auth_header[1] ).inject({}) {|acc, (key,val)| acc[key.downcase] = val; acc}
@@ -211,19 +211,19 @@ module Signet
       def request_realm(options={})
         if(options[:request])
           request_components = verify_request_components(
-            :request=>options[:request], 
+            :request=>options[:request],
             :adapter=>options[:adapter] )
         else
           request_components = verify_request_components(
-            :method=>options[:method], 
-            :uri=>options[:uri], 
-            :headers=>options[:headers], 
+            :method=>options[:method],
+            :uri=>options[:uri],
+            :headers=>options[:headers],
             :body=>options[:body] )
         end
-        
+
         auth_header = request_components[:headers].find{|x| x[0] == 'Authorization'}
         if(auth_header.nil? || auth_header[1] == '')
-          raise MalformedAuthorizationError.new('Authorization header is missing') 
+          raise MalformedAuthorizationError.new('Authorization header is missing')
         end
         auth_hash = ::Signet::OAuth1.parse_authorization_header(
           auth_header[1] ).inject({}) {|acc, (key,val)| acc[key.downcase] = val; acc}
@@ -244,8 +244,8 @@ module Signet
       # @return [String] The oauth_callback value, or <code>false</code> if not valid.
       def authenticate_temporary_credential_request(options={})
         verifications = {
-          :client_credential => 
-            lambda { |x| ::Signet::OAuth1::Credential.new('Client credential key', 
+          :client_credential =>
+            lambda { |x| ::Signet::OAuth1::Credential.new('Client credential key',
                                                           'Client credential secret'
                                                          )
             }
@@ -253,15 +253,15 @@ module Signet
         verifications.each do |(key, value)|
           raise ArgumentError, "#{key} was not set." unless self.send(key)
         end
-        
+
         if(options[:request])
           request_components = verify_request_components(
-            :request=>options[:request], 
+            :request=>options[:request],
             :adapter=>options[:adapter] )
         else
           request_components = verify_request_components(
-            :method=>options[:method], 
-            :uri=>options[:uri], 
+            :method=>options[:method],
+            :uri=>options[:uri],
             :headers=>options[:headers] )
         end
         # body should be blank; we don't care in any case.
@@ -273,21 +273,21 @@ module Signet
         return false unless(client_credential = find_client_credential(
                                                   auth_hash['oauth_consumer_key']) )
 
-        return false unless validate_nonce_timestamp(auth_hash['oauth_nonce'], 
+        return false unless validate_nonce_timestamp(auth_hash['oauth_nonce'],
                                                      auth_hash['oauth_timestamp'])
         client_credential_secret = client_credential.secret if client_credential
 
         computed_signature = ::Signet::OAuth1.sign_parameters(
-          method, 
-          uri, 
+          method,
+          uri,
           # Realm isn't used, and will throw the signature off.
-          auth_hash.reject{|k,v| k=='realm'}.to_a, 
-          client_credential_secret, 
+          auth_hash.reject{|k,v| k=='realm'}.to_a,
+          client_credential_secret,
           nil
         )
         if(computed_signature == auth_hash['oauth_signature'])
           if(auth_hash.fetch('oauth_callback', 'oob').empty?)
-            'oob' 
+            'oob'
           else
             auth_hash.fetch('oauth_callback')
           end
@@ -310,15 +310,15 @@ module Signet
       #   or <code>nil</code> if not valid.
       def authenticate_token_credential_request(options={})
         verifications = {
-          :client_credential => 
-            lambda {|x| ::Signet::OAuth1::Credential.new('Client credential key', 
-                                                         'Client credential secret') 
+          :client_credential =>
+            lambda {|x| ::Signet::OAuth1::Credential.new('Client credential key',
+                                                         'Client credential secret')
                    },
-          :temporary_credential => 
-            lambda {|x| ::Signet::OAuth1::Credential.new('Temporary credential key', 
-                                                         'Temporary credential secret') 
+          :temporary_credential =>
+            lambda {|x| ::Signet::OAuth1::Credential.new('Temporary credential key',
+                                                         'Temporary credential secret')
                    },
-          :verifier => 
+          :verifier =>
             lambda {|x| 'Verifier' }
         }
         verifications.each do |(key, value)|
@@ -328,22 +328,22 @@ module Signet
         end
         if(options[:request])
           request_components = verify_request_components(
-            :request=>options[:request], 
-            :adapter=>options[:adapter] 
+            :request=>options[:request],
+            :adapter=>options[:adapter]
           )
         else
           request_components = verify_request_components(
-            :method=>options[:method], 
-            :uri=>options[:uri], 
-            :headers=>options[:headers], 
-            :body=>options[:body] 
+            :method=>options[:method],
+            :uri=>options[:uri],
+            :headers=>options[:headers],
+            :body=>options[:body]
           )
         end
         # body should be blank; we don't care in any case.
         method = request_components[:method]
         uri = request_components[:uri]
         headers = request_components[:headers]
- 
+
         auth_hash = verify_auth_header_components(headers)
         return false unless(
           client_credential = find_client_credential(auth_hash['oauth_consumer_key'])
@@ -355,11 +355,11 @@ module Signet
           auth_hash['oauth_nonce'], auth_hash['oauth_timestamp'])
 
         computed_signature = ::Signet::OAuth1.sign_parameters(
-          method, 
-          uri, 
+          method,
+          uri,
           # Realm isn't used, and will throw the signature off.
-          auth_hash.reject{|k,v| k=='realm'}.to_a, 
-          client_credential.secret, 
+          auth_hash.reject{|k,v| k=='realm'}.to_a,
+          client_credential.secret,
           temporary_credential.secret
         )
 
@@ -384,24 +384,24 @@ module Signet
       #   @param [Boolean] two_legged skip the token_credential lookup?
       #   @param [HTTPAdapter] adapter The HTTP adapter(optional).
       #
-      # @return [Hash] A hash of the credentials and realm for a valid request, 
+      # @return [Hash] A hash of the credentials and realm for a valid request,
       #   or <code>nil</code> if not valid.
       def authenticate_resource_request(options={})
         verifications = {
-          :client_credential => 
-            lambda do |x| 
-              ::Signet::OAuth1::Credential.new('Client credential key', 
+          :client_credential =>
+            lambda do |x|
+              ::Signet::OAuth1::Credential.new('Client credential key',
                                                'Client credential secret')
-            end 
+            end
         }
 
         unless(options[:two_legged] == true)
           verifications.update(
-            :token_credential => 
-              lambda do |x| 
-                ::Signet::OAuth1::Credential.new('Token credential key', 
+            :token_credential =>
+              lambda do |x|
+                ::Signet::OAuth1::Credential.new('Token credential key',
                                                  'Token credential secret')
-              end 
+              end
           )
         end
         # Make sure all required state is set
@@ -413,13 +413,13 @@ module Signet
 
         if(options[:request])
           request_components = verify_request_components(
-            :request=>options[:request], 
+            :request=>options[:request],
             :adapter=>options[:adapter] )
         else
           request_components = verify_request_components(
-            :method=>options[:method], 
-            :uri=>options[:uri], 
-            :headers=>options[:headers], 
+            :method=>options[:method],
+            :uri=>options[:uri],
+            :headers=>options[:headers],
             :body=>options[:body] )
         end
         method = request_components[:method]
@@ -458,13 +458,13 @@ module Signet
           token_credential_secret = token_credential.secret if token_credential
         end
 
-        return nil unless(client_credential = 
+        return nil unless(client_credential =
                             find_client_credential(auth_hash['oauth_consumer_key']))
 
-        return nil unless validate_nonce_timestamp(auth_hash['oauth_nonce'], 
+        return nil unless validate_nonce_timestamp(auth_hash['oauth_nonce'],
                                                      auth_hash['oauth_timestamp'])
 
-        if(method == ('POST' || 'PUT') && 
+        if(method == ('POST' || 'PUT') &&
            media_type == 'application/x-www-form-urlencoded')
           request_components[:body] = body
           post_parameters = Addressable::URI.form_unencode(body)
@@ -472,8 +472,8 @@ module Signet
           # If the auth header doesn't have the same params as the body, it
           # can't have been signed correctly(5849#3.4.1.3)
           unless(post_parameters == auth_hash.reject{|k,v| k.index('oauth_')}.to_a)
-            raise MalformedAuthorizationError.new( 
-              'Request is of type application/x-www-form-urlencoded ' + 
+            raise MalformedAuthorizationError.new(
+              'Request is of type application/x-www-form-urlencoded ' +
               'but Authentication header did not include form values'
                                                  )
           end
@@ -482,11 +482,11 @@ module Signet
         client_credential_secret = client_credential.secret if client_credential
 
         computed_signature = ::Signet::OAuth1.sign_parameters(
-          method, 
-          uri, 
+          method,
+          uri,
           # Realm isn't used, and will throw the signature off.
-          auth_hash.reject{|k,v| k=='realm'}.to_a, 
-          client_credential_secret, 
+          auth_hash.reject{|k,v| k=='realm'}.to_a,
+          client_credential_secret,
           token_credential_secret
         )
 
