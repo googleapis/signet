@@ -27,7 +27,7 @@ namespace :gem do
     s.add_runtime_dependency("jwt", ">= 0.1.4")
 
     s.add_development_dependency("rake", "~> 0.8.3")
-    s.add_development_dependency("rspec", "~> 1.1.11")
+    s.add_development_dependency("rspec", "~> 2.10.0")
     s.add_development_dependency("launchy", "~> 2.0.0")
 
     s.require_path = "lib"
