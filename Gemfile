@@ -1,7 +1,7 @@
 source :rubygems
 
 gem 'addressable', '>= 2.2.3'
-gem 'faraday', '~> 0.7.0'
+gem 'faraday', '~> 0.8.1'
 gem 'multi_json', '>= 1.3.0'
 gem 'jwt', '>= 0.1.4'
 gem 'extlib', '>= 0.9.15'
