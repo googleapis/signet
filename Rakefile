@@ -5,14 +5,6 @@ $:.uniq!
 require 'rubygems'
 require 'rake'
 
-begin
-  require 'spec/rake/spectask'
-rescue LoadError
-  STDERR.puts "Please install rspec:"
-  STDERR.puts "sudo gem install rspec"
-  exit(1)
-end
-
 require File.join(File.dirname(__FILE__), 'lib/signet', 'version')
 
 PKG_DISPLAY_NAME   = 'Signet'
@@ -36,11 +28,11 @@ PKG_FILES = FileList[
     "[A-Z]*", "Rakefile"
 ].exclude(/database\.yml/).exclude(/[_\.]git$/)
 
-RCOV_ENABLED = !!(RUBY_PLATFORM != "java" && RUBY_VERSION =~ /^1\.8/)
+RCOV_ENABLED = !!(RUBY_PLATFORM != 'java' && RUBY_VERSION =~ /^1\.8/)
 if RCOV_ENABLED
-  task :default => "spec:verify"
+  task :default => 'spec:rcov'
 else
-  task :default => "spec"
+  task :default => 'spec'
 end
 
 WINDOWS = (RUBY_PLATFORM =~ /mswin|win32|mingw|bccwin|cygwin/) rescue false
