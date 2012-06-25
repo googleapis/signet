@@ -12,6 +12,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+spec_dir = File.expand_path(File.join(File.dirname(__FILE__), "../../.."))
+$:.unshift(spec_dir)
+$:.uniq!
+
 require 'spec_helper'
 
 require 'signet/oauth_1/client'
@@ -203,7 +207,7 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
     @client.token_credential_secret = 'Ew3YHAY4bcBryiOUvbdHGa57'
     response = @client.fetch_protected_resource(
       :connection => connection,
-      :request => Faraday::Request.create(:get) do |req|
+      :request => Faraday.default_connection.build_request(:get) do |req|
         req.url(
           'http://www-opensocial.googleusercontent.com/api/people/@me/@self'
         )

@@ -12,11 +12,17 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+spec_dir = File.expand_path(File.join(File.dirname(__FILE__), "../.."))
+$:.unshift(spec_dir)
+$:.uniq!
+
 require 'spec_helper'
 
 require 'signet/oauth_1/client'
 require 'addressable/uri'
 require 'stringio'
+
+CONN = Faraday.default_connection
 
 def merge_body(chunked_body)
   if chunked_body == nil
@@ -518,13 +524,11 @@ describe Signet::OAuth1::Client, 'configured' do
 
   it 'should not raise an error if a request is ' +
       'provided without a connection' do
-    (lambda do
-      @client.generate_authenticated_request(
-        :request => Faraday::Request.new(:get) do |req|
-          req.url('http://www.example.com/')
-        end
-      )
-    end).should_not raise_error(ArgumentError)
+    request = @client.generate_authenticated_request(
+      :request => CONN.build_request(:get) do |req|
+        req.url('http://www.example.com/')
+      end
+    )
   end
 
   it 'should raise an error if no URI is provided' do
@@ -633,7 +637,9 @@ describe Signet::OAuth1::Client, 'configured' do
       )
       signed_request.method.should == :get
       signed_request.path.should ===
-        'https://photos.example.net/photos?file=vacation.jpg&size=original'
+        'https://photos.example.net/photos'
+      signed_request.params.should ==
+        {"file"=>"vacation.jpg", "size"=>"original"}
       authorization_header = signed_request.headers['Authorization']
       signed_request.body.should == ''
       parameters = ::Signet::OAuth1.parse_authorization_header(
@@ -696,9 +702,13 @@ describe Signet::OAuth1::Client, 'configured' do
     it 'should correctly get the protected resource' do
       # Repeat this because signatures change from test to test
       10.times do
-        original_request = Faraday::Request.create(:get) do |req|
-          req.url(Addressable::URI.parse('https://photos.example.net/photos?file=vacation.jpg&size=original'))
-          req.headers = Faraday::Utils::Headers.new([['Host', 'photos.example.net']])
+        original_request = CONN.build_request(:get) do |req|
+          req.url(
+            'https://photos.example.net/photos?file=vacation.jpg&size=original'
+          )
+          req.headers = Faraday::Utils::Headers.new(
+            [['Host', 'photos.example.net']]
+          )
           req.body = ''
         end
 
@@ -711,7 +721,9 @@ describe Signet::OAuth1::Client, 'configured' do
 
         signed_request.method.should == :get
         signed_request.path.should ===
-          'https://photos.example.net/photos?file=vacation.jpg&size=original'
+          'https://photos.example.net/photos'
+        signed_request.params.should ===
+          {"file"=>"vacation.jpg", "size"=>"original"}
         authorization_header = signed_request.headers['Authorization']
         signed_request.body.should == ''
         parameters = ::Signet::OAuth1.parse_authorization_header(
@@ -734,8 +746,8 @@ describe Signet::OAuth1::Client, 'configured' do
     it 'should correctly post the protected resource' do
       # Repeat this because signatures change from test to test
       10.times do
-        original_request = Faraday::Request.create(:post) do |req|
-          req.url(Addressable::URI.parse('https://photos.example.net/photos'))
+        original_request = CONN.build_request(:post) do |req|
+          req.url('https://photos.example.net/photos')
           req.headers = Faraday::Utils::Headers.new([
             ['Host', 'photos.example.net'],
             ['Content-Type', 'application/x-www-form-urlencoded; charset=utf-8'],

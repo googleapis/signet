@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-gem 'faraday', '~> 0.7.0'
+gem 'faraday', '~> 0.8.1'
 require 'faraday'
 require 'faraday/utils'
 
@@ -538,7 +538,8 @@ module Signet
         options = {
           :signature_method => 'HMAC-SHA1',
           :additional_parameters => [],
-          :realm => nil
+          :realm => nil,
+          :connection => Faraday.default_connection
         }.merge(options)
         method = :post
         parameters = ::Signet::OAuth1.unsigned_temporary_credential_parameters(
@@ -565,8 +566,10 @@ module Signet
           headers << ['Content-Type', 'application/x-www-form-urlencoded']
           headers << ['Content-Length', '0']
         end
-        return Faraday::Request.create(method.to_s.downcase.to_sym) do |req|
-          req.url(Addressable::URI.parse(self.temporary_credential_uri.to_str))
+        return options[:connection].build_request(method.to_s.downcase.to_sym) do |req|
+          req.url(Addressable::URI.parse(
+            self.temporary_credential_uri.to_str
+          ).normalize.to_s)
           req.headers = Faraday::Utils::Headers.new(headers)
         end
       end
@@ -603,6 +606,7 @@ module Signet
         options[:connection] ||= Faraday.default_connection
         request = self.generate_temporary_credential_request(options)
         request_env = request.to_env(options[:connection])
+        request_env[:request] ||= request
         response = options[:connection].app.call(request_env)
         if response.status.to_i == 200
           return ::Signet::OAuth1.parse_form_encoded_credentials(response.body)
@@ -689,7 +693,8 @@ module Signet
         end
         options = {
           :signature_method => 'HMAC-SHA1',
-          :realm => nil
+          :realm => nil,
+          :connection => Faraday.default_connection
         }.merge(options)
         method = :post
         parameters = ::Signet::OAuth1.unsigned_token_credential_parameters(
@@ -718,8 +723,10 @@ module Signet
           headers << ['Content-Type', 'application/x-www-form-urlencoded']
           headers << ['Content-Length', '0']
         end
-        return Faraday::Request.create(method.to_s.downcase.to_sym) do |req|
-          req.url(Addressable::URI.parse(self.token_credential_uri.to_str))
+        return options[:connection].build_request(method.to_s.downcase.to_sym) do |req|
+          req.url(Addressable::URI.parse(
+            self.token_credential_uri.to_str
+          ).normalize.to_s)
           req.headers = Faraday::Utils::Headers.new(headers)
         end
       end
@@ -754,6 +761,7 @@ module Signet
         options[:connection] ||= Faraday.default_connection
         request = self.generate_token_credential_request(options)
         request_env = request.to_env(options[:connection])
+        request_env[:request] ||= request
         response = options[:connection].app.call(request_env)
         if response.status.to_i == 200
           return ::Signet::OAuth1.parse_form_encoded_credentials(response.body)
@@ -889,9 +897,8 @@ module Signet
             raise TypeError, "Expected String, got #{body.class}."
           end
           method = method.to_s.downcase.to_sym
-          
-          request = Faraday::Request.create(method) do |req|
-            req.url(Addressable::URI.parse(uri))
+          request = options[:connection].build_request(method) do |req|
+            req.url(Addressable::URI.parse(uri).normalize.to_s)
             req.headers = Faraday::Utils::Headers.new(headers)
             req.body = body
           end
@@ -978,6 +985,7 @@ module Signet
         options[:connection] ||= Faraday.default_connection
         request = self.generate_authenticated_request(options)
         request_env = request.to_env(options[:connection])
+        request_env[:request] ||= request
         response = options[:connection].app.call(request_env)
         if response.status.to_i == 401
           # When accessing a protected resource, we only want to raise an

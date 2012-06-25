@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-gem 'faraday', '~> 0.7.0'
+gem 'faraday', '~> 0.8.1'
 require 'faraday'
 require 'faraday/utils'
 
@@ -657,6 +657,7 @@ module Signet
           raise ArgumentError, 'Missing token endpoint URI.'
         end
 
+        options[:connection] ||= Faraday.default_connection
         method = 'POST'
         parameters = {"grant_type" => self.grant_type}
         case self.grant_type
@@ -682,8 +683,12 @@ module Signet
           ['Cache-Control', 'no-store'],
           ['Content-Type', 'application/x-www-form-urlencoded']
         ]
-        return Faraday::Request.create(method.to_s.downcase.to_sym) do |req|
-          req.url(Addressable::URI.parse(self.token_credential_uri))
+        return options[:connection].build_request(
+          method.to_s.downcase.to_sym
+        ) do |req|
+          req.url(Addressable::URI.parse(
+            self.token_credential_uri
+          ).normalize.to_s)
           req.headers = Faraday::Utils::Headers.new(headers)
           req.body = Addressable::URI.form_encode(parameters)
         end
@@ -693,6 +698,7 @@ module Signet
         options[:connection] ||= Faraday.default_connection
         request = self.generate_access_token_request(options)
         request_env = request.to_env(options[:connection])
+        request_env[:request] ||= request
         response = options[:connection].app.call(request_env)
         if response.status.to_i == 200
           return ::Signet::OAuth2.parse_json_credentials(response.body)
@@ -756,6 +762,7 @@ module Signet
         options = {
           :realm => nil
         }.merge(options)
+
         if options[:request].kind_of?(Faraday::Request)
           request = options[:request]
         else
@@ -781,8 +788,8 @@ module Signet
             end
           end
           method = method.to_s.downcase.to_sym
-          request = Faraday::Request.create(method.to_s.downcase.to_sym) do |req|
-            req.url(Addressable::URI.parse(uri))
+          request = options[:connection].build_request(method.to_s.downcase.to_sym) do |req|
+            req.url(Addressable::URI.parse(uri).normalize.to_s)
             req.headers = Faraday::Utils::Headers.new(headers)
             req.body = body
           end
@@ -840,6 +847,7 @@ module Signet
         options[:connection] ||= Faraday.default_connection
         request = self.generate_authenticated_request(options)
         request_env = request.to_env(options[:connection])
+        request_env[:request] ||= request
         response = options[:connection].app.call(request_env)
         if response.status.to_i == 401
           # When accessing a protected resource, we only want to raise an

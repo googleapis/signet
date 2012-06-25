@@ -12,6 +12,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+spec_dir = File.expand_path(File.join(File.dirname(__FILE__), "../.."))
+$:.unshift(spec_dir)
+$:.uniq!
+
 require 'spec_helper'
 
 require 'signet/oauth_2/client'
@@ -19,6 +23,8 @@ require 'openssl'
 
 gem 'jwt', '~> 0.1.4'
 require 'jwt'
+
+CONN = Faraday.default_connection
 
 describe Signet::OAuth2::Client, 'unconfigured' do
   before do
@@ -429,7 +435,7 @@ JSON
     request = @client.generate_authenticated_request(
       :connection => connection,
       :realm => 'Example',
-      :request => Faraday::Request.create(:get) do |req|
+      :request => CONN.build_request(:get) do |req|
         req.url('https://www.googleapis.com/oauth2/v1/userinfo?alt=json')
       end
     )
@@ -461,14 +467,12 @@ JSON
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     @client.access_token = '12345'
-    (lambda do
-      @client.generate_authenticated_request(
-        :realm => 'Example',
-        :request => Faraday::Request.create(:get) do |req|
-          req.url('https://www.googleapis.com/oauth2/v1/userinfo?alt=json')
-        end
-      )
-    end).should_not raise_error
+    request = @client.generate_authenticated_request(
+      :realm => 'Example',
+      :request => CONN.build_request(:get) do |req|
+        req.url('https://www.googleapis.com/oauth2/v1/userinfo?alt=json')
+      end
+    )
   end
 
   it 'should raise an error if not enough information ' +
