@@ -22,7 +22,7 @@ require 'signet/oauth_1/client'
 require 'addressable/uri'
 require 'stringio'
 
-CONN = Faraday.default_connection
+conn = Faraday.default_connection
 
 def merge_body(chunked_body)
   if chunked_body == nil
@@ -525,7 +525,7 @@ describe Signet::OAuth1::Client, 'configured' do
   it 'should not raise an error if a request is ' +
       'provided without a connection' do
     request = @client.generate_authenticated_request(
-      :request => CONN.build_request(:get) do |req|
+      :request => conn.build_request(:get) do |req|
         req.url('http://www.example.com/')
       end
     )
@@ -702,7 +702,7 @@ describe Signet::OAuth1::Client, 'configured' do
     it 'should correctly get the protected resource' do
       # Repeat this because signatures change from test to test
       10.times do
-        original_request = CONN.build_request(:get) do |req|
+        original_request = conn.build_request(:get) do |req|
           req.url(
             'https://photos.example.net/photos?file=vacation.jpg&size=original'
           )
@@ -746,7 +746,7 @@ describe Signet::OAuth1::Client, 'configured' do
     it 'should correctly post the protected resource' do
       # Repeat this because signatures change from test to test
       10.times do
-        original_request = CONN.build_request(:post) do |req|
+        original_request = conn.build_request(:post) do |req|
           req.url('https://photos.example.net/photos')
           req.headers = Faraday::Utils::Headers.new([
             ['Host', 'photos.example.net'],

@@ -24,7 +24,7 @@ require 'openssl'
 gem 'jwt', '~> 0.1.4'
 require 'jwt'
 
-CONN = Faraday.default_connection
+conn = Faraday.default_connection
 
 describe Signet::OAuth2::Client, 'unconfigured' do
   before do
@@ -435,7 +435,7 @@ JSON
     request = @client.generate_authenticated_request(
       :connection => connection,
       :realm => 'Example',
-      :request => CONN.build_request(:get) do |req|
+      :request => conn.build_request(:get) do |req|
         req.url('https://www.googleapis.com/oauth2/v1/userinfo?alt=json')
       end
     )
@@ -469,7 +469,7 @@ JSON
     @client.access_token = '12345'
     request = @client.generate_authenticated_request(
       :realm => 'Example',
-      :request => CONN.build_request(:get) do |req|
+      :request => conn.build_request(:get) do |req|
         req.url('https://www.googleapis.com/oauth2/v1/userinfo?alt=json')
       end
     )
