@@ -5,7 +5,7 @@ rvm:
   - 1.9.3
   - jruby
   - ree
-script: "bundle exec rake"
+script: "bundle exec rake spec:normal"
 before_install:
  - sudo apt-get update
  - sudo apt-get install idn

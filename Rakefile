@@ -32,7 +32,7 @@ RCOV_ENABLED = !!(RUBY_PLATFORM != 'java' && RUBY_VERSION =~ /^1\.8/)
 if RCOV_ENABLED
   task :default => 'spec:rcov'
 else
-  task :default => 'spec'
+  task :default => 'spec:normal'
 end
 
 WINDOWS = (RUBY_PLATFORM =~ /mswin|win32|mingw|bccwin|cygwin/) rescue false
