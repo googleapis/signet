@@ -1,26 +1,20 @@
-require 'rake'
+require 'rake/clean'
 
-begin
-  require 'yard'
-  require 'yard/rake/yardoc_task'
+CLOBBER.include('doc')
 
-  namespace :doc do
-    desc 'Generate Yardoc documentation'
-    YARD::Rake::YardocTask.new do |yardoc|
-      yardoc.name = 'yard'
-      yardoc.options = ['--verbose', '--markup', 'markdown']
-      yardoc.files = [
-        'lib/**/*.rb', 'ext/**/*.c', 'README.md', 'CHANGELOG.md', 'LICENSE'
-      ]
-    end
+require 'yard'
+require 'yard/rake/yardoc_task'
+
+namespace :doc do
+  desc 'Generate Yardoc documentation'
+  YARD::Rake::YardocTask.new do |yardoc|
+    yardoc.name = 'yard'
+    yardoc.options = ['--verbose', '--markup', 'markdown']
+    yardoc.files = [
+      'lib/**/*.rb', 'ext/**/*.c', 'README.md', 'CHANGELOG.md', 'LICENSE'
+    ]
   end
-
-  task 'clobber' => ['doc:clobber_yard']
-
-  desc 'Alias to doc:yard'
-  task 'doc' => 'doc:yard'
-rescue LoadError
-  # If yard isn't available, it's not the end of the world
-  desc 'Alias to doc:rdoc'
-  task 'doc' => 'doc:rdoc'
 end
+
+desc 'Alias to doc:yard'
+task 'doc' => 'doc:yard'
