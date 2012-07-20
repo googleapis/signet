@@ -6,9 +6,6 @@ rvm:
   - jruby
   - ree
 script: "bundle exec rake spec:normal"
-before_install:
- - sudo apt-get update
- - sudo apt-get install idn
 notifications:
   email:
     recipients:
