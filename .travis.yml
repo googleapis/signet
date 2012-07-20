@@ -6,6 +6,7 @@ rvm:
   - jruby
   - ree
 script: "bundle exec rake spec:normal"
+jdk: openjdk7
 notifications:
   email:
     recipients:
