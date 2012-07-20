@@ -21,14 +21,14 @@ namespace :gem do
     s.extra_rdoc_files = %w( README.md )
     s.rdoc_options.concat ["--main",  "README.md"]
 
-    s.add_runtime_dependency("addressable", "~> 2.2.3")
+    s.add_runtime_dependency("addressable", ">= 2.2.3")
     s.add_runtime_dependency("faraday", "~> 0.8.1")
     s.add_runtime_dependency("multi_json", ">= 1.0.0")
-    s.add_runtime_dependency("jwt", ">= 0.1.4")
+    s.add_runtime_dependency("jwt", ">= 0.1.5")
 
-    s.add_development_dependency("rake", "~> 0.8.3")
-    s.add_development_dependency("rspec", "~> 2.11.0")
-    s.add_development_dependency("launchy", "~> 2.0.0")
+    s.add_development_dependency("rake", ">= 0.9.0")
+    s.add_development_dependency("rspec", ">= 2.11.0")
+    s.add_development_dependency("launchy", ">= 2.0.0")
 
     s.require_path = "lib"
   end
