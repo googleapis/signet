@@ -1,3 +1,7 @@
+# 0.3.5
+
+* Updated Faraday dependency
+
 # 0.3.4
 
 * Attempts to auto-detect CA cert location
