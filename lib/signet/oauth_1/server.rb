@@ -471,7 +471,7 @@ module Signet
           post_parameters.each {|param| param[1] = "" if param[1].nil?}
           # If the auth header doesn't have the same params as the body, it
           # can't have been signed correctly(5849#3.4.1.3)
-          unless(post_parameters == auth_hash.reject{|k,v| k.index('oauth_')}.to_a)
+          unless(post_parameters.sort == auth_hash.reject{|k,v| k.index('oauth_')}.to_a.sort)
             raise MalformedAuthorizationError.new(
               'Request is of type application/x-www-form-urlencoded ' +
               'but Authentication header did not include form values'
