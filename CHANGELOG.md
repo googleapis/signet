@@ -1,5 +1,6 @@
-# 0.3.5
+# 0.4.0
 
+* Added OAuth 1 server implementation
 * Updated Faraday dependency
 
 # 0.3.4
