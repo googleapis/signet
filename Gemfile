@@ -8,9 +8,7 @@ gem 'extlib', '>= 0.9.15'
 gem 'jruby-openssl', :platforms => :jruby
 
 group :development do
-  # Temporary measure to avoid overly restrictive dependency on Addressable
-  # introduced in Launchy 2.0.4.
-  gem 'launchy', '>= 2.0.0', '<= 2.0.3'
+  gem 'launchy', '>= 2.1.1'
   gem 'yard'
   gem 'redcarpet'
 end
