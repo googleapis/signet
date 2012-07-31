@@ -17,10 +17,10 @@ RELEASE_NAME       = "REL #{PKG_VERSION}"
 PKG_AUTHOR         = "Bob Aman"
 PKG_AUTHOR_EMAIL   = "bobaman@google.com"
 PKG_HOMEPAGE       = "http://code.google.com/p/oauth-signet/"
-PKG_SUMMARY        = "Package Summary"
 PKG_DESCRIPTION    = <<-TEXT
 Signet is an OAuth 1.0 / OAuth 2.0 implementation.
 TEXT
+PKG_SUMMARY        = PKG_DESCRIPTION
 
 PKG_FILES = FileList[
     "lib/**/*", "spec/**/*", "vendor/**/*",
