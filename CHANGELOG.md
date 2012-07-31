@@ -1,3 +1,7 @@
+# 0.4.1
+
+* Updated Launchy dependency
+
 # 0.4.0
 
 * Added OAuth 1 server implementation
