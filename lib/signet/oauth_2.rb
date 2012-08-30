@@ -77,7 +77,7 @@ module Signet #:nodoc:
       if !body.kind_of?(String)
         raise TypeError, "Expected String, got #{body.class}."
       end
-      return MultiJson.decode(body)
+      return MultiJson.load(body)
     end
 
     ##

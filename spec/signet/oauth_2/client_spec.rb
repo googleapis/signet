@@ -309,7 +309,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.redirect_uri = 'https://www.example.com/'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.encode({
+        [200, {}, MultiJson.dump({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600'
@@ -335,7 +335,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.password = 'incognito'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.encode({
+        [200, {}, MultiJson.dump({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600'
@@ -360,7 +360,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.refresh_token = '54321'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.encode({
+        [200, {}, MultiJson.dump({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600'
@@ -546,7 +546,7 @@ JSON
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.encode({
+        [200, {}, MultiJson.dump({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600',
@@ -587,7 +587,7 @@ JSON
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.encode({
+        [200, {}, MultiJson.dump({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600',
@@ -622,7 +622,7 @@ JSON
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.encode({
+        [200, {}, MultiJson.dump({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600',
@@ -655,7 +655,7 @@ JSON
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.encode({
+        [200, {}, MultiJson.dump({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600',
