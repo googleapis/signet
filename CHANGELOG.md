@@ -1,3 +1,7 @@
+# 0.4.3
+
+* Added method to clear credentials
+
 # 0.4.2
 
 * Backwards compatibility for MultiJson

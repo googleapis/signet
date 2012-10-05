@@ -605,6 +605,19 @@ module Signet
       def expired?
         return self.expires_at != nil && Time.now >= self.expires_at
       end
+      
+      ##
+      # Removes all credentials from the client.
+      def clear_credentials!
+        @access_token = nil
+        @refresh_token = nil
+        @id_token = nil
+        @username = nil
+        @password = nil
+        @code = nil
+        @issued_at = nil
+        @expires_in = nil
+      end
 
       ##
       # Returns the inferred grant type, based on the current state of the
