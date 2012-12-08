@@ -139,6 +139,91 @@ describe Signet::OAuth2::Client, 'unconfigured' do
   end
 end
 
+describe Signet::OAuth2::Client, 'configured for assertions profile' do
+  
+  describe 'when using RSA keys' do
+    before do
+      @key = OpenSSL::PKey::RSA.new 2048
+      @client = Signet::OAuth2::Client.new(
+        :token_credential_uri =>
+          'https://accounts.google.com/o/oauth2/token',
+        :scope => 'https://www.googleapis.com/auth/userinfo.profile',
+        :issuer => 'app@example.com',
+        :audience => 'https://accounts.google.com/o/oauth2/token',
+        :signing_key => @key
+      )
+    end
+
+    it 'should generate valid JWTs' do
+      jwt = @client.to_jwt
+      jwt.should_not == nil
+
+      claim = JWT.decode(jwt, @key.public_key, true)
+      claim["iss"].should == 'app@example.com'
+      claim["scope"].should == 'https://www.googleapis.com/auth/userinfo.profile'
+      claim["aud"].should == 'https://accounts.google.com/o/oauth2/token'
+    end
+
+    it 'should generate valid JWTs for impersonation' do
+      @client.person = 'user@example.com'
+      jwt = @client.to_jwt
+      jwt.should_not == nil
+
+      claim = JWT.decode(jwt, @key.public_key, true)
+      claim["iss"].should == 'app@example.com'
+      claim["prn"].should == 'user@example.com'
+      claim["scope"].should == 'https://www.googleapis.com/auth/userinfo.profile'
+      claim["aud"].should == 'https://accounts.google.com/o/oauth2/token'
+    end
+
+    it 'should send valid access token request' do
+      stubs = Faraday::Adapter::Test::Stubs.new do |stub|
+        stub.post('/o/oauth2/token') do |env|
+          params = Addressable::URI.form_unencode(env[:body])
+          jwt = JWT.decode(params.assoc("assertion").last, @key.public_key)
+          params.assoc("grant_type").should == ['grant_type','urn:ietf:params:oauth:grant-type:jwt-bearer']
+          [200, {}, '{
+            "access_token" : "1/abcdef1234567890",
+            "token_type" : "Bearer",
+            "expires_in" : 3600
+          }']
+        end
+      end
+      connection = Faraday.new(:url => 'https://www.google.com') do |builder|
+        builder.adapter(:test, stubs)
+      end
+
+      @client.fetch_access_token!(:connection => connection)
+      @client.access_token.should == "1/abcdef1234567890"
+      stubs.verify_stubbed_calls    
+    end
+  end
+    
+  describe 'when using shared secrets' do
+    before do
+      @key = 'my secret key'
+      @client = Signet::OAuth2::Client.new(
+        :token_credential_uri =>
+          'https://accounts.google.com/o/oauth2/token',
+        :scope => 'https://www.googleapis.com/auth/userinfo.profile',
+        :issuer => 'app@example.com',
+        :audience => 'https://accounts.google.com/o/oauth2/token',
+        :signing_key => @key
+      )
+    end
+
+    it 'should generate valid JWTs' do
+      jwt = @client.to_jwt
+      jwt.should_not == nil
+
+      claim = JWT.decode(jwt, @key, true)
+      claim["iss"].should == 'app@example.com'
+      claim["scope"].should == 'https://www.googleapis.com/auth/userinfo.profile'
+      claim["aud"].should == 'https://accounts.google.com/o/oauth2/token'
+    end
+  end
+end
+
 describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
   before do
     @client = Signet::OAuth2::Client.new(

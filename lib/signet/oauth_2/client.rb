@@ -58,6 +58,14 @@ module Signet
       #     The resource owner's username.
       #   - <code>:password</code> —
       #     The resource owner's password.
+      #   - <code>:issuer</code> —
+      #     Issuer ID when using assertion profile
+      #   - <code>:person</code> -
+      #     Target user for assertions
+      #   - <code>:expiry</code> -
+      #     Number of seconds assertions are valid for
+      #   - <code>:signing_key</code> —
+      #     Signing key when using assertion profile
       #   - <code>:refresh_token</code> —
       #     The refresh token associated with the access token
       #     to be refreshed.
@@ -116,6 +124,16 @@ module Signet
       #     The resource owner's username.
       #   - <code>:password</code> —
       #     The resource owner's password.
+      #   - <code>:issuer</code> —
+      #     Issuer ID when using assertion profile
+      #   - <code>:audience</code> —
+      #     Target audience for assertions
+      #   - <code>:person</code> -
+      #     Target user for assertions
+      #   - <code>:expiry</code> -
+      #     Number of seconds assertions are valid for
+      #   - <code>:signing_key</code> —
+      #     Signing key when using assertion profile
       #   - <code>:refresh_token</code> —
       #     The refresh token associated with the access token
       #     to be refreshed.
@@ -149,6 +167,11 @@ module Signet
         self.redirect_uri = options["redirect_uri"]
         self.username = options["username"]
         self.password = options["password"]
+        self.issuer = options["issuer"]
+        self.person = options["person"]
+        self.expiry = options["expiry"] || 60
+        self.audience = options["audience"]
+        self.signing_key = options["signing_key"]
         self.extension_parameters = options["extension_parameters"] || {}
         self.update_token!(options)
         return self
@@ -452,6 +475,109 @@ module Signet
       end
 
       ##
+      # Returns the issuer ID associated with this client.
+      # Used only by the assertion grant type.
+      #
+      # @return [String] Issuer id.
+      def issuer
+        return @issuer
+      end
+
+      ##
+      # Sets the issuer ID associated with this client.
+      # Used only by the assertion grant type.
+      #
+      # @param [String] new_issuer
+      #   Issuer ID (typical in email adddress form).
+      def issuer=(new_issuer)
+        @issuer = new_issuer
+      end
+
+      ##
+      # Returns the issuer ID associated with this client.
+      # Used only by the assertion grant type.
+      #
+      # @return [String] Target audience ID.
+      def audience
+        return @audience
+      end
+
+      ##
+      # Sets the target audience ID when issuing assertions.
+      # Used only by the assertion grant type.
+      #
+      # @param [String] new_issuer
+      #   Target audience ID
+      def audience=(new_audience)
+        @audience = new_audience
+      end
+
+      ##
+      # Returns the target resource owner for impersonation.
+      # Used only by the assertion grant type.
+      #
+      # @return [String] Target user for impersonation.
+      def person
+        return @person
+      end
+
+      ##
+      # Sets the target resource owner for impersonation.
+      # Used only by the assertion grant type.
+      #
+      # @param [String] new_person
+      #   Target user for impersonation
+      def person=(new_person)
+        @person = new_person
+      end
+      
+      ##
+      # Returns the number of seconds assertions are valid for
+      # Used only by the assertion grant type.
+      #
+      # @return [Fixnum] Assertion expiry, in seconds
+      def expiry
+        return @expiry
+      end
+
+      ##
+      # Sets the number of seconds assertions are valid for
+      # Used only by the assertion grant type.
+      #
+      # @param [String] new_expiry
+      #   Assertion expiry, in seconds
+      def expiry=(new_expiry)
+        @expiry = new_expiry
+      end
+      
+      
+      ##
+      # Returns the signing key associated with this client.
+      # Used only by the assertion grant type.
+      #
+      # @return [String,OpenSSL::PKey] Signing key
+      def signing_key
+        return @signing_key
+      end
+
+      ##
+      # Sets the signing key when issuing assertions.
+      # Used only by the assertion grant type.
+      #
+      # @param [String, OpenSSL::Pkey] new_key
+      #   Signing key. Either private key for RSA or string for HMAC algorithm
+      def signing_key=(new_key)
+        @signing_key = new_key
+      end
+      
+      ##
+      # Algorithm used for signing JWTs
+      # @return [String] Signing algorithm
+      def signing_algorithm
+        self.signing_key.is_a?(String) ? "HS256" : "RS256"
+      end
+      
+      ##
       # Returns the set of extension parameters used by the client.
       # Used only by extension access grant types.
       #
@@ -637,6 +763,8 @@ module Signet
             'refresh_token'
           elsif self.username && self.password
             'password'
+          elsif self.issuer && self.signing_key
+            'urn:ietf:params:oauth:grant-type:jwt-bearer'
           else
             # We don't have sufficient auth information, assume an out-of-band
             # authorization arrangement between the client and server, or an
@@ -656,6 +784,20 @@ module Signet
         end
       end
 
+      def to_jwt(options={})
+        now = Time.new        
+        skew = options[:skew] || 60
+        assertion = {
+          "iss" => self.issuer,
+          "scope" => self.scope.join(' '),
+          "aud" => self.audience,
+          "exp" => (now + self.expiry).to_i,
+          "iat" => (now - skew).to_i
+        }
+        assertion['prn'] = self.person unless self.person.nil?
+        JWT.encode(assertion, self.signing_key, self.signing_algorithm)
+      end
+      
       ##
       # Generates a request for token credentials.
       #
@@ -682,6 +824,8 @@ module Signet
           parameters['password'] = self.password
         when 'refresh_token'
           parameters['refresh_token'] = self.refresh_token
+        when 'urn:ietf:params:oauth:grant-type:jwt-bearer'
+          parameters['assertion'] = self.to_jwt(options)
         else
           if self.redirect_uri
             # Grant type was intended to be `authorization_code` because of
@@ -747,6 +891,12 @@ module Signet
         return token_hash
       end
 
+      ## 
+      # Refresh the access token, if possible
+      def refresh!
+        self.fetch_access_token!
+      end
+      
       ##
       # Generates an authenticated request for protected resources.
       #
