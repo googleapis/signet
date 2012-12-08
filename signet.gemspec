@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = "signet"
-  s.version = "0.4.3"
+  s.version = "0.4.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Bob Aman"]
-  s.date = "2012-10-05"
+  s.date = "2012-12-08"
   s.description = "Signet is an OAuth 1.0 / OAuth 2.0 implementation.\n"
   s.email = "bobaman@google.com"
   s.extra_rdoc_files = ["README.md"]
@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://code.google.com/p/oauth-signet/"
   s.rdoc_options = ["--main", "README.md"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.24"
+  s.rubygems_version = "1.8.10"
   s.summary = "Signet is an OAuth 1.0 / OAuth 2.0 implementation."
 
   if s.respond_to? :specification_version then

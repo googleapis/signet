@@ -1,3 +1,7 @@
+# 0.4.4
+
+* Add support for assertion profile
+
 # 0.4.3
 
 * Added method to clear credentials
