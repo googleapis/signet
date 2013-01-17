@@ -429,7 +429,8 @@ module Signet
       #   The redirect URI.
       def redirect_uri=(new_redirect_uri)
         new_redirect_uri = Addressable::URI.parse(new_redirect_uri)
-        if new_redirect_uri == nil || new_redirect_uri.absolute?
+        #TODO - Better solution to allow google postmessage flow. For now, make an exception to the spec. 
+        if new_redirect_uri == nil|| new_redirect_uri.absolute? || uri_is_postmessage?(new_redirect_uri)
           @redirect_uri = new_redirect_uri
         else
           raise ArgumentError, "Redirect URI must be an absolute URI."
@@ -732,6 +733,7 @@ module Signet
         return self.expires_at != nil && Time.now >= self.expires_at
       end
       
+      
       ##
       # Removes all credentials from the client.
       def clear_credentials!
@@ -744,6 +746,7 @@ module Signet
         @issued_at = nil
         @expires_in = nil
       end
+
 
       ##
       # Returns the inferred grant type, based on the current state of the
@@ -1026,6 +1029,16 @@ module Signet
           return response
         end
       end
+      
+      private
+      
+      ##
+      # Check if URI is Google's postmessage flow (not a valid redirect_uri by spec, but allowed)
+      # @private
+      def uri_is_postmessage?(uri)
+        return uri.to_s.casecmp('postmessage') == 0
+      end
+      
     end
   end
 end

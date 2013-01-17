@@ -71,7 +71,14 @@ describe Signet::OAuth2::Client, 'unconfigured' do
       @client = Signet::OAuth2::Client.new(:redirect_uri => '/relative/path')
     end).should raise_error(ArgumentError)
   end
-
+  
+  it 'should allow "postmessage" as a redirect URI (Google hack)' do
+    @client.authorization_uri = 'https://example.com/authorize'
+    @client.client_id = 's6BhdRkqt3'
+    @client.redirect_uri = 'postmessage'
+    @client.authorization_uri.query_values['redirect_uri'].should == 'postmessage'
+  end
+  
   it 'should have no authorization_uri' do
     @client.authorization_uri.should == nil
   end
