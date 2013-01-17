@@ -100,7 +100,7 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
       @client.token_credential_secret = '12345'
       @client.fetch_protected_resource(
         :uri =>
-          'http://www-opensocial.googleusercontent.com/api/people/@me/@self'
+          'https://www.google.com/m8/feeds/'
       )
     end).should raise_error(Signet::AuthorizationError)
   end
@@ -232,7 +232,7 @@ describe Signet::OAuth1::Client, 'configured for two-legged OAuth' do
     (lambda do
       @client.fetch_protected_resource(
         :uri =>
-          'http://www-opensocial.googleusercontent.com/api/people/@me/@self'
+          'https://www.google.com/m8/feeds/'
       )
     end).should raise_error(Signet::AuthorizationError)
   end
