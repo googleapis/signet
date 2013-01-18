@@ -126,7 +126,7 @@ module Signet
       ##
       #  Determine if the verifier is valid by calling the Proc in {#verifier}.
       #
-      # @param [String] Key provided to the {#verifier} Proc.
+      # @param [String] verifier Key provided to the {#verifier} Proc.
       # @return [Boolean] if the verifier Proc returns anything other than
       #   <code>nil</code> or <code>false</code>.
       def find_verifier(verifier)
