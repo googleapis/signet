@@ -10,8 +10,9 @@ gem 'jruby-openssl', :platforms => :jruby
 group :development do
   gem 'launchy', '>= 2.1.1'
   gem 'yard'
-  gem 'redcarpet'
+  gem 'kramdown'
 end
+
 
 group :test, :development do
   gem 'rake', '>= 0.9.0'
