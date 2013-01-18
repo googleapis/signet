@@ -1,3 +1,8 @@
+# 0.4.5
+
+* Minor documentation fixes
+* Allow postmessage as a valid redirect_uri in OAuth 2
+
 # 0.4.4
 
 * Add support for assertion profile
