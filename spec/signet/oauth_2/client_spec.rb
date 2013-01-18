@@ -172,6 +172,19 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
     end
 
     it 'should generate valid JWTs for impersonation' do
+      @client.principal = 'user@example.com'
+      jwt = @client.to_jwt
+      jwt.should_not == nil
+
+      claim = JWT.decode(jwt, @key.public_key, true)
+      claim["iss"].should == 'app@example.com'
+      claim["prn"].should == 'user@example.com'
+      claim["scope"].should == 'https://www.googleapis.com/auth/userinfo.profile'
+      claim["aud"].should == 'https://accounts.google.com/o/oauth2/token'
+    end
+
+
+    it 'should generate valid JWTs for impersonation using deprecated person attribute' do
       @client.person = 'user@example.com'
       jwt = @client.to_jwt
       jwt.should_not == nil

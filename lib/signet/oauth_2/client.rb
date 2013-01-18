@@ -532,8 +532,8 @@ module Signet
         @principal = new_person
       end
       
-      alias_method :princpal, :person
-      alias_method :principal=, :person=
+      alias_method :person, :principal
+      alias_method :person=, :principal=
       
       ##
       # Returns the number of seconds assertions are valid for
