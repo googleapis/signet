@@ -11,7 +11,8 @@ namespace :doc do
     yardoc.name = 'yard'
     yardoc.options = ['--verbose', '--markup', 'markdown']
     yardoc.files = [
-      'lib/**/*.rb', 'ext/**/*.c', 'README.md', 'CHANGELOG.md', 'LICENSE'
+      'lib/**/*.rb', 'ext/**/*.c', '-',
+      'README.md', 'CHANGELOG.md', 'LICENSE'
     ]
   end
 end

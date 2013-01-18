@@ -103,13 +103,12 @@ module Signet #:nodoc:
     end
 
     ##
-    # Generates a Basic Authorization header from a client identifier and a
-    # client password.
+    # Generates an authorization header for an access token
     #
-    # @param [String] client_id
-    #   The client identifier.
-    # @param [String] client_password
-    #   The client password.
+    # @param [String] access_token
+    #   The access token.
+    # @param [Hash] auth_params
+    #   Additonal parameters to be encoded in the header
     #
     # @return [String]
     #   The value for the HTTP Basic Authorization header.

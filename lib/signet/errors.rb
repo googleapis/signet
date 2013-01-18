@@ -43,16 +43,16 @@ module Signet
     #   A message describing the error.
     # @param [Hash] options
     #   The configuration parameters for the request.
-    #   - <code>:request</code> —
+    #   - <code>:request</code> -
     #     A Faraday::Request object.  Optional.
-    #   - <code>:response</code> —
+    #   - <code>:response</code> -
     #     A Faraday::Response object.  Optional.
-    #   - <code>:code</code> —
+    #   - <code>:code</code> -
     #     An error code.
-    #   - <code>:description</code> —
+    #   - <code>:description</code> -
     #     Human-readable text intended to be used to assist in resolving the
     #     error condition.
-    #   - <code>:uri</code> —
+    #   - <code>:uri</code> -
     #     A URI identifying a human-readable web page with additional
     #     information about the error, indended for the resource owner.
     def initialize(message, options={})

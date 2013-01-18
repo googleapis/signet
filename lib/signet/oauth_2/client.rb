@@ -33,47 +33,47 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the client.
-      #   - <code>:authorization_uri</code> —
+      #   - <code>:authorization_uri</code> -
       #     The authorization server's HTTP endpoint capable of
       #     authenticating the end-user and obtaining authorization.
-      #   - <code>:token_credential_uri</code> —
+      #   - <code>:token_credential_uri</code> -
       #     The authorization server's HTTP endpoint capable of issuing
       #     tokens and refreshing expired tokens.
-      #   - <code>:client_id</code> —
+      #   - <code>:client_id</code> -
       #     A unique identifier issued to the client to identify itself to the
       #     authorization server.
-      #   - <code>:client_secret</code> —
+      #   - <code>:client_secret</code> -
       #     A shared symmetric secret issued by the authorization server,
       #     which is used to authenticate the client.
-      #   - <code>:scope</code> —
+      #   - <code>:scope</code> -
       #     The scope of the access request, expressed either as an Array
       #     or as a space-delimited String.
-      #   - <code>:state</code> —
+      #   - <code>:state</code> -
       #     An arbitrary string designed to allow the client to maintain state.
-      #   - <code>:code</code> —
+      #   - <code>:code</code> -
       #     The authorization code received from the authorization server.
-      #   - <code>:redirect_uri</code> —
+      #   - <code>:redirect_uri</code> -
       #     The redirection URI used in the initial request.
-      #   - <code>:username</code> —
+      #   - <code>:username</code> -
       #     The resource owner's username.
-      #   - <code>:password</code> —
+      #   - <code>:password</code> -
       #     The resource owner's password.
-      #   - <code>:issuer</code> —
+      #   - <code>:issuer</code> -
       #     Issuer ID when using assertion profile
       #   - <code>:person</code> -
       #     Target user for assertions
       #   - <code>:expiry</code> -
       #     Number of seconds assertions are valid for
-      #   - <code>:signing_key</code> —
+      #   - <code>:signing_key</code> -
       #     Signing key when using assertion profile
-      #   - <code>:refresh_token</code> —
+      #   - <code>:refresh_token</code> -
       #     The refresh token associated with the access token
       #     to be refreshed.
-      #   - <code>:access_token</code> —
+      #   - <code>:access_token</code> -
       #     The current access token for this client.
-      #   - <code>:id_token</code> —
+      #   - <code>:id_token</code> -
       #     The current ID token for this client.
-      #   - <code>:extension_parameters</code> —
+      #   - <code>:extension_parameters</code> -
       #     When using an extension grant type, this the set of parameters used
       #     by that extension.
       #
@@ -99,49 +99,49 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the client.
-      #   - <code>:authorization_uri</code> —
+      #   - <code>:authorization_uri</code> -
       #     The authorization server's HTTP endpoint capable of
       #     authenticating the end-user and obtaining authorization.
-      #   - <code>:token_credential_uri</code> —
+      #   - <code>:token_credential_uri</code> -
       #     The authorization server's HTTP endpoint capable of issuing
       #     tokens and refreshing expired tokens.
-      #   - <code>:client_id</code> —
+      #   - <code>:client_id</code> -
       #     A unique identifier issued to the client to identify itself to the
       #     authorization server.
-      #   - <code>:client_secret</code> —
+      #   - <code>:client_secret</code> -
       #     A shared symmetric secret issued by the authorization server,
       #     which is used to authenticate the client.
-      #   - <code>:scope</code> —
+      #   - <code>:scope</code> -
       #     The scope of the access request, expressed either as an Array
       #     or as a space-delimited String.
-      #   - <code>:state</code> —
+      #   - <code>:state</code> -
       #     An arbitrary string designed to allow the client to maintain state.
-      #   - <code>:code</code> —
+      #   - <code>:code</code> -
       #     The authorization code received from the authorization server.
-      #   - <code>:redirect_uri</code> —
+      #   - <code>:redirect_uri</code> -
       #     The redirection URI used in the initial request.
-      #   - <code>:username</code> —
+      #   - <code>:username</code> -
       #     The resource owner's username.
-      #   - <code>:password</code> —
+      #   - <code>:password</code> -
       #     The resource owner's password.
-      #   - <code>:issuer</code> —
+      #   - <code>:issuer</code> -
       #     Issuer ID when using assertion profile
-      #   - <code>:audience</code> —
+      #   - <code>:audience</code> -
       #     Target audience for assertions
       #   - <code>:person</code> -
       #     Target user for assertions
       #   - <code>:expiry</code> -
       #     Number of seconds assertions are valid for
-      #   - <code>:signing_key</code> —
+      #   - <code>:signing_key</code> -
       #     Signing key when using assertion profile
-      #   - <code>:refresh_token</code> —
+      #   - <code>:refresh_token</code> -
       #     The refresh token associated with the access token
       #     to be refreshed.
-      #   - <code>:access_token</code> —
+      #   - <code>:access_token</code> -
       #     The current access token for this client.
-      #   - <code>:id_token</code> —
+      #   - <code>:id_token</code> -
       #     The current ID token for this client.
-      #   - <code>:extension_parameters</code> —
+      #   - <code>:extension_parameters</code> -
       #     When using an extension grant type, this the set of parameters used
       #     by that extension.
       #
@@ -182,16 +182,16 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters related to the token.
-      #   - <code>:refresh_token</code> —
+      #   - <code>:refresh_token</code> -
       #     The refresh token associated with the access token
       #     to be refreshed.
-      #   - <code>:access_token</code> —
+      #   - <code>:access_token</code> -
       #     The current access token for this client.
-      #   - <code>:id_token</code> —
+      #   - <code>:id_token</code> -
       #     The current ID token for this client.
-      #   - <code>:expires_in</code> —
+      #   - <code>:expires_in</code> -
       #     The time in seconds until access token expiration.
-      #   - <code>:issued_at</code> —
+      #   - <code>:issued_at</code> -
       #     The timestamp that the token was issued at.
       #
       # @example
@@ -507,7 +507,7 @@ module Signet
       # Sets the target audience ID when issuing assertions.
       # Used only by the assertion grant type.
       #
-      # @param [String] new_issuer
+      # @param [String] new_audience
       #   Target audience ID
       def audience=(new_audience)
         @audience = new_audience
@@ -518,8 +518,8 @@ module Signet
       # Used only by the assertion grant type.
       #
       # @return [String] Target user for impersonation.
-      def person
-        return @person
+      def principal
+        return @principal
       end
 
       ##
@@ -528,9 +528,12 @@ module Signet
       #
       # @param [String] new_person
       #   Target user for impersonation
-      def person=(new_person)
-        @person = new_person
+      def principal=(new_person)
+        @principal = new_person
       end
+      
+      alias_method :princpal, :person
+      alias_method :principal=, :person=
       
       ##
       # Returns the number of seconds assertions are valid for
@@ -806,7 +809,7 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:code</code> —
+      #   - <code>:code</code> -
       #     The authorization code.
       #
       # @return [Array] The request object.
@@ -905,19 +908,19 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:request</code> —
+      #   - <code>:request</code> -
       #     A pre-constructed request.  An OAuth 2 Authorization header
       #     will be added to it, as well as an explicit Cache-Control
       #     `no-store` directive.
-      #   - <code>:method</code> —
+      #   - <code>:method</code> -
       #     The HTTP method for the request.  Defaults to 'GET'.
-      #   - <code>:uri</code> —
+      #   - <code>:uri</code> -
       #     The URI for the request.
-      #   - <code>:headers</code> —
+      #   - <code>:headers</code> -
       #     The HTTP headers for the request.
-      #   - <code>:body</code> —
+      #   - <code>:body</code> -
       #     The HTTP body for the request.
-      #   - <code>:realm</code> —
+      #   - <code>:realm</code> -
       #     The Authorization realm.  See RFC 2617.
       #
       # @return [Faraday::Request] The request object.
@@ -974,21 +977,21 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:request</code> —
+      #   - <code>:request</code> -
       #     A pre-constructed request.  An OAuth 2 Authorization header
       #     will be added to it, as well as an explicit Cache-Control
       #     `no-store` directive.
-      #   - <code>:method</code> —
+      #   - <code>:method</code> -
       #     The HTTP method for the request.  Defaults to 'GET'.
-      #   - <code>:uri</code> —
+      #   - <code>:uri</code> -
       #     The URI for the request.
-      #   - <code>:headers</code> —
+      #   - <code>:headers</code> -
       #     The HTTP headers for the request.
-      #   - <code>:body</code> —
+      #   - <code>:body</code> -
       #     The HTTP body for the request.
-      #   - <code>:realm</code> —
+      #   - <code>:realm</code> -
       #     The Authorization realm.  See RFC 2617.
-      #   - <code>:connection</code> —
+      #   - <code>:connection</code> -
       #     The HTTP connection to use.
       #     Must be of type <code>Faraday::Connection</code>.
       #

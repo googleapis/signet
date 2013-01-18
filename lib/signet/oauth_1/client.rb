@@ -31,17 +31,17 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the client.
-      #   - <code>:temporary_credential_uri</code> —
+      #   - <code>:temporary_credential_uri</code> -
       #     The OAuth temporary credentials URI.
-      #   - <code>:authorization_uri</code> —
+      #   - <code>:authorization_uri</code> -
       #     The OAuth authorization URI.
-      #   - <code>:token_credential_uri</code> —
+      #   - <code>:token_credential_uri</code> -
       #     The OAuth token credentials URI.
-      #   - <code>:client_credential_key</code> —
+      #   - <code>:client_credential_key</code> -
       #     The OAuth client credential key.
-      #   - <code>:client_credential_secret</code> —
+      #   - <code>:client_credential_secret</code> -
       #     The OAuth client credential secret.
-      #   - <code>:callback</code> —  The OAuth callback.  Defaults to 'oob'.
+      #   - <code>:callback</code> -  The OAuth callback.  Defaults to 'oob'.
       #
       # @example
       #   client = Signet::OAuth1::Client.new(
@@ -515,11 +515,11 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:signature_method</code> —
+      #   - <code>:signature_method</code> -
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-      #   - <code>:additional_parameters</code> —
+      #   - <code>:additional_parameters</code> -
       #     Non-standard additional parameters.
-      #   - <code>:realm</code> —
+      #   - <code>:realm</code> -
       #     The Authorization realm.  See RFC 2617.
       #
       # @return [Array] The request object.
@@ -584,13 +584,13 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:signature_method</code> —
+      #   - <code>:signature_method</code> -
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-      #   - <code>:additional_parameters</code> —
+      #   - <code>:additional_parameters</code> -
       #     Non-standard additional parameters.
-      #   - <code>:realm</code> —
+      #   - <code>:realm</code> -
       #     The Authorization realm.  See RFC 2617.
-      #   - <code>:connection</code> —
+      #   - <code>:connection</code> -
       #     The HTTP connection to use.
       #     Must be of type <code>Faraday::Connection</code>.
       #
@@ -639,13 +639,13 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:signature_method</code> —
+      #   - <code>:signature_method</code> -
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-      #   - <code>:additional_parameters</code> —
+      #   - <code>:additional_parameters</code> -
       #     Non-standard additional parameters.
-      #   - <code>:realm</code> —
+      #   - <code>:realm</code> -
       #     The Authorization realm.  See RFC 2617.
-      #   - <code>:connection</code> —
+      #   - <code>:connection</code> -
       #     The HTTP connection to use.
       #     Must be of type <code>Faraday::Connection</code>.
       #
@@ -669,11 +669,11 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:verifier</code> —
+      #   - <code>:verifier</code> -
       #     The OAuth verifier provided by the server.  Required.
-      #   - <code>:signature_method</code> —
+      #   - <code>:signature_method</code> -
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-      #   - <code>:realm</code> —
+      #   - <code>:realm</code> -
       #     The Authorization realm.  See RFC 2617.
       #
       # @return [Array] The request object.
@@ -741,13 +741,13 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:verifier</code> —
+      #   - <code>:verifier</code> -
       #     The OAuth verifier provided by the server.  Required.
-      #   - <code>:signature_method</code> —
+      #   - <code>:signature_method</code> -
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-      #   - <code>:realm</code> —
+      #   - <code>:realm</code> -
       #     The Authorization realm.  See RFC 2617.
-      #   - <code>:connection</code> —
+      #   - <code>:connection</code> -
       #     The HTTP connection to use.
       #     Must be of type <code>Faraday::Connection</code>.
       #
@@ -794,13 +794,13 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:signature_method</code> —
+      #   - <code>:signature_method</code> -
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-      #   - <code>:additional_parameters</code> —
+      #   - <code>:additional_parameters</code> -
       #     Non-standard additional parameters.
-      #   - <code>:realm</code> —
+      #   - <code>:realm</code> -
       #     The Authorization realm.  See RFC 2617.
-      #   - <code>:connection</code> —
+      #   - <code>:connection</code> -
       #     The HTTP connection to use.
       #     Must be of type <code>Faraday::Connection</code>.
       #
@@ -822,19 +822,19 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:request</code> —
+      #   - <code>:request</code> -
       #     A pre-constructed request to sign.
-      #   - <code>:method</code> —
+      #   - <code>:method</code> -
       #     The HTTP method for the request.  Defaults to :get.
-      #   - <code>:uri</code> —
+      #   - <code>:uri</code> -
       #     The URI for the request.
-      #   - <code>:headers</code> —
+      #   - <code>:headers</code> -
       #     The HTTP headers for the request.
-      #   - <code>:body</code> —
+      #   - <code>:body</code> -
       #     The HTTP body for the request.
-      #   - <code>:signature_method</code> —
+      #   - <code>:signature_method</code> -
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-      #   - <code>:realm</code> —
+      #   - <code>:realm</code> -
       #     The Authorization realm.  See RFC 2617.
       #
       # @return [Array] The request object.
@@ -947,21 +947,21 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the request.
-      #   - <code>:request</code> —
+      #   - <code>:request</code> -
       #     A pre-constructed request to sign.
-      #   - <code>:method</code> —
+      #   - <code>:method</code> -
       #     The HTTP method for the request.  Defaults to :get.
-      #   - <code>:uri</code> —
+      #   - <code>:uri</code> -
       #     The URI for the request.
-      #   - <code>:headers</code> —
+      #   - <code>:headers</code> -
       #     The HTTP headers for the request.
-      #   - <code>:body</code> —
+      #   - <code>:body</code> -
       #     The HTTP body for the request.
-      #   - <code>:signature_method</code> —
+      #   - <code>:signature_method</code> -
       #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-      #   - <code>:realm</code> —
+      #   - <code>:realm</code> -
       #     The Authorization realm.  See RFC 2617.
-      #   - <code>:connection</code> —
+      #   - <code>:connection</code> -
       #     The HTTP connection to use.
       #     Must be of type <code>Faraday::Connection</code>.
       #

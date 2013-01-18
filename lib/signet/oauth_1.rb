@@ -169,7 +169,7 @@ module Signet #:nodoc:
     # '&' characters.
     #
     # @param [String] method The HTTP method.
-    # @param [Addressable::URI, String, #to_str] The URI.
+    # @param [Addressable::URI, String, #to_str] uri The URI.
     # @param [Enumerable] parameters The OAuth parameter list.
     #
     # @return [String] The signature base string.
@@ -274,7 +274,7 @@ module Signet #:nodoc:
     # <code>NotImplementedError</code> exception being raised.
     #
     # @param [String] method The HTTP method.
-    # @param [Addressable::URI, String, #to_str] The URI.
+    # @param [Addressable::URI, String, #to_str] uri The URI.
     # @param [Enumerable] parameters The OAuth parameter list.
     # @param [String] client_credential_secret The client credential secret.
     # @param [String] token_credential_secret
@@ -307,13 +307,13 @@ module Signet #:nodoc:
     #
     # @param [Hash] options
     #   The configuration parameters for the request.
-    #   - <code>:client_credential_key</code> —
+    #   - <code>:client_credential_key</code> -
     #     The client credential key.
-    #   - <code>:callback</code> —
+    #   - <code>:callback</code> -
     #     The OAuth callback.  Defaults to {Signet::OAuth1::OUT_OF_BAND}.
-    #   - <code>:signature_method</code> —
+    #   - <code>:signature_method</code> -
     #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-    #   - <code>:additional_parameters</code> —
+    #   - <code>:additional_parameters</code> -
     #     Non-standard additional parameters.
     #
     # @return [Array]
@@ -382,13 +382,13 @@ module Signet #:nodoc:
     #
     # @param [Hash] options
     #   The configuration parameters for the request.
-    #   - <code>:client_credential_key</code> —
+    #   - <code>:client_credential_key</code> -
     #     The client credential key.
-    #   - <code>:temporary_credential_key</code> —
+    #   - <code>:temporary_credential_key</code> -
     #     The temporary credential key.
-    #   - <code>:verifier</code> —
+    #   - <code>:verifier</code> -
     #     The OAuth verifier.
-    #   - <code>:signature_method</code> —
+    #   - <code>:signature_method</code> -
     #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
     #
     # @return [Array]
@@ -430,13 +430,13 @@ module Signet #:nodoc:
     #
     # @param [Hash] options
     #   The configuration parameters for the request.
-    #   - <code>:client_credential_key</code> —
+    #   - <code>:client_credential_key</code> -
     #     The client credential key.
-    #   - <code>:token_credential_key</code> —
+    #   - <code>:token_credential_key</code> -
     #     The token credential key.
-    #   - <code>:signature_method</code> —
+    #   - <code>:signature_method</code> -
     #     The signature method.  Defaults to <code>'HMAC-SHA1'</code>.
-    #   - <code>:two_legged</code> —
+    #   - <code>:two_legged</code> -
     #     A switch for two-legged OAuth.  Defaults to <code>false</code>.
     #
     # @return [Array]
