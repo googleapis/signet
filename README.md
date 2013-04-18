@@ -49,6 +49,6 @@ response = client.fetch_protected_resource(
 
 ## Install
 
-`sudo gem install signet`
+`gem install signet`
 
 Be sure `https://rubygems.org` is in your gem sources.
