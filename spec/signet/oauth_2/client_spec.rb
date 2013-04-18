@@ -352,6 +352,23 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.should_not be_expired
   end
 
+  it 'should allow the expires_at time to be updated' do
+    expires_at = Time.now.round
+    @client.update_token!(
+      :expires_at => expires_at.to_i,
+      :expires_in => nil
+    )
+    @client.expires_at.should == expires_at
+    @client.should be_expired
+  end
+
+  it 'should allow setting expires_at manually' do
+    expires_at = Time.now.round + 100
+    @client.expires_at = expires_at.to_i
+    @client.expires_at.should == expires_at
+    @client.should_not be_expired
+  end
+
   it 'should raise an error if the authorization endpoint is not secure' do
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
