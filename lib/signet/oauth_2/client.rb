@@ -191,6 +191,8 @@ module Signet
       #     The current ID token for this client.
       #   - <code>:expires_in</code> -
       #     The time in seconds until access token expiration.
+      #   - <code>:expires_at</code> -
+      #     The time as an integer number of seconds since the Epoch
       #   - <code>:issued_at</code> -
       #     The timestamp that the token was issued at.
       #
@@ -209,6 +211,7 @@ module Signet
 
         self.access_token = options["access_token"] if options["access_token"]
         self.expires_in = options["expires_in"] if options["expires_in"]
+        self.expires_at = options["expires_at"] if options["expires_at"]
 
         # The refresh token may not be returned in a token response.
         # In which case, the old one should continue to be used.
@@ -720,11 +723,20 @@ module Signet
       #
       # @return [Integer] The access token lifetime.
       def expires_at
-        if @issued_at && @expires_in
+        if @expires_at
+          @expires_at
+        elsif @issued_at && @expires_in
           return @issued_at + @expires_in
         else
           return nil
         end
+      end
+
+      ##
+      # Limits the lifetime of the access token as number of seconds since
+      # the Epoch
+      def expires_at=(new_expires_at)
+        @expires_at = Time.at new_expires_at
       end
 
       ##
