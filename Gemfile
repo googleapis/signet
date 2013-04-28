@@ -1,4 +1,4 @@
-source :rubygems
+source 'https://rubygems.org'
 
 gem 'addressable', '>= 2.3.1'
 gem 'faraday', '~> 0.8.1'
