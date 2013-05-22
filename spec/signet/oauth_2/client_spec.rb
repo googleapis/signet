@@ -353,19 +353,19 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
   end
 
   it 'should allow the expires_at time to be updated' do
-    expires_at = Time.now.round
+    expires_at = Time.now
     @client.update_token!(
       :expires_at => expires_at.to_i,
       :expires_in => nil
     )
-    @client.expires_at.should == expires_at
+    @client.expires_at.should be_within(1).of(expires_at)
     @client.should be_expired
   end
 
   it 'should allow setting expires_at manually' do
-    expires_at = Time.now.round + 100
+    expires_at = Time.now+100
     @client.expires_at = expires_at.to_i
-    @client.expires_at.should == expires_at
+    @client.expires_at.should be_within(1).of(expires_at)
     @client.should_not be_expired
   end
 
