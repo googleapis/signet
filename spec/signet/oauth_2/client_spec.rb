@@ -20,8 +20,6 @@ require 'spec_helper'
 
 require 'signet/oauth_2/client'
 require 'openssl'
-
-gem 'jwt', '~> 0.1.4'
 require 'jwt'
 
 conn = Faraday.default_connection
@@ -353,7 +351,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
   end
 
   it 'should allow the expires_at time to be updated' do
-    expires_at = Time.now.round
+    expires_at = Time.now.round - 100
     @client.update_token!(
       :expires_at => expires_at.to_i,
       :expires_in => nil
