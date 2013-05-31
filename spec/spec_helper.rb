@@ -11,3 +11,6 @@ $:.uniq!
 require 'rubygems'
 require 'signet'
 require 'rspec'
+
+require 'faraday'
+Faraday::Adapter.load_middleware(:test)

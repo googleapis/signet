@@ -12,7 +12,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-gem 'faraday', '~> 0.8.1'
 require 'faraday'
 #require 'faraday/utils'
 
@@ -22,7 +21,6 @@ require 'signet'
 require 'signet/errors'
 require 'signet/oauth_2'
 
-gem 'jwt', '~> 0.1.4'
 require 'jwt'
 
 module Signet

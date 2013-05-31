@@ -20,8 +20,6 @@ require 'spec_helper'
 
 require 'signet/oauth_2/client'
 require 'openssl'
-
-gem 'jwt', '~> 0.1.4'
 require 'jwt'
 
 conn = Faraday.default_connection
