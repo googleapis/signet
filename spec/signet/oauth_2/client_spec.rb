@@ -828,10 +828,6 @@ describe Signet::OAuth2::Client, 'authorization_uri' do
     )
   end
 
-  it 'should set prompt to consent by default' do
-    @client.authorization_uri.query_values['prompt'].should == 'consent'
-  end
-
   it 'should set access_type to offline by default' do
     @client.authorization_uri.query_values['access_type'].should == 'offline'
   end
@@ -840,7 +836,9 @@ describe Signet::OAuth2::Client, 'authorization_uri' do
     @client.authorization_uri.query_values['response_type'].should == 'code'
   end
 
-  it 'should not include prompt if approval_prompt is passed as an option' do
-    @client.authorization_uri(:approval_prompt => 'force').query_values['prompt'].should be_nil
+  it 'should raise an error when setting both prompt and approval_prompt' do
+    (lambda do
+      @client.authorization_uri(:approval_prompt => 'force', :prompt => 'consent')
+    end).should raise_error(ArgumentError)
   end
 end
