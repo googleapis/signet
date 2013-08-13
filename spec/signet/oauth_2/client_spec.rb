@@ -818,3 +818,29 @@ PUBKEY
     stubs.verify_stubbed_calls
   end
 end
+
+describe Signet::OAuth2::Client, 'authorization_uri' do
+  before do
+    @client = Signet::OAuth2::Client.new(
+      :client_id => 's6BhdRkqt3',
+      :redirect_uri => 'https://example.client.com/callback',
+      :authorization_uri => 'https://example.com/authorize'
+    )
+  end
+
+  it 'should set prompt to consent by default' do
+    @client.authorization_uri.query_values['prompt'].should == 'consent'
+  end
+
+  it 'should set access_type to offline by default' do
+    @client.authorization_uri.query_values['access_type'].should == 'offline'
+  end
+
+  it 'should set response_type to code by default' do
+    @client.authorization_uri.query_values['response_type'].should == 'code'
+  end
+
+  it 'should not include prompt if approval_prompt is passed as an option' do
+    @client.authorization_uri(:approval_prompt => 'force').query_values['prompt'].should be_nil
+  end
+end

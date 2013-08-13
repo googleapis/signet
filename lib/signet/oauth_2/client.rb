@@ -244,9 +244,8 @@ module Signet
         unless options[:access_type]
           options[:access_type] = :offline
         end
-        unless options[:approval_prompt]
-          # This default will likely change in the future.
-          options[:approval_prompt] = :force
+        if !options[:prompt] && !options[:approval_prompt]
+          options[:prompt] = :consent
         end
         options[:client_id] ||= self.client_id
         options[:redirect_uri] ||= self.redirect_uri
