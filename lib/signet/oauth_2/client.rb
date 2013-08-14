@@ -155,22 +155,22 @@ module Signet
       def update!(options={})
         # Normalize key to String to allow indifferent access.
         options = options.inject({}) { |accu, (k, v)| accu[k.to_s] = v; accu }
-        self.authorization_uri = options["authorization_uri"] if options["authorization_uri"]
-        self.token_credential_uri = options["token_credential_uri"] if options["token_credential_uri"]
-        self.client_id = options["client_id"] if options["client_id"]
-        self.client_secret = options["client_secret"] if options["client_secret"]
-        self.scope = options["scope"] if options["scope"]
-        self.state = options["state"] if options["state"]
-        self.code = options["code"] if options["code"]
-        self.redirect_uri = options["redirect_uri"] if options["redirect_uri"]
-        self.username = options["username"] if options["username"]
-        self.password = options["password"] if options["password"]
-        self.issuer = options["issuer"] if options["issuer"]
-        self.person = options["person"] if options["person"]
+        self.authorization_uri = options["authorization_uri"] if options.has_key?("authorization_uri")
+        self.token_credential_uri = options["token_credential_uri"] if options.has_key?("token_credential_uri")
+        self.client_id = options["client_id"] if options.has_key?("client_id")
+        self.client_secret = options["client_secret"] if options.has_key?("client_secret")
+        self.scope = options["scope"] if options.has_key?("scope")
+        self.state = options["state"] if options.has_key?("state")
+        self.code = options["code"] if options.has_key?("code")
+        self.redirect_uri = options["redirect_uri"] if options.has_key?("redirect_uri")
+        self.username = options["username"] if options.has_key?("username")
+        self.password = options["password"] if options.has_key?("password")
+        self.issuer = options["issuer"] if options.has_key?("issuer")
+        self.person = options["person"] if options.has_key?("person")
         self.expiry = options["expiry"] || 60
-        self.audience = options["audience"] if options["audience"]
-        self.signing_key = options["signing_key"] if options["signing_key"]
-        self.extension_parameters = options["extension_parameters"] || {}
+        self.audience = options["audience"] if options.has_key?("audience")
+        self.signing_key = options["signing_key"] if options.has_key?("signing_key")
+        self.extension_parameters = options.has_key?("extension_parameters") || {}
         self.update_token!(options)
         return self
       end
@@ -207,16 +207,16 @@ module Signet
         # Normalize key to String to allow indifferent access.
         options = options.inject({}) { |accu, (k, v)| accu[k.to_s] = v; accu }
 
-        self.expires_in = options["expires_in"] if options["expires_in"]
-        self.expires_at = options["expires_at"] if options["expires_at"]
+        self.expires_in = options["expires_in"] if options.has_key?("expires_in")
+        self.expires_at = options["expires_at"] if options.has_key?("expires_at")
         
         # By default, the token is issued at `Time.now` when `expires_in` is
         # set, but this can be used to supply a more precise time.
-        self.issued_at = options["issued_at"] if options["issued_at"]        
+        self.issued_at = options["issued_at"] if options.has_key?("issued_at")        
         
-        self.access_token = options["access_token"] if options["access_token"]        
-        self.refresh_token = options["refresh_token"] if options["refresh_token"]
-        self.id_token = options["id_token"] if options["id_token"]
+        self.access_token = options["access_token"] if options.has_key?("access_token")        
+        self.refresh_token = options["refresh_token"] if options.has_key?("refresh_token")
+        self.id_token = options["id_token"] if options.has_key?("id_token")
 
         return self
       end
