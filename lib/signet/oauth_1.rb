@@ -295,6 +295,11 @@ module Signet #:nodoc:
         return Signet::OAuth1::HMACSHA1.generate_signature(
           base_string, client_credential_secret, token_credential_secret
         )
+      when 'PLAINTEXT'
+        require 'signet/oauth_1/signature_methods/plaintext'
+        return Signet::OAuth1::PLAINTEXT.generate_signature(
+          base_string, client_credential_secret, token_credential_secret
+        )
       else
         raise NotImplementedError,
           "Unsupported signature method: #{signature_method}"
