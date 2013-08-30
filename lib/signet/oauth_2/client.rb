@@ -162,6 +162,7 @@ module Signet
         self.scope = options["scope"] if options.has_key?("scope")
         self.state = options["state"] if options.has_key?("state")
         self.code = options["code"] if options.has_key?("code")
+        self.type = options["type"] if options.has_key?("type")
         self.redirect_uri = options["redirect_uri"] if options.has_key?("redirect_uri")
         self.username = options["username"] if options.has_key?("username")
         self.password = options["password"] if options.has_key?("password")
@@ -248,6 +249,9 @@ module Signet
         end
         if !options[:scope] && self.scope
           options[:scope] = self.scope.join(' ')
+        end
+        if !options[:type] && self.type
+          options[:type] = self.type
         end
         options[:state] = self.state unless options[:state]
         uri = Addressable::URI.parse(
@@ -384,6 +388,22 @@ module Signet
       #   The state value.
       def state=(new_state)
         @state = new_state
+      end
+      ##
+      # Returns the client's current type value.
+      #
+      # @return [String] The type value.
+      def type
+        return @type
+      end
+
+      ##
+      # Sets the client's current state value.
+      #
+      # @param [String] new_state
+      #   The state value.
+      def type=(new_type)
+        @type = new_type
       end
 
       ##
@@ -840,6 +860,7 @@ module Signet
           end
           parameters.merge!(self.extension_parameters)
         end
+        parameters['type'] = self.type unless self.type.nil?
         parameters['client_id'] = self.client_id unless self.client_id.nil?
         parameters['client_secret'] = self.client_secret unless self.client_secret.nil?
         headers = [
