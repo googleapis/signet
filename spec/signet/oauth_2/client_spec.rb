@@ -29,6 +29,11 @@ describe Signet::OAuth2::Client, 'unconfigured' do
     @client = Signet::OAuth2::Client.new
   end
 
+  it 'should allow the type to be set to a String' do
+    @client.type = 'web_server'
+    @client.type.should == 'web_server'
+  end
+
   it 'should raise an error if a bogus scope is provided' do
     (lambda do
       @client = Signet::OAuth2::Client.new(:scope => :bogus)
