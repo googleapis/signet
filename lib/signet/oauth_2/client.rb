@@ -170,7 +170,8 @@ module Signet
         self.expiry = options["expiry"] || 60
         self.audience = options["audience"] if options.has_key?("audience")
         self.signing_key = options["signing_key"] if options.has_key?("signing_key")
-        self.extension_parameters = options.has_key?("extension_parameters") || {}
+        self.extension_parameters = options["extension_parameters"] || {}
+        self.additional_parameters = options["additional_parameters"] || {}
         self.update_token!(options)
         return self
       end
@@ -250,6 +251,7 @@ module Signet
           options[:scope] = self.scope.join(' ')
         end
         options[:state] = self.state unless options[:state]
+        options.merge!(self.additional_parameters.merge(options[:additional_parameters] || {}))
         uri = Addressable::URI.parse(
           ::Signet::OAuth2.generate_authorization_uri(
             @authorization_uri, options
@@ -597,6 +599,28 @@ module Signet
       end
 
       ##
+      # Returns the set of additional (non standard) parameters to be used by the client.
+      #
+      # @return [Hash] The pass through parameters.
+      def additional_parameters
+        return @additional_parameters ||= {}
+      end
+
+      ##
+      # Sets additional (non standard) parameters to be used by the client.
+      #
+      # @param [Hash] new_additional_parameters
+      #   The parameters.
+      def additional_parameters=(new_additional_parameters)
+        if new_additional_parameters.respond_to?(:to_hash)
+          @additional_parameters = new_additional_parameters.to_hash
+        else
+          raise TypeError,
+                "Expected Hash, got #{new_additional_parameters.class}."
+        end
+      end
+
+      ##
       # Returns the refresh token associated with this client.
       #
       # @return [String] The refresh token.
@@ -846,6 +870,7 @@ module Signet
           ['Cache-Control', 'no-store'],
           ['Content-Type', 'application/x-www-form-urlencoded']
         ]
+        parameters.merge!(self.additional_parameters.merge(options[:additional_parameters] || {}))
         return options[:connection].build_request(
           method.to_s.downcase.to_sym
         ) do |req|
