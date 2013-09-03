@@ -28,14 +28,12 @@ describe Signet::OAuth2::Client, 'unconfigured' do
   before do
     @client = Signet::OAuth2::Client.new
   end
-
   it 'should allow additional paraemters to be set.' do
     @client.additional_parameters['type'] =
         'web_server'
     @client.additional_parameters.should ==
         {'type' => 'web_server'}
   end
-
   it 'should raise an error if a bogus scope is provided' do
     (lambda do
       @client = Signet::OAuth2::Client.new(:scope => :bogus)
@@ -847,5 +845,42 @@ describe Signet::OAuth2::Client, 'authorization_uri' do
     (lambda do
       @client.authorization_uri(:approval_prompt => 'force', :prompt => 'consent')
     end).should raise_error(ArgumentError)
+  end
+end
+
+describe Signet::OAuth2::Client, 'configured with custom parameters' do
+  before do
+    @client = Signet::OAuth2::Client.new(
+        :client_id => 's6BhdRkqt3',
+        :redirect_uri => 'https://example.client.com/callback',
+        :authorization_uri => 'https://example.com/authorize',
+        :token_credential_uri => 'https://example.com/token',
+        :additional_parameters =>{'type' => 'web_server'}
+    )
+  end
+
+  it 'should allow custom parameters to be set on init' do
+    @client.additional_parameters.should == {'type' => 'web_server'}
+  end
+
+  it 'should allow custom parameters to be updated' do
+    @client.update!(:additional_parameters => {'type' => 'new_type'})
+    @client.additional_parameters.should == {'type' => 'new_type'}
+  end
+
+  it 'should use custom parameters when generating authorization_uri' do
+    @client.authorization_uri().to_s.should == "https://example.com/authorize?access_type=offline&client_id=s6BhdRkqt3&redirect_uri=https://example.client.com/callback&response_type=code&type=web_server"
+  end
+  it 'should use custom parameters when calling generate_access_token_request' do
+    @client.update!(:code=>'12345')
+    @client.generate_access_token_request().body.should == "grant_type=authorization_code&code=12345&redirect_uri=https%3A%2F%2Fexample.client.com%2Fcallback&client_id=s6BhdRkqt3"
+  end
+  it 'should merge new authorization_uri custom parameters' do
+    @client.authorization_uri(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).to_s.should == "https://example.com/authorize?access_type=offline&client_id=s6BhdRkqt3&new_param=new_val&redirect_uri=https://example.client.com/callback&response_type=code&type=new_type"
+  end
+
+  it 'should merge new generate_access_token_request custom parameters' do
+    @client.update!(:code=>'12345')
+    @client.generate_access_token_request(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).body.should == "grant_type=authorization_code&code=12345&redirect_uri=https%3A%2F%2Fexample.client.com%2Fcallback&client_id=s6BhdRkqt3&type=new_type&new_param=new_val"
   end
 end
