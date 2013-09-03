@@ -2,7 +2,7 @@ require 'digest/sha1'
 require 'base64'
 require 'openssl'
 require 'signet'
-
+require 'compat/base64'
 module Signet #:nodoc:
   module OAuth1
     module RSASHA1

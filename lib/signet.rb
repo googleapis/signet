@@ -13,7 +13,6 @@
 #    limitations under the License.
 
 require 'signet/version'
-require 'base64'
 module Signet #:nodoc:
   def self.parse_auth_param_list(auth_param_string)
     # Production rules from:
@@ -67,11 +66,5 @@ module Signet #:nodoc:
       accu << [name, value]
       accu
     end)
-  end
-  # Backport from ruby-1.9 to ruby-1.8 (which doesn't support pack('m0') either)
-  unless Base64.respond_to?(:strict_encode64)
-    def Base64.strict_encode64(str)
-      Base64.encode64(str).gsub("\n", "")
-    end
   end
 end
