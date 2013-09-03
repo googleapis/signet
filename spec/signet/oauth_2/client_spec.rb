@@ -871,16 +871,14 @@ describe Signet::OAuth2::Client, 'configured with custom parameters' do
   it 'should use custom parameters when generating authorization_uri' do
     @client.authorization_uri().query_values.should == {"access_type"=>"offline", "client_id"=>"s6BhdRkqt3", "redirect_uri"=>"https://example.client.com/callback", "response_type"=>"code", "type"=>"web_server"}
   end
-  it 'should use custom parameters when calling generate_access_token_request' do
-    @client.update!(:code=>'12345')
-    @client.generate_access_token_request().body.should == "grant_type=authorization_code&code=12345&redirect_uri=https%3A%2F%2Fexample.client.com%2Fcallback&client_id=s6BhdRkqt3"
-  end
   it 'should merge new authorization_uri custom parameters' do
     @client.authorization_uri(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).query_values.should == {"access_type"=>"offline", "client_id"=>"s6BhdRkqt3", "new_param"=>"new_val",  "response_type"=>"code","redirect_uri"=>"https://example.client.com/callback", "type"=>"new_type"}
   end
 
   it 'should merge new generate_access_token_request custom parameters' do
     @client.update!(:code=>'12345')
-    @client.generate_access_token_request(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).body.should == "grant_type=authorization_code&code=12345&redirect_uri=https%3A%2F%2Fexample.client.com%2Fcallback&client_id=s6BhdRkqt3&type=new_type&new_param=new_val"
+    body = @client.generate_access_token_request(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).body
+    body.should include("type=new_type")
+    body.should include("new_param=new_val")
   end
 end
