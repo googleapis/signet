@@ -1,6 +1,3 @@
-
-require 'base64'
-
 require 'signet'
 
 module Signet #:nodoc:
