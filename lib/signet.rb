@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 require 'signet/version'
+
 module Signet #:nodoc:
   def self.parse_auth_param_list(auth_param_string)
     # Production rules from:
