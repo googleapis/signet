@@ -74,20 +74,35 @@ describe Signet::OAuth2::Client, 'unconfigured' do
       @client = Signet::OAuth2::Client.new(:redirect_uri => '/relative/path')
     end).should raise_error(ArgumentError)
   end
-  
+
   it 'should allow "postmessage" as a redirect URI (Google hack)' do
     @client.authorization_uri = 'https://example.com/authorize'
     @client.client_id = 's6BhdRkqt3'
     @client.redirect_uri = 'postmessage'
     @client.authorization_uri.query_values['redirect_uri'].should == 'postmessage'
   end
-  
+
   it 'should have no authorization_uri' do
     @client.authorization_uri.should == nil
   end
 
   it 'should allow the authorization_uri to be set to a String' do
     @client.authorization_uri = 'https://example.com/authorize'
+    @client.client_id = 's6BhdRkqt3'
+    @client.redirect_uri = 'https://example.client.com/callback'
+    @client.authorization_uri.to_s.should include(
+      'https://example.com/authorize'
+    )
+    @client.authorization_uri.query_values['client_id'].should == 's6BhdRkqt3'
+    @client.authorization_uri.query_values['redirect_uri'].should == (
+      'https://example.client.com/callback'
+    )
+  end
+
+  it 'should allow the authorization_uri to be set to a Hash' do
+    @client.authorization_uri = {
+      :scheme => 'https', :host => 'example.com', :path => '/authorize'
+    }
     @client.client_id = 's6BhdRkqt3'
     @client.redirect_uri = 'https://example.client.com/callback'
     @client.authorization_uri.to_s.should include(
@@ -150,7 +165,7 @@ describe Signet::OAuth2::Client, 'unconfigured' do
 end
 
 describe Signet::OAuth2::Client, 'configured for assertions profile' do
-  
+
   describe 'when using RSA keys' do
     before do
       @key = OpenSSL::PKey::RSA.new 2048
@@ -218,10 +233,10 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
 
       @client.fetch_access_token!(:connection => connection)
       @client.access_token.should == "1/abcdef1234567890"
-      stubs.verify_stubbed_calls    
+      stubs.verify_stubbed_calls
     end
   end
-    
+
   describe 'when using shared secrets' do
     before do
       @key = 'my secret key'
@@ -309,12 +324,12 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.grant_type = 'urn:ietf:params:oauth:grant-type:saml2-bearer'
     @client.extension_parameters['assertion'] =
       'PEFzc2VydGlvbiBJc3N1ZUluc3RhbnQ9IjIwMTEtMDU'
-      
+
     request = @client.generate_access_token_request
     params = Addressable::URI.form_unencode(request.body)
     params.should include(['assertion', 'PEFzc2VydGlvbiBJc3N1ZUluc3RhbnQ9IjIwMTEtMDU'])
   end
-  
+
   it 'should allow the token to be updated' do
     issued_at = Time.now
     @client.update_token!(

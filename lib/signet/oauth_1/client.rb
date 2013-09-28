@@ -127,8 +127,10 @@ module Signet
       #   The authorization URI.
       def authorization_uri=(new_authorization_uri)
         if new_authorization_uri != nil
-          new_authorization_uri =
-            Addressable::URI.parse(new_authorization_uri)
+          new_authorization_uri = Addressable::URI.send(
+            new_authorization_uri.kind_of?(Hash) ? :new : :parse,
+            new_authorization_uri
+          )
           @authorization_uri = new_authorization_uri
         else
           @authorization_uri = nil
@@ -859,7 +861,7 @@ module Signet
           :realm => nil,
           :connection => Faraday.default_connection
         }.merge(options)
-        
+
         if options[:request].kind_of?(Faraday::Request)
           request = options[:request]
         else
@@ -902,16 +904,16 @@ module Signet
             req.body = body
           end
         end
-        
+
         parameters = ::Signet::OAuth1.unsigned_resource_parameters(
           :client_credential_key => self.client_credential_key,
           :token_credential_key => self.token_credential_key,
           :signature_method => options[:signature_method],
           :two_legged => self.two_legged
         )
-        
+
         env = request.to_env(options[:connection])
-        
+
         content_type = request['Content-Type'].to_s
         content_type = content_type.split(';', 2).first if content_type.index(';')
         if request.method == :post && content_type == 'application/x-www-form-urlencoded'
@@ -923,7 +925,7 @@ module Signet
           post_parameters = Addressable::URI.form_unencode(env[:body])
           parameters = parameters.concat(post_parameters)
         end
-        
+
         # No need to attach URI query parameters, the .sign_parameters
         # method takes care of that automatically.
         signature = ::Signet::OAuth1.sign_parameters(
@@ -933,7 +935,7 @@ module Signet
           self.client_credential_secret,
           self.token_credential_secret
         )
-        
+
         parameters << ['oauth_signature', signature]
         request['Authorization'] =  ::Signet::OAuth1.generate_authorization_header(
             parameters, options[:realm])

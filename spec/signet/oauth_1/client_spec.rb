@@ -66,6 +66,15 @@ describe Signet::OAuth1::Client, 'unconfigured' do
     )
   end
 
+  it 'should allow the authorization_uri to be set to a Hash' do
+    @client.authorization_uri = {
+      :scheme => 'http', :host => 'example.com', :path => '/authorize'
+    }
+    @client.authorization_uri.to_s.should include(
+      'http://example.com/authorize'
+    )
+  end
+
   it 'should allow the authorization_uri to be set to a URI' do
     @client.authorization_uri =
       Addressable::URI.parse('http://example.com/authorize')

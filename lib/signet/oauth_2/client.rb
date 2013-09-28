@@ -210,12 +210,12 @@ module Signet
 
         self.expires_in = options["expires_in"] if options.has_key?("expires_in")
         self.expires_at = options["expires_at"] if options.has_key?("expires_at")
-        
+
         # By default, the token is issued at `Time.now` when `expires_in` is
         # set, but this can be used to supply a more precise time.
-        self.issued_at = options["issued_at"] if options.has_key?("issued_at")        
-        
-        self.access_token = options["access_token"] if options.has_key?("access_token")        
+        self.issued_at = options["issued_at"] if options.has_key?("issued_at")
+
+        self.access_token = options["access_token"] if options.has_key?("access_token")
         self.refresh_token = options["refresh_token"] if options.has_key?("refresh_token")
         self.id_token = options["id_token"] if options.has_key?("id_token")
 
@@ -268,12 +268,14 @@ module Signet
       ##
       # Sets the authorization URI for this client.
       #
-      # @param [Addressable::URI, String, #to_str] new_authorization_uri
+      # @param [Addressable::URI, Hash, String, #to_str] new_authorization_uri
       #   The authorization URI.
       def authorization_uri=(new_authorization_uri)
         if new_authorization_uri != nil
-          new_authorization_uri =
-            Addressable::URI.parse(new_authorization_uri)
+          new_authorization_uri = Addressable::URI.send(
+            new_authorization_uri.kind_of?(Hash) ? :new : :parse,
+            new_authorization_uri
+          )
           @authorization_uri = new_authorization_uri
         else
           @authorization_uri = nil
@@ -423,7 +425,7 @@ module Signet
       #   The redirect URI.
       def redirect_uri=(new_redirect_uri)
         new_redirect_uri = Addressable::URI.parse(new_redirect_uri)
-        #TODO - Better solution to allow google postmessage flow. For now, make an exception to the spec. 
+        #TODO - Better solution to allow google postmessage flow. For now, make an exception to the spec.
         if new_redirect_uri == nil|| new_redirect_uri.absolute? || uri_is_postmessage?(new_redirect_uri)
           @redirect_uri = new_redirect_uri
         else
@@ -525,10 +527,10 @@ module Signet
       def principal=(new_person)
         @principal = new_person
       end
-      
+
       alias_method :person, :principal
       alias_method :person=, :principal=
-      
+
       ##
       # Returns the number of seconds assertions are valid for
       # Used only by the assertion grant type.
@@ -547,8 +549,8 @@ module Signet
       def expiry=(new_expiry)
         @expiry = new_expiry
       end
-      
-      
+
+
       ##
       # Returns the signing key associated with this client.
       # Used only by the assertion grant type.
@@ -567,14 +569,14 @@ module Signet
       def signing_key=(new_key)
         @signing_key = new_key
       end
-      
+
       ##
       # Algorithm used for signing JWTs
       # @return [String] Signing algorithm
       def signing_algorithm
         self.signing_key.is_a?(String) ? "HS256" : "RS256"
       end
-      
+
       ##
       # Returns the set of extension parameters used by the client.
       # Used only by extension access grant types.
@@ -760,8 +762,8 @@ module Signet
       def expired?
         return self.expires_at != nil && Time.now >= self.expires_at
       end
-      
-      
+
+
       ##
       # Removes all credentials from the client.
       def clear_credentials!
@@ -816,7 +818,7 @@ module Signet
       end
 
       def to_jwt(options={})
-        now = Time.new        
+        now = Time.new
         skew = options[:skew] || 60
         assertion = {
           "iss" => self.issuer,
@@ -828,7 +830,7 @@ module Signet
         assertion['prn'] = self.person unless self.person.nil?
         JWT.encode(assertion, self.signing_key, self.signing_algorithm)
       end
-      
+
       ##
       # Generates a request for token credentials.
       #
@@ -923,12 +925,12 @@ module Signet
         return token_hash
       end
 
-      ## 
+      ##
       # Refresh the access token, if possible
       def refresh!
         self.fetch_access_token!
       end
-      
+
       ##
       # Generates an authenticated request for protected resources.
       #
@@ -989,7 +991,7 @@ module Signet
             req.body = body
           end
         end
-        
+
         request['Authorization'] = ::Signet::OAuth2.generate_bearer_authorization_header(
           self.access_token,
           options[:realm] ? [['realm', options[:realm]]] : nil
@@ -1058,16 +1060,16 @@ module Signet
           return response
         end
       end
-      
+
       private
-      
+
       ##
       # Check if URI is Google's postmessage flow (not a valid redirect_uri by spec, but allowed)
       # @private
       def uri_is_postmessage?(uri)
         return uri.to_s.casecmp('postmessage') == 0
       end
-      
+
     end
   end
 end
