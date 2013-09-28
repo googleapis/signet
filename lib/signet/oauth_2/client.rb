@@ -832,6 +832,36 @@ module Signet
       end
 
       ##
+      # Serialize the client object to JSON.
+      #
+      # @note A serialized client contains sensitive information. Persist or transmit with care.
+      #
+      # @return [String] A serialized JSON representation of the client.
+      def to_json
+        return MultiJson.dump({
+          'authorization_uri' => self.authorization_uri,
+          'token_credential_uri' => self.token_credential_uri,
+          'client_id' => self.client_id,
+          'client_secret' => self.client_secret,
+          'scope' => self.scope,
+          'state' => self.state,
+          'code' => self.code,
+          'redirect_uri' => self.redirect_uri,
+          'username' => self.username,
+          'password' => self.password,
+          'issuer' => self.issuer,
+          'audience' => self.audience,
+          'person' => self.person,
+          'expiry' => self.expiry,
+          'signing_key' => self.signing_key,
+          'refresh_token' => self.refresh_token,
+          'access_token' => self.access_token,
+          'id_token' => self.id_token,
+          'extension_parameters' => self.extension_parameters
+        })
+      end
+
+      ##
       # Generates a request for token credentials.
       #
       # @param [Hash] options
@@ -1069,7 +1099,6 @@ module Signet
       def uri_is_postmessage?(uri)
         return uri.to_s.casecmp('postmessage') == 0
       end
-
     end
   end
 end

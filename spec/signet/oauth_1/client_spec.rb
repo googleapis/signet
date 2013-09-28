@@ -407,6 +407,26 @@ describe Signet::OAuth1::Client, 'configured' do
     @client.token_credential_secret = 'pfkkdhi9sl3r4s00'
   end
 
+  it 'should generate a JSON representation of the client' do
+    json = @client.to_json
+    json.should_not == nil
+
+    deserialized = MultiJson.load(json)
+    deserialized["temporary_credential_uri"].should ==
+      'http://example.com/temporary_credentials'
+    deserialized["authorization_uri"].should include(
+      'http://example.com/authorize')
+    deserialized["token_credential_uri"].should ==
+      'http://example.com/token_credentials'
+    deserialized["callback"].should == 'http://example.com/callback'
+    deserialized["client_credential_key"].should == 'dpf43f3p2l4k3l03'
+    deserialized["client_credential_secret"].should == 'kd94hf93k423kf44'
+    deserialized["temporary_credential_key"].should == 'hh5s93j4hdidpola'
+    deserialized["temporary_credential_secret"].should == 'hdhd0244k9j7ao03'
+    deserialized["token_credential_key"].should == 'nnch734d00sl2jdk'
+    deserialized["token_credential_secret"].should == 'pfkkdhi9sl3r4s00'
+  end
+
   it 'should generate an authorization URI with a callback' do
     @client.temporary_credential_key = nil
     @client.authorization_uri.should ===

@@ -512,6 +512,28 @@ module Signet
       end
 
       ##
+      # Serialize the client object to JSON.
+      #
+      # @note A serialized client contains sensitive information. Persist or transmit with care.
+      #
+      # @return [String] A serialized JSON representation of the client.
+      def to_json
+        return MultiJson.dump({
+          'temporary_credential_uri' => self.temporary_credential_uri,
+          'authorization_uri' => self.authorization_uri,
+          'token_credential_uri' => self.token_credential_uri,
+          'callback' => self.callback,
+          'two_legged' => self.two_legged,
+          'client_credential_key' => self.client_credential_key,
+          'client_credential_secret' => self.client_credential_secret,
+          'temporary_credential_key' => self.temporary_credential_key,
+          'temporary_credential_secret' => self.temporary_credential_secret,
+          'token_credential_key' => self.token_credential_key,
+          'token_credential_secret' => self.token_credential_secret
+        })
+      end
+
+      ##
       # Generates a request for temporary credentials.
       #
       # @param [Hash] options

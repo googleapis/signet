@@ -201,7 +201,6 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       claim["aud"].should == 'https://accounts.google.com/o/oauth2/token'
     end
 
-
     it 'should generate valid JWTs for impersonation using deprecated person attribute' do
       @client.person = 'user@example.com'
       jwt = @client.to_jwt
@@ -212,6 +211,21 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       claim["prn"].should == 'user@example.com'
       claim["scope"].should == 'https://www.googleapis.com/auth/userinfo.profile'
       claim["aud"].should == 'https://accounts.google.com/o/oauth2/token'
+    end
+
+    it 'should generate a JSON representation of the client' do
+      @client.principal = 'user@example.com'
+      json = @client.to_json
+      json.should_not == nil
+
+      deserialized = MultiJson.load(json)
+      deserialized["token_credential_uri"].should ==
+        'https://accounts.google.com/o/oauth2/token'
+      deserialized["scope"].should ==
+        ['https://www.googleapis.com/auth/userinfo.profile']
+      deserialized["issuer"].should == 'app@example.com'
+      deserialized["audience"].should == 'https://accounts.google.com/o/oauth2/token'
+      deserialized["signing_key"].should == @key.to_s
     end
 
     it 'should send valid access token request' do
