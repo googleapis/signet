@@ -69,27 +69,27 @@ module Signet #:nodoc:
     #
     # @return [String] The credential key value.
     def self.extract_credential_key_option(credential_type, options)
-      credential_key_symbol =
-        ("#{credential_type}_credential_key").to_sym
-      credential_symbol =
-        ("#{credential_type}_credential").to_sym
-      if options[credential_key_symbol]
-        credential_key = options[credential_key_symbol]
-      elsif options[credential_symbol]
+      # Normalize key to String to allow indifferent access.
+      options = options.inject({}) { |accu, (k, v)| accu[k.to_s] = v; accu }
+      credential_key = "#{credential_type}_credential_key"
+      credential = "#{credential_type}_credential"
+      if options[credential_key]
+        credential_key = options[credential_key]
+      elsif options[credential]
         require 'signet/oauth_1/credential'
-        if !options[credential_symbol].respond_to?(:key)
+        if !options[credential].respond_to?(:key)
           raise TypeError,
             "Expected Signet::OAuth1::Credential, " +
-            "got #{options[credential_symbol].class}."
+            "got #{options[credential].class}."
         end
-        credential_key = options[credential_symbol].key
-      elsif options[:client]
+        credential_key = options[credential].key
+      elsif options["client"]
         require 'signet/oauth_1/client'
-        if !options[:client].kind_of?(::Signet::OAuth1::Client)
+        if !options["client"].kind_of?(::Signet::OAuth1::Client)
           raise TypeError,
-            "Expected Signet::OAuth1::Client, got #{options[:client].class}."
+            "Expected Signet::OAuth1::Client, got #{options["client"].class}."
         end
-        credential_key = options[:client].send(credential_key_symbol)
+        credential_key = options["client"].send(credential_key)
       else
         credential_key = nil
       end
@@ -111,27 +111,27 @@ module Signet #:nodoc:
     #
     # @return [String] The credential secret value.
     def self.extract_credential_secret_option(credential_type, options)
-      credential_secret_symbol =
-        ("#{credential_type}_credential_secret").to_sym
-      credential_symbol =
-        ("#{credential_type}_credential").to_sym
-      if options[credential_secret_symbol]
-        credential_secret = options[credential_secret_symbol]
-      elsif options[credential_symbol]
+      # Normalize key to String to allow indifferent access.
+      options = options.inject({}) { |accu, (k, v)| accu[k.to_s] = v; accu }
+      credential_secret = "#{credential_type}_credential_secret"
+      credential = "#{credential_type}_credential"
+      if options[credential_secret]
+        credential_secret = options[credential_secret]
+      elsif options[credential]
         require 'signet/oauth_1/credential'
-        if !options[credential_symbol].respond_to?(:secret)
+        if !options[credential].respond_to?(:secret)
           raise TypeError,
             "Expected Signet::OAuth1::Credential, " +
-            "got #{options[credential_symbol].class}."
+            "got #{options[credential].class}."
         end
-        credential_secret = options[credential_symbol].secret
-      elsif options[:client]
+        credential_secret = options[credential].secret
+      elsif options["client"]
         require 'signet/oauth_1/client'
-        if !options[:client].kind_of?(::Signet::OAuth1::Client)
+        if !options["client"].kind_of?(::Signet::OAuth1::Client)
           raise TypeError,
-            "Expected Signet::OAuth1::Client, got #{options[:client].class}."
+            "Expected Signet::OAuth1::Client, got #{options["client"].class}."
         end
-        credential_secret = options[:client].send(credential_secret_symbol)
+        credential_secret = options["client"].send(credential_secret)
       else
         credential_secret = nil
       end

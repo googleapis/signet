@@ -54,25 +54,62 @@ module Signet
       #     :client_credential_secret => 'anonymous'
       #   )
       def initialize(options={})
-        self.temporary_credential_uri = options[:temporary_credential_uri]
-        self.authorization_uri = options[:authorization_uri]
-        self.token_credential_uri = options[:token_credential_uri]
+        self.update!(options)
+      end
+
+      ##
+      # Updates an OAuth 1.0 client.
+      #
+      # @param [Hash] options
+      #   The configuration parameters for the client.
+      #   - <code>:temporary_credential_uri</code> -
+      #     The OAuth temporary credentials URI.
+      #   - <code>:authorization_uri</code> -
+      #     The OAuth authorization URI.
+      #   - <code>:token_credential_uri</code> -
+      #     The OAuth token credentials URI.
+      #   - <code>:client_credential_key</code> -
+      #     The OAuth client credential key.
+      #   - <code>:client_credential_secret</code> -
+      #     The OAuth client credential secret.
+      #   - <code>:callback</code> -  The OAuth callback.  Defaults to 'oob'.
+      #
+      # @example
+      #   client.update!(
+      #     :temporary_credential_uri =>
+      #       'https://www.google.com/accounts/OAuthGetRequestToken',
+      #     :authorization_uri =>
+      #       'https://www.google.com/accounts/OAuthAuthorizeToken',
+      #     :token_credential_uri =>
+      #       'https://www.google.com/accounts/OAuthGetAccessToken',
+      #     :client_credential_key => 'anonymous',
+      #     :client_credential_secret => 'anonymous'
+      #   )
+      #
+      # @see Signet::OAuth1::Client#initialize
+      def update!(options={})
+        # Normalize key to String to allow indifferent access.
+        options = options.inject({}) { |accu, (k, v)| accu[k.to_s] = v; accu }
+        self.temporary_credential_uri = options["temporary_credential_uri"]
+        self.authorization_uri = options["authorization_uri"]
+        self.token_credential_uri = options["token_credential_uri"]
         # Technically... this would allow you to pass in a :client key...
         # But that would be weird.  Don't do that.
         self.client_credential_key =
-          Signet::OAuth1.extract_credential_key_option(:client, options)
+          Signet::OAuth1.extract_credential_key_option("client", options)
         self.client_credential_secret =
-          Signet::OAuth1.extract_credential_secret_option(:client, options)
+          Signet::OAuth1.extract_credential_secret_option("client", options)
         self.temporary_credential_key =
-          Signet::OAuth1.extract_credential_key_option(:temporary, options)
+          Signet::OAuth1.extract_credential_key_option("temporary", options)
         self.temporary_credential_secret =
-          Signet::OAuth1.extract_credential_secret_option(:temporary, options)
+          Signet::OAuth1.extract_credential_secret_option("temporary", options)
         self.token_credential_key =
-          Signet::OAuth1.extract_credential_key_option(:token, options)
+          Signet::OAuth1.extract_credential_key_option("token", options)
         self.token_credential_secret =
-          Signet::OAuth1.extract_credential_secret_option(:token, options)
-        self.callback = options[:callback]
-        self.two_legged = options[:two_legged] || false
+          Signet::OAuth1.extract_credential_secret_option("token", options)
+        self.callback = options["callback"]
+        self.two_legged = options["two_legged"] || false
+        return self
       end
 
       ##
