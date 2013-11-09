@@ -293,12 +293,14 @@ module Signet
       ##
       # Sets the token credential URI for this client.
       #
-      # @param [Addressable::URI, String, #to_str] new_token_credential_uri
+      # @param [Addressable::URI, Hash, String, #to_str] new_token_credential_uri
       #   The token credential URI.
       def token_credential_uri=(new_token_credential_uri)
         if new_token_credential_uri != nil
-          new_token_credential_uri =
-            Addressable::URI.parse(new_token_credential_uri)
+          new_token_credential_uri = Addressable::URI.send(
+            new_token_credential_uri.kind_of?(Hash) ? :new : :parse,
+            new_token_credential_uri
+          )
           @token_credential_uri = new_token_credential_uri
         else
           @token_credential_uri = nil

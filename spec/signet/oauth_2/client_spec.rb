@@ -157,6 +157,15 @@ describe Signet::OAuth2::Client, 'unconfigured' do
     @client.token_credential_uri.should === "https://example.com/token"
   end
 
+  it 'should allow the authorization_uri to be set to a Hash' do
+    @client.token_credential_uri = {
+      :scheme => 'https', :host => 'example.com', :path => '/token'
+    }
+    @client.token_credential_uri.to_s.should include(
+      'https://example.com/token'
+    )
+  end
+
   it 'should allow the token_credential_uri to be set to a URI' do
     @client.token_credential_uri =
       Addressable::URI.parse("https://example.com/token")
