@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = "signet"
-  s.version = "0.5.0"
+  s.version = "0.5.0.c5c5e46b5ed3c999dc57b65912ebab148b32ed0d"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Bob Aman"]
