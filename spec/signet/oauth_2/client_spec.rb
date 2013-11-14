@@ -213,6 +213,18 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       claim["aud"].should == 'https://accounts.google.com/o/oauth2/token'
     end
 
+    it 'should generate valid JWTs for impersonation using the sub attribute' do
+      @client.sub = 'user@example.com'
+      jwt = @client.to_jwt
+      jwt.should_not == nil
+
+      claim = JWT.decode(jwt, @key.public_key, true)
+      claim["iss"].should == 'app@example.com'
+      claim["sub"].should == 'user@example.com'
+      claim["scope"].should == 'https://www.googleapis.com/auth/userinfo.profile'
+      claim["aud"].should == 'https://accounts.google.com/o/oauth2/token'
+    end
+
     it 'should generate a JSON representation of the client' do
       @client.principal = 'user@example.com'
       json = @client.to_json

@@ -167,6 +167,7 @@ module Signet
         self.password = options["password"] if options.has_key?("password")
         self.issuer = options["issuer"] if options.has_key?("issuer")
         self.person = options["person"] if options.has_key?("person")
+        self.sub = options["sub"] if options.has_key?("sub")
         self.expiry = options["expiry"] || 60
         self.audience = options["audience"] if options.has_key?("audience")
         self.signing_key = options["signing_key"] if options.has_key?("signing_key")
@@ -532,6 +533,12 @@ module Signet
       alias_method :person=, :principal=
 
       ##
+      # The target "sub" when issuing assertions.
+      # Used in some Admin SDK APIs.
+      #
+      attr_accessor :sub
+
+      ##
       # Returns the number of seconds assertions are valid for
       # Used only by the assertion grant type.
       #
@@ -828,6 +835,7 @@ module Signet
           "iat" => (now - skew).to_i
         }
         assertion['prn'] = self.person unless self.person.nil?
+        assertion['sub'] = self.sub unless self.sub.nil?
         JWT.encode(assertion, self.signing_key, self.signing_algorithm)
       end
 
