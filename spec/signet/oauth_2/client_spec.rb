@@ -82,6 +82,15 @@ describe Signet::OAuth2::Client, 'unconfigured' do
     @client.authorization_uri.query_values['redirect_uri'].should == 'postmessage'
   end
 
+  it 'should allow oob values as a redirect URI (for installed apps)' do
+    @client.authorization_uri = 'https://example.com/authorize'
+    @client.client_id = 's6BhdRkqt3'
+    @client.redirect_uri = 'urn:ietf:wg:oauth:2.0:oob'
+    @client.authorization_uri.query_values['redirect_uri'].should == 'urn:ietf:wg:oauth:2.0:oob'
+    @client.redirect_uri = 'oob'
+    @client.authorization_uri.query_values['redirect_uri'].should == 'oob'
+  end
+
   it 'should have no authorization_uri' do
     @client.authorization_uri.should == nil
   end
