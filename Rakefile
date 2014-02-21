@@ -26,7 +26,7 @@ PKG_FILES = FileList[
     "lib/**/*", "spec/**/*", "vendor/**/*",
     "tasks/**/*", "website/**/*",
     "[A-Z]*", "Rakefile"
-].exclude(/database\.yml/).exclude(/[_\.]git$/)
+].exclude(/database\.yml/).exclude(/[_\.]git$/).exclude(/Gemfile\.lock/)
 
 RCOV_ENABLED = !!(RUBY_PLATFORM != 'java' && RUBY_VERSION =~ /^1\.8/)
 if RCOV_ENABLED
