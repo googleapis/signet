@@ -22,3 +22,6 @@ notifications:
       - sbazyl@google.com
     on_success: change
     on_failure: change
+matrix:
+  allow_failures:
+    - rvm: rbx
