@@ -427,7 +427,7 @@ module Signet
       def redirect_uri=(new_redirect_uri)
         new_redirect_uri = Addressable::URI.parse(new_redirect_uri)
         #TODO - Better solution to allow google postmessage flow. For now, make an exception to the spec.
-        if new_redirect_uri == nil|| new_redirect_uri.absolute? || uri_is_postmessage?(new_redirect_uri)
+        if new_redirect_uri == nil|| new_redirect_uri.absolute? || uri_is_postmessage?(new_redirect_uri) || uri_is_oob?(new_redirect_uri)
           @redirect_uri = new_redirect_uri
         else
           raise ArgumentError, "Redirect URI must be an absolute URI."
@@ -1107,6 +1107,14 @@ module Signet
       def uri_is_postmessage?(uri)
         return uri.to_s.casecmp('postmessage') == 0
       end
+
+      ##
+      # Check if the URI is a out-of-band
+      # @private
+      def uri_is_oob?(uri)
+        return uri.to_s == 'urn:ietf:wg:oauth:2.0:oob' || uri.to_s == 'oob'
+      end
+
     end
   end
 end
