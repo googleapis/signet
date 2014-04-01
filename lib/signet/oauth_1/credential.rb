@@ -59,6 +59,7 @@ module Signet #:nodoc:
           parameters = args.first.to_hash
           @key = key_from_hash.call(parameters)
           @secret = secret_from_hash.call(parameters)
+          @raw = parameters
           unless @key && @secret
             raise ArgumentError,
               "Could not find both key and secret in #{hash.inspect}."
@@ -74,8 +75,10 @@ module Signet #:nodoc:
           elsif args.first.respond_to?(:to_ary)
             args = args.first.to_ary
           end
+          @raw = args
           if args.all? { |value| value.kind_of?(Array) }
             parameters = args.inject({}) { |h,(k,v)| h[k]=v; h }
+            @raw = parameters
             @key = key_from_hash.call(parameters)
             @secret = secret_from_hash.call(parameters)
           elsif args.size == 2
@@ -97,7 +100,7 @@ module Signet #:nodoc:
         end
       end
 
-      attr_accessor :key, :secret
+      attr_accessor :key, :secret, :raw
 
       def to_hash
         return {
