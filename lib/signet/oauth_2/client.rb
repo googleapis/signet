@@ -967,8 +967,8 @@ module Signet
 
       ##
       # Refresh the access token, if possible
-      def refresh!
-        self.fetch_access_token!
+      def refresh!(options={})
+        self.fetch_access_token!(options)
       end
 
       ##
