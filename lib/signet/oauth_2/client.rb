@@ -272,15 +272,7 @@ module Signet
       # @param [Addressable::URI, Hash, String, #to_str] new_authorization_uri
       #   The authorization URI.
       def authorization_uri=(new_authorization_uri)
-        if new_authorization_uri != nil
-          new_authorization_uri = Addressable::URI.send(
-            new_authorization_uri.kind_of?(Hash) ? :new : :parse,
-            new_authorization_uri
-          )
-          @authorization_uri = new_authorization_uri
-        else
-          @authorization_uri = nil
-        end
+        @authorization_uri = addressable_uri_for(new_authorization_uri)
       end
 
       ##
@@ -297,14 +289,16 @@ module Signet
       # @param [Addressable::URI, Hash, String, #to_str] new_token_credential_uri
       #   The token credential URI.
       def token_credential_uri=(new_token_credential_uri)
-        if new_token_credential_uri != nil
-          new_token_credential_uri = Addressable::URI.send(
-            new_token_credential_uri.kind_of?(Hash) ? :new : :parse,
-            new_token_credential_uri
-          )
-          @token_credential_uri = new_token_credential_uri
-        else
-          @token_credential_uri = nil
+        @token_credential_uri = addressable_uri_for(new_token_credential_uri)
+      end
+
+      # Addressable expects URIs formatted as hashes to come in with symbols as keys. 
+      # Returns nil implicitly for the nil case.
+      def addressable_uri_for(incoming_uri)
+        if incoming_uri.is_a? Hash
+          Addressable::URI.new(hash_keys_to_sym(incoming_uri))
+        elsif incoming_uri
+          Addressable::URI.parse(incoming_uri)
         end
       end
 
@@ -1116,7 +1110,16 @@ module Signet
       def uri_is_oob?(uri)
         return uri.to_s == 'urn:ietf:wg:oauth:2.0:oob' || uri.to_s == 'oob'
       end
+      
+      # Convert all keys in this hash (not nested) to symbols for uniform retrieval
+      def hash_keys_to_sym(old_hash)
+        old_hash.inject(formatted_hash={}) do |formatted_hash,(k,v)| 
+          formatted_hash[k.to_sym] = v
+          formatted_hash
+        end
 
+        formatted_hash
+      end
     end
   end
 end
