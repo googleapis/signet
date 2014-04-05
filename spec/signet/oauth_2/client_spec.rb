@@ -916,18 +916,22 @@ describe Signet::OAuth2::Client, 'configured with custom parameters' do
     )
   end
 
+  # Normalizing to symbols - good test case example here for changes to normalized input.
+  # Also tests Addressable's output.
+  # Note: The only changes made here are to testing the **INTERNAL** representation of options.
   it 'should allow custom parameters to be set on init' do
-    @client.additional_parameters.should == {'type' => 'web_server'}
+    @client.additional_parameters.should == { :type => 'web_server'}
   end
 
   it 'should allow custom parameters to be updated' do
     @client.update!(:additional_parameters => {'type' => 'new_type'})
-    @client.additional_parameters.should == {'type' => 'new_type'}
+    @client.additional_parameters.should == { :type => 'new_type'}
   end
 
   it 'should use custom parameters when generating authorization_uri' do
     @client.authorization_uri().query_values.should == {"access_type"=>"offline", "client_id"=>"s6BhdRkqt3", "redirect_uri"=>"https://example.client.com/callback", "response_type"=>"code", "type"=>"web_server"}
   end
+
   it 'should merge new authorization_uri custom parameters' do
     @client.authorization_uri(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).query_values.should == {"access_type"=>"offline", "client_id"=>"s6BhdRkqt3", "new_param"=>"new_val",  "response_type"=>"code","redirect_uri"=>"https://example.client.com/callback", "type"=>"new_type"}
   end

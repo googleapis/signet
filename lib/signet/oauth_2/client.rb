@@ -153,26 +153,27 @@ module Signet
       # @see Signet::OAuth2::Client#initialize
       # @see Signet::OAuth2::Client#update_token!
       def update!(options={})
-        # Normalize key to String to allow indifferent access.
-        options = options.inject({}) { |accu, (k, v)| accu[k.to_s] = v; accu }
-        self.authorization_uri = options["authorization_uri"] if options.has_key?("authorization_uri")
-        self.token_credential_uri = options["token_credential_uri"] if options.has_key?("token_credential_uri")
-        self.client_id = options["client_id"] if options.has_key?("client_id")
-        self.client_secret = options["client_secret"] if options.has_key?("client_secret")
-        self.scope = options["scope"] if options.has_key?("scope")
-        self.state = options["state"] if options.has_key?("state")
-        self.code = options["code"] if options.has_key?("code")
-        self.redirect_uri = options["redirect_uri"] if options.has_key?("redirect_uri")
-        self.username = options["username"] if options.has_key?("username")
-        self.password = options["password"] if options.has_key?("password")
-        self.issuer = options["issuer"] if options.has_key?("issuer")
-        self.person = options["person"] if options.has_key?("person")
-        self.sub = options["sub"] if options.has_key?("sub")
-        self.expiry = options["expiry"] || 60
-        self.audience = options["audience"] if options.has_key?("audience")
-        self.signing_key = options["signing_key"] if options.has_key?("signing_key")
-        self.extension_parameters = options["extension_parameters"] || {}
-        self.additional_parameters = options["additional_parameters"] || {}
+        # Normalize all keys to symbols to allow indifferent access.
+        options = deep_hash_normalize(options)
+
+        self.authorization_uri = options[:authorization_uri] if options.has_key?(:authorization_uri)
+        self.token_credential_uri = options[:token_credential_uri] if options.has_key?(:token_credential_uri)
+        self.client_id = options[:client_id] if options.has_key?(:client_id)
+        self.client_secret = options[:client_secret] if options.has_key?(:client_secret)
+        self.scope = options[:scope] if options.has_key?(:scope)
+        self.state = options[:state] if options.has_key?(:state)
+        self.code = options[:code] if options.has_key?(:code)
+        self.redirect_uri = options[:redirect_uri] if options.has_key?(:redirect_uri)
+        self.username = options[:username] if options.has_key?(:username)
+        self.password = options[:password] if options.has_key?(:password)
+        self.issuer = options[:issuer] if options.has_key?(:issuer)
+        self.person = options[:person] if options.has_key?(:person)
+        self.sub = options[:sub] if options.has_key?(:sub)
+        self.expiry = options[:expiry] || 60
+        self.audience = options[:audience] if options.has_key?(:audience)
+        self.signing_key = options[:signing_key] if options.has_key?(:signing_key)
+        self.extension_parameters = options[:extension_parameters] || {}
+        self.additional_parameters = options[:additional_parameters] || {}
         self.update_token!(options)
         return self
       end
@@ -206,19 +207,19 @@ module Signet
       # @see Signet::OAuth2::Client#initialize
       # @see Signet::OAuth2::Client#update!
       def update_token!(options={})
-        # Normalize key to String to allow indifferent access.
-        options = options.inject({}) { |accu, (k, v)| accu[k.to_s] = v; accu }
+        # Normalize all keys to symbols to allow indifferent access internally
+        options = deep_hash_normalize(options)
 
-        self.expires_in = options["expires_in"] if options.has_key?("expires_in")
-        self.expires_at = options["expires_at"] if options.has_key?("expires_at")
+        self.expires_in = options[:expires_in] if options.has_key?(:expires_in)
+        self.expires_at = options[:expires_at] if options.has_key?(:expires_at)
 
         # By default, the token is issued at `Time.now` when `expires_in` is
         # set, but this can be used to supply a more precise time.
-        self.issued_at = options["issued_at"] if options.has_key?("issued_at")
+        self.issued_at = options[:issued_at] if options.has_key?(:issued_at)
 
-        self.access_token = options["access_token"] if options.has_key?("access_token")
-        self.refresh_token = options["refresh_token"] if options.has_key?("refresh_token")
-        self.id_token = options["id_token"] if options.has_key?("id_token")
+        self.access_token = options[:access_token] if options.has_key?(:access_token)
+        self.refresh_token = options[:refresh_token] if options.has_key?(:refresh_token)
+        self.id_token = options[:id_token] if options.has_key?(:id_token)
 
         return self
       end
@@ -230,6 +231,9 @@ module Signet
       #
       # @see Signet::OAuth2.generate_authorization_uri
       def authorization_uri(options={})
+        # Normalize external input
+        options = deep_hash_normalize(options)
+
         return nil if @authorization_uri == nil
         unless options[:response_type]
           options[:response_type] = :code
@@ -272,7 +276,7 @@ module Signet
       # @param [Addressable::URI, Hash, String, #to_str] new_authorization_uri
       #   The authorization URI.
       def authorization_uri=(new_authorization_uri)
-        @authorization_uri = addressable_uri_for(new_authorization_uri)
+        @authorization_uri = coerce_uri(new_authorization_uri)
       end
 
       ##
@@ -289,14 +293,14 @@ module Signet
       # @param [Addressable::URI, Hash, String, #to_str] new_token_credential_uri
       #   The token credential URI.
       def token_credential_uri=(new_token_credential_uri)
-        @token_credential_uri = addressable_uri_for(new_token_credential_uri)
+        @token_credential_uri = coerce_uri(new_token_credential_uri)
       end
 
       # Addressable expects URIs formatted as hashes to come in with symbols as keys. 
       # Returns nil implicitly for the nil case.
-      def addressable_uri_for(incoming_uri)
+      def coerce_uri(incoming_uri)
         if incoming_uri.is_a? Hash
-          Addressable::URI.new(hash_keys_to_sym(incoming_uri))
+          Addressable::URI.new(deep_hash_normalize(incoming_uri))
         elsif incoming_uri
           Addressable::URI.parse(incoming_uri)
         end
@@ -821,6 +825,8 @@ module Signet
       end
 
       def to_jwt(options={})
+        options = deep_hash_normalize(options)
+
         now = Time.new
         skew = options[:skew] || 60
         assertion = {
@@ -875,6 +881,8 @@ module Signet
       #
       # @return [Array] The request object.
       def generate_access_token_request(options={})
+        options = deep_hash_normalize(options)
+
         if self.token_credential_uri == nil
           raise ArgumentError, 'Missing token endpoint URI.'
         end
@@ -920,6 +928,8 @@ module Signet
       end
 
       def fetch_access_token(options={})
+        options = deep_hash_normalize(options)
+
         options[:connection] ||= Faraday.default_connection
         request = self.generate_access_token_request(options)
         request_env = request.to_env(options[:connection])
@@ -947,6 +957,8 @@ module Signet
       end
 
       def fetch_access_token!(options={})
+        options = deep_hash_normalize(options)
+
         token_hash = self.fetch_access_token(options)
         if token_hash
           # No-op for grant types other than `authorization_code`.
@@ -962,6 +974,8 @@ module Signet
       ##
       # Refresh the access token, if possible
       def refresh!(options={})
+        options = deep_hash_normalize(options)
+
         self.fetch_access_token!(options)
       end
 
@@ -987,6 +1001,8 @@ module Signet
       #
       # @return [Faraday::Request] The request object.
       def generate_authenticated_request(options={})
+        options = deep_hash_normalize(options)
+
         if self.access_token == nil
           raise ArgumentError, 'Missing access token.'
         end
@@ -1075,6 +1091,8 @@ module Signet
       #
       # @return [Array] The response object.
       def fetch_protected_resource(options={})
+        options = deep_hash_normalize(options)
+
         options[:connection] ||= Faraday.default_connection
         request = self.generate_authenticated_request(options)
         request_env = request.to_env(options[:connection])
@@ -1111,10 +1129,19 @@ module Signet
         return uri.to_s == 'urn:ietf:wg:oauth:2.0:oob' || uri.to_s == 'oob'
       end
       
-      # Convert all keys in this hash (not nested) to symbols for uniform retrieval
-      def hash_keys_to_sym(old_hash)
-        old_hash.inject(formatted_hash={}) do |formatted_hash,(k,v)| 
-          formatted_hash[k.to_sym] = v
+      # Convert all keys in this hash (nested) to symbols for uniform retrieval
+      def recursive_hash_normalize_keys(val)
+        if val.is_a? Hash
+          deep_hash_normalize(val)
+        else
+          val
+        end
+      end
+
+      def deep_hash_normalize(old_hash)
+        old_hash.inject(formatted_hash={}) do |formatted_hash,(k,v)|
+
+          formatted_hash[k.to_sym] = recursive_hash_normalize_keys(v)
           formatted_hash
         end
 
