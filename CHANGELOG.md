@@ -1,3 +1,16 @@
+# 0.5.1
+
+* Allow Hash objects to be used to initialize authorization URI
+* Added PLAINTEXT and RSA-SHA1 signature methods to OAuth 1 support
+* Added client object serialization
+* The `approval_prompt` option no longer defaults to `:force`
+* The `approval_prompt` and `prompt` are now mutually exclusive.
+
+# 0.5.0
+
+* Switched to faraday 0.9.0
+* Added `expires_at` option
+
 # 0.4.5
 
 * Minor documentation fixes
