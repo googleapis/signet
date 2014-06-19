@@ -46,6 +46,9 @@ module Signet
       #   - <code>:scope</code> -
       #     The scope of the access request, expressed either as an Array
       #     or as a space-delimited String.
+      #   - <code>:hd</code> -
+      #     A hosted domain streamlines the login process for Google Apps hosted
+      #     accounts.
       #   - <code>:state</code> -
       #     An arbitrary string designed to allow the client to maintain state.
       #   - <code>:code</code> -
@@ -112,6 +115,9 @@ module Signet
       #   - <code>:scope</code> -
       #     The scope of the access request, expressed either as an Array
       #     or as a space-delimited String.
+      #   - <code>:hd</code> -
+      #     A hosted domain streamlines the login process for Google Apps hosted
+      #     accounts.
       #   - <code>:state</code> -
       #     An arbitrary string designed to allow the client to maintain state.
       #   - <code>:code</code> -
@@ -160,6 +166,7 @@ module Signet
         self.client_id = options["client_id"] if options.has_key?("client_id")
         self.client_secret = options["client_secret"] if options.has_key?("client_secret")
         self.scope = options["scope"] if options.has_key?("scope")
+        self.hd = options["hd"] if options.has_key?("hd")
         self.state = options["state"] if options.has_key?("state")
         self.code = options["code"] if options.has_key?("code")
         self.redirect_uri = options["redirect_uri"] if options.has_key?("redirect_uri")
@@ -250,6 +257,9 @@ module Signet
         end
         if !options[:scope] && self.scope
           options[:scope] = self.scope.join(' ')
+        end
+        if !options[:hd] && self.hd
+          options[:hd] = self.hd
         end
         options[:state] = self.state unless options[:state]
         options.merge!(self.additional_parameters.merge(options[:additional_parameters] || {}))
@@ -375,6 +385,24 @@ module Signet
         else
           raise TypeError, "Expected Array or String, got #{new_scope.class}"
         end
+      end
+
+      ##
+      # Returns the hd (hosted domain) for this client. HD parameter 
+      # streamlines the login process for Google Apps hosted accounts.
+      #
+      # @return [String] The hd value.
+      def hd
+        return @hd
+      end
+
+      ##
+      # Sets the client's hd value.
+      #
+      # @param [String] new_hd
+      #   The hd value.
+      def hd=(new_hd)
+        @hd = new_hd
       end
 
       ##
@@ -854,6 +882,7 @@ module Signet
           'client_id' => self.client_id,
           'client_secret' => self.client_secret,
           'scope' => self.scope,
+          'hd' => self.hd,
           'state' => self.state,
           'code' => self.code,
           'redirect_uri' => self.redirect_uri,
