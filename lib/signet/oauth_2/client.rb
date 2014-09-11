@@ -273,11 +273,11 @@ module Signet
       #   The authorization URI.
       def authorization_uri=(new_authorization_uri)
         if new_authorization_uri != nil
-          new_authorization_uri = Addressable::URI.send(
-            new_authorization_uri.kind_of?(Hash) ? :new : :parse,
-            new_authorization_uri
-          )
-          @authorization_uri = new_authorization_uri
+          @authorization_uri = if new_authorization_uri.kind_of? Hash
+            Addressable::URI.new new_authorization_uri.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+          else
+            Addressable::URI.parse new_authorization_uri
+          end
         else
           @authorization_uri = nil
         end
@@ -298,11 +298,11 @@ module Signet
       #   The token credential URI.
       def token_credential_uri=(new_token_credential_uri)
         if new_token_credential_uri != nil
-          new_token_credential_uri = Addressable::URI.send(
-            new_token_credential_uri.kind_of?(Hash) ? :new : :parse,
-            new_token_credential_uri
-          )
-          @token_credential_uri = new_token_credential_uri
+          @token_credential_uri = if new_token_credential_uri.kind_of? Hash
+            Addressable::URI.new new_token_credential_uri.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+          else
+            Addressable::URI.parse new_token_credential_uri
+          end
         else
           @token_credential_uri = nil
         end
