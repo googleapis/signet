@@ -45,9 +45,9 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
   end
 
   it 'should raise an error if scope is omitted' do
-    (lambda do
+    expect(lambda do
       @client.fetch_temporary_credential!
-    end).should raise_error(Signet::AuthorizationError)
+    end).to raise_error(Signet::AuthorizationError)
   end
 
   it 'should raise an error if the server gives an unexpected status' do
@@ -56,7 +56,7 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
         [509, {}, 'Rate limit hit or something.']
       end
     end
-    (lambda do
+    expect(lambda do
       connection = Faraday.new(:url => 'https://www.google.com') do |builder|
         builder.adapter(:test, stubs)
       end
@@ -66,7 +66,7 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
           :scope => 'https://www.google.com/m8/feeds/'
         }
       )
-    end).should raise_error(Signet::AuthorizationError)
+    end).to raise_error(Signet::AuthorizationError)
     stubs.verify_stubbed_calls
   end
 
@@ -74,35 +74,35 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
     @client.fetch_temporary_credential!(:additional_parameters => {
       :scope => 'https://www.google.com/m8/feeds/'
     })
-    @client.temporary_credential_key.size.should > 0
-    @client.temporary_credential_secret.size.should > 0
+    expect(@client.temporary_credential_key.size).to be > 0
+    expect(@client.temporary_credential_secret.size).to be > 0
   end
 
   it 'should have the correct authorization URI' do
     @client.fetch_temporary_credential!(:additional_parameters => {
       :scope => 'https://www.google.com/m8/feeds/'
     })
-    @client.authorization_uri.query_values["oauth_token"].should ==
-      @client.temporary_credential_key
+    expect(@client.authorization_uri.query_values["oauth_token"]).to eq(
+      @client.temporary_credential_key)
   end
 
   it 'should raise an error if the temporary credentials are bogus' do
-    (lambda do
+    expect(lambda do
       @client.temporary_credential_key = '12345'
       @client.temporary_credential_secret = '12345'
       @client.fetch_token_credential!(:verifier => 'XbVKagBShNsAGBRJWoC4gtFR')
-    end).should raise_error(Signet::AuthorizationError)
+    end).to raise_error(Signet::AuthorizationError)
   end
 
   it 'should raise an error if the token credentials are bogus' do
-    (lambda do
+    expect(lambda do
       @client.token_credential_key = '12345'
       @client.token_credential_secret = '12345'
       @client.fetch_protected_resource(
         :uri =>
           'https://www.google.com/m8/feeds/'
       )
-    end).should raise_error(Signet::AuthorizationError)
+    end).to raise_error(Signet::AuthorizationError)
   end
 
   # We have to stub responses for the token credentials
@@ -130,9 +130,8 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
         :scope => 'https://www.google.com/m8/feeds/'
       }
     )
-    @client.token_credential_key.should ==
-      '1/YFw6UH2Dn7W691-qAbCfsmqEHQrPb7ptIvYx9m6YkUQ'
-    @client.token_credential_secret.should == 'Ew3YHAY4bcBryiOUvbdHGa57'
+    expect(@client.token_credential_key).to eq '1/YFw6UH2Dn7W691-qAbCfsmqEHQrPb7ptIvYx9m6YkUQ'
+    expect(@client.token_credential_secret).to eq 'Ew3YHAY4bcBryiOUvbdHGa57'
     stubs.verify_stubbed_calls
   end
 
@@ -142,7 +141,7 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
         [509, {}, 'Rate limit hit or something.']
       end
     end
-    (lambda do
+    expect(lambda do
       connection = Faraday.new(:url => 'https://www.google.com') do |builder|
         builder.adapter(:test, stubs)
       end
@@ -155,7 +154,7 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
           :scope => 'https://www.google.com/m8/feeds/'
         }
       )
-    end).should raise_error(Signet::AuthorizationError)
+    end).to raise_error(Signet::AuthorizationError)
     stubs.verify_stubbed_calls
   end
 
@@ -182,9 +181,9 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
       :uri =>
         'http://www-opensocial.googleusercontent.com/api/people/@me/@self'
     )
-    response.status.should == 200
-    response.headers['Content-Type'].should == 'application/json'
-    response.body.should == '{"data":"goes here"}'
+    expect(response.status).to eq 200
+    expect(response.headers['Content-Type']).to eq 'application/json'
+    expect(response.body).to eq '{"data":"goes here"}'
   end
 
   it 'should correctly fetch the protected resource' do
@@ -213,9 +212,9 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
         )
       end
     )
-    response.status.should == 200
-    response.headers['Content-Type'].should == 'application/json'
-    response.body.should == '{"data":"goes here"}'
+    expect(response.status).to eq 200
+    expect(response.headers['Content-Type']).to eq 'application/json'
+    expect(response.body).to eq '{"data":"goes here"}'
   end
 end
 
@@ -229,11 +228,11 @@ describe Signet::OAuth1::Client, 'configured for two-legged OAuth' do
   end
 
   it 'should raise an error if the client credentials are bogus' do
-    (lambda do
+    expect(lambda do
       @client.fetch_protected_resource(
         :uri =>
           'https://www.google.com/m8/feeds/'
       )
-    end).should raise_error(Signet::AuthorizationError)
+    end).to raise_error(Signet::AuthorizationError)
   end
 end

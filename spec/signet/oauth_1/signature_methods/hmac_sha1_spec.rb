@@ -38,9 +38,9 @@ describe Signet::OAuth1::HMACSHA1 do
     client_credential_secret = "kd94hf93k423kf44"
     token_credential_secret = "pfkkdhi9sl3r4s00"
     base_string = Signet::OAuth1.generate_base_string(method, uri, parameters)
-    Signet::OAuth1::HMACSHA1.generate_signature(
+    expect(Signet::OAuth1::HMACSHA1.generate_signature(
       base_string, client_credential_secret, token_credential_secret
-    ).should == "tR3+Ty81lMeYAr/Fid0kMTYa/WM="
+    )).to eq "tR3+Ty81lMeYAr/Fid0kMTYa/WM="
   end
 
   it 'should correctly generate a signature' do
@@ -59,8 +59,8 @@ describe Signet::OAuth1::HMACSHA1 do
     client_credential_secret = "Kv+o2XXL/9RxkQW3lO3QTVlH"
     token_credential_secret = "QllSuL9eQ5FXFO1Z/HcgL4ON"
     base_string = Signet::OAuth1.generate_base_string(method, uri, parameters)
-    Signet::OAuth1::HMACSHA1.generate_signature(
+    expect(Signet::OAuth1::HMACSHA1.generate_signature(
       base_string, client_credential_secret, token_credential_secret
-    ).should == "G/nkdbmbpEA+6RD1Sc5uIefhFfQ="
+    )).to eq "G/nkdbmbpEA+6RD1Sc5uIefhFfQ="
   end
 end

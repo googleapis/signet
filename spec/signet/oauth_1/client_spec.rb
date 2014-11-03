@@ -41,27 +41,27 @@ describe Signet::OAuth1::Client, 'unconfigured' do
   end
 
   it 'should have no temporary_credential_uri' do
-    @client.temporary_credential_uri.should == nil
+    expect(@client.temporary_credential_uri).to be_nil
   end
 
   it 'should allow the temporary_credential_uri to be set to a String' do
     @client.temporary_credential_uri = "http://example.com/"
-    @client.temporary_credential_uri.should === "http://example.com/"
+    expect(@client.temporary_credential_uri.to_s).to eq "http://example.com/"
   end
 
   it 'should allow the temporary_credential_uri to be set to a URI' do
     @client.temporary_credential_uri =
       Addressable::URI.parse("http://example.com/")
-    @client.temporary_credential_uri.should === "http://example.com/"
+    expect(@client.temporary_credential_uri.to_s).to eq "http://example.com/"
   end
 
   it 'should have no authorization_uri' do
-    @client.authorization_uri.should == nil
+    expect(@client.authorization_uri).to be_nil
   end
 
   it 'should allow the authorization_uri to be set to a String' do
     @client.authorization_uri = 'http://example.com/authorize'
-    @client.authorization_uri.to_s.should include(
+    expect(@client.authorization_uri.to_s).to include(
       'http://example.com/authorize'
     )
   end
@@ -70,7 +70,7 @@ describe Signet::OAuth1::Client, 'unconfigured' do
     @client.authorization_uri = {
       :scheme => 'http', :host => 'example.com', :path => '/authorize'
     }
-    @client.authorization_uri.to_s.should include(
+    expect(@client.authorization_uri.to_s).to include(
       'http://example.com/authorize'
     )
   end
@@ -78,321 +78,318 @@ describe Signet::OAuth1::Client, 'unconfigured' do
   it 'should allow the authorization_uri to be set to a URI' do
     @client.authorization_uri =
       Addressable::URI.parse('http://example.com/authorize')
-    @client.authorization_uri.to_s.should include(
+    expect(@client.authorization_uri.to_s).to include(
       'http://example.com/authorize'
     )
   end
 
   it 'should have no token_credential_uri' do
-    @client.token_credential_uri.should == nil
+    expect(@client.token_credential_uri).to be_nil
   end
 
   it 'should allow the token_credential_uri to be set to a String' do
     @client.token_credential_uri = "http://example.com/"
-    @client.token_credential_uri.should === "http://example.com/"
+    expect(@client.token_credential_uri.to_s).to eq "http://example.com/"
   end
 
   it 'should allow the token_credential_uri to be set to a Hash' do
     @client.token_credential_uri = {
       :scheme => 'http', :host => 'example.com', :path => '/token'
     }
-    @client.token_credential_uri.to_s.should === 'http://example.com/token'
+    expect(@client.token_credential_uri.to_s).to eq 'http://example.com/token'
   end
 
   it 'should allow the token_credential_uri to be set to a URI' do
     @client.token_credential_uri =
       Addressable::URI.parse("http://example.com/")
-    @client.token_credential_uri.should === "http://example.com/"
+    expect(@client.token_credential_uri.to_s).to eq "http://example.com/"
   end
 
   it 'should have no client_credential' do
-    @client.client_credential.should == nil
+    expect(@client.client_credential).to be_nil
   end
 
   it 'should raise an error for partially set client credentials' do
     @client.client_credential_key = "12345"
     @client.client_credential_secret = nil
-    (lambda do
+    expect(lambda do
       @client.client_credential
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error for partially set client credentials' do
     @client.client_credential_key = nil
     @client.client_credential_secret = "54321"
-    (lambda do
+    expect(lambda do
       @client.client_credential
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should allow the client_credential to be set to a ' +
       'Signet::OAuth1::Credential' do
     @client.client_credential =
       Signet::OAuth1::Credential.new("12345", "54321")
-    @client.client_credential_key.should == "12345"
-    @client.client_credential_secret.should == "54321"
-    @client.client_credential.should ==
-      Signet::OAuth1::Credential.new("12345", "54321")
+    expect(@client.client_credential_key).to eq "12345"
+    expect(@client.client_credential_secret).to eq "54321"
+    expect(@client.client_credential).to eq Signet::OAuth1::Credential.new("12345", "54321")
   end
 
   it 'should allow the client_credential to be set to nil' do
     @client.client_credential_key = "12345"
     @client.client_credential_secret = "54321"
-    @client.client_credential_key.should == "12345"
-    @client.client_credential_secret.should == "54321"
+    expect(@client.client_credential_key).to eq "12345"
+    expect(@client.client_credential_secret).to eq "54321"
     @client.client_credential = nil
-    @client.client_credential.should == nil
-    @client.client_credential_key.should == nil
-    @client.client_credential_secret.should == nil
+    expect(@client.client_credential).to be_nil
+    expect(@client.client_credential_key).to be_nil
+    expect(@client.client_credential_secret).to be_nil
   end
 
   it 'should not allow the client_credential to be set to a bogus value' do
-    (lambda do
+    expect(lambda do
       @client.client_credential = 42
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should have no client_credential_key' do
-    @client.client_credential_key.should == nil
+    expect(@client.client_credential_key).to be_nil
   end
 
   it 'should allow the client_credential_key to be set to a String' do
     @client.client_credential_key = "12345"
-    @client.client_credential_key.should == "12345"
+    expect(@client.client_credential_key).to eq "12345"
   end
 
   it 'should not allow the client_credential_key to be set to a non-String' do
-    (lambda do
+    expect(lambda do
       @client.client_credential_key = 12345
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should have no client_credential_secret' do
-    @client.client_credential_secret.should == nil
+    expect(@client.client_credential_secret).to be_nil
   end
 
   it 'should allow the client_credential_secret to be set to a String' do
     @client.client_credential_secret = "54321"
-    @client.client_credential_secret.should === "54321"
+    expect(@client.client_credential_secret).to eq "54321"
   end
 
   it 'should not allow the client_credential_secret ' +
       'to be set to a non-String' do
-    (lambda do
+    expect(lambda do
       @client.client_credential_secret = 54321
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should have an out-of-band callback' do
-    @client.callback.should == ::Signet::OAuth1::OUT_OF_BAND
+    expect(@client.callback).to eq ::Signet::OAuth1::OUT_OF_BAND
   end
 
   it 'should allow the callback to be set to a String' do
     @client.callback = "http://example.com/callback"
-    @client.callback.should == "http://example.com/callback"
+    expect(@client.callback).to eq "http://example.com/callback"
   end
 
   it 'should allow the callback to be set to a URI' do
     @client.callback =
       Addressable::URI.parse("http://example.com/callback")
-    @client.callback.should == "http://example.com/callback"
+    expect(@client.callback).to eq "http://example.com/callback"
   end
 
   it 'should not allow the callback to be set to a non-String' do
-    (lambda do
+    expect(lambda do
       @client.callback = 12345
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should raise an error if the temporary credentials URI is not set' do
     @client.client_credential_key = 'dpf43f3p2l4k3l03'
     @client.client_credential_secret = 'kd94hf93k423kf44'
-    (lambda do
+    expect(lambda do
       @client.generate_temporary_credential_request
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if the client credential key is not set' do
     @client.temporary_credential_uri =
       'http://example.com/temporary_credentials'
     @client.client_credential_secret = 'kd94hf93k423kf44'
-    (lambda do
+    expect(lambda do
       @client.generate_temporary_credential_request
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if the client credential secret is not set' do
     @client.temporary_credential_uri =
       'http://example.com/temporary_credentials'
     @client.client_credential_key = 'dpf43f3p2l4k3l03'
-    (lambda do
+    expect(lambda do
       @client.generate_temporary_credential_request
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should have no temporary_credential' do
-    @client.temporary_credential.should == nil
+    expect(@client.temporary_credential).to be_nil
   end
 
   it 'should raise an error for partially set temporary credentials' do
     @client.temporary_credential_key = "12345"
     @client.temporary_credential_secret = nil
-    (lambda do
+    expect(lambda do
       @client.temporary_credential
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error for partially set temporary credentials' do
     @client.temporary_credential_key = nil
     @client.temporary_credential_secret = "54321"
-    (lambda do
+    expect(lambda do
       @client.temporary_credential
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should allow the temporary_credential to be set to a ' +
       'Signet::OAuth1::Credential' do
     @client.temporary_credential =
       Signet::OAuth1::Credential.new("12345", "54321")
-    @client.temporary_credential_key.should == "12345"
-    @client.temporary_credential_secret.should == "54321"
-    @client.temporary_credential.should ==
-      Signet::OAuth1::Credential.new("12345", "54321")
+    expect(@client.temporary_credential_key).to eq "12345"
+    expect(@client.temporary_credential_secret).to eq "54321"
+    expect(@client.temporary_credential).to eq       Signet::OAuth1::Credential.new("12345", "54321")
   end
 
   it 'should allow the temporary_credential to be set to nil' do
     @client.temporary_credential_key = "12345"
     @client.temporary_credential_secret = "54321"
-    @client.temporary_credential_key.should == "12345"
-    @client.temporary_credential_secret.should == "54321"
+    expect(@client.temporary_credential_key).to eq "12345"
+    expect(@client.temporary_credential_secret).to eq "54321"
     @client.temporary_credential = nil
-    @client.temporary_credential.should == nil
-    @client.temporary_credential_key.should == nil
-    @client.temporary_credential_secret.should == nil
+    expect(@client.temporary_credential).to be_nil
+    expect(@client.temporary_credential_key).to be_nil
+    expect(@client.temporary_credential_secret).to be_nil
   end
 
   it 'should not allow the temporary_credential to be set to a bogus value' do
-    (lambda do
+    expect(lambda do
       @client.temporary_credential = 42
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should have no temporary_credential_key' do
-    @client.temporary_credential_key.should == nil
+    expect(@client.temporary_credential_key).to be_nil
   end
 
   it 'should allow the temporary_credential_key to be set to a String' do
     @client.temporary_credential_key = "12345"
-    @client.temporary_credential_key.should === "12345"
+    expect(@client.temporary_credential_key).to eq "12345"
   end
 
   it 'should not allow the temporary_credential_key ' +
       'to be set to a non-String' do
-    (lambda do
+    expect(lambda do
       @client.temporary_credential_key = 12345
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should have no temporary_credential_secret' do
-    @client.temporary_credential_secret.should == nil
+    expect(@client.temporary_credential_secret).to be_nil
   end
 
   it 'should allow the temporary_credential_secret to be set to a String' do
     @client.temporary_credential_secret = "54321"
-    @client.temporary_credential_secret.should === "54321"
+    expect(@client.temporary_credential_secret).to eq "54321"
   end
 
   it 'should not allow the temporary_credential_secret ' +
       'to be set to a non-String' do
-    (lambda do
+    expect(lambda do
       @client.temporary_credential_secret = 54321
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should have no token_credential' do
-    @client.token_credential.should == nil
+    expect(@client.token_credential).to be_nil
   end
 
   it 'should raise an error for partially set token credentials' do
     @client.token_credential_key = "12345"
     @client.token_credential_secret = nil
-    (lambda do
+    expect(lambda do
       @client.token_credential
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error for partially set token credentials' do
     @client.token_credential_key = nil
     @client.token_credential_secret = "54321"
-    (lambda do
+    expect(lambda do
       @client.token_credential
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should allow the token_credential to be set to a ' +
       'Signet::OAuth1::Credential' do
     @client.token_credential =
       Signet::OAuth1::Credential.new("12345", "54321")
-    @client.token_credential_key.should == "12345"
-    @client.token_credential_secret.should == "54321"
-    @client.token_credential.should ==
-      Signet::OAuth1::Credential.new("12345", "54321")
+    expect(@client.token_credential_key).to eq "12345"
+    expect(@client.token_credential_secret).to eq "54321"
+    expect(@client.token_credential).to eq Signet::OAuth1::Credential.new("12345", "54321")
   end
 
   it 'should allow the token_credential to be set to nil' do
     @client.token_credential_key = "12345"
     @client.token_credential_secret = "54321"
-    @client.token_credential_key.should == "12345"
-    @client.token_credential_secret.should == "54321"
+    expect(@client.token_credential_key).to eq "12345"
+    expect(@client.token_credential_secret).to eq "54321"
     @client.token_credential = nil
-    @client.token_credential.should == nil
-    @client.token_credential_key.should == nil
-    @client.token_credential_secret.should == nil
+    expect(@client.token_credential).to be_nil
+    expect(@client.token_credential_key).to be_nil
+    expect(@client.token_credential_secret).to be_nil
   end
 
   it 'should not allow the token_credential to be set to a bogus value' do
-    (lambda do
+    expect(lambda do
       @client.token_credential = 42
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should have no token_credential_key' do
-    @client.token_credential_key.should == nil
+    expect(@client.token_credential_key).to be_nil
   end
 
   it 'should allow the token_credential_key to be set to a String' do
     @client.token_credential_key = "12345"
-    @client.token_credential_key.should === "12345"
+    expect(@client.token_credential_key).to eq "12345"
   end
 
   it 'should not allow the token_credential_key ' +
       'to be set to a non-String' do
-    (lambda do
+    expect(lambda do
       @client.token_credential_key = 12345
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should have no token_credential_secret' do
-    @client.token_credential_secret.should == nil
+    expect(@client.token_credential_secret).to be_nil
   end
 
   it 'should allow the token_credential_secret to be set to a String' do
     @client.token_credential_secret = "54321"
-    @client.token_credential_secret.should === "54321"
+    expect(@client.token_credential_secret).to eq "54321"
   end
 
   it 'should not allow the token_credential_secret ' +
       'to be set to a non-String' do
-    (lambda do
+    expect(lambda do
       @client.token_credential_secret = 54321
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should not allow the two_legged flag ' +
       'to be set to a non-Boolean' do
-    (lambda do
+    expect(lambda do
       @client.two_legged = 42
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 end
 
@@ -416,43 +413,40 @@ describe Signet::OAuth1::Client, 'configured' do
 
   it 'should generate a JSON representation of the client' do
     json = @client.to_json
-    json.should_not == nil
+    expect(json).not_to be_nil
 
     deserialized = MultiJson.load(json)
-    deserialized["temporary_credential_uri"].should ==
-      'http://example.com/temporary_credentials'
-    deserialized["authorization_uri"].should include(
+    expect(deserialized["temporary_credential_uri"]).to eq       'http://example.com/temporary_credentials'
+    expect(deserialized["authorization_uri"]).to include(
       'http://example.com/authorize')
-    deserialized["token_credential_uri"].should ==
-      'http://example.com/token_credentials'
-    deserialized["callback"].should == 'http://example.com/callback'
-    deserialized["client_credential_key"].should == 'dpf43f3p2l4k3l03'
-    deserialized["client_credential_secret"].should == 'kd94hf93k423kf44'
-    deserialized["temporary_credential_key"].should == 'hh5s93j4hdidpola'
-    deserialized["temporary_credential_secret"].should == 'hdhd0244k9j7ao03'
-    deserialized["token_credential_key"].should == 'nnch734d00sl2jdk'
-    deserialized["token_credential_secret"].should == 'pfkkdhi9sl3r4s00'
+    expect(deserialized["token_credential_uri"]).to eq       'http://example.com/token_credentials'
+    expect(deserialized["callback"]).to eq 'http://example.com/callback'
+    expect(deserialized["client_credential_key"]).to eq 'dpf43f3p2l4k3l03'
+    expect(deserialized["client_credential_secret"]).to eq 'kd94hf93k423kf44'
+    expect(deserialized["temporary_credential_key"]).to eq 'hh5s93j4hdidpola'
+    expect(deserialized["temporary_credential_secret"]).to eq 'hdhd0244k9j7ao03'
+    expect(deserialized["token_credential_key"]).to eq 'nnch734d00sl2jdk'
+    expect(deserialized["token_credential_secret"]).to eq 'pfkkdhi9sl3r4s00'
   end
 
   it 'should generate an authorization URI with a callback' do
     @client.temporary_credential_key = nil
-    @client.authorization_uri.should ===
-      'http://example.com/authorize?oauth_callback=http://example.com/callback'
+    expect(@client.authorization_uri.to_s).to eq 'http://example.com/authorize?oauth_callback=http://example.com/callback'
   end
 
   it 'should generate an authorization URI with a temporary credential' do
     @client.callback = nil
-    @client.authorization_uri.to_s.should include(
+    expect(@client.authorization_uri.to_s).to include(
       'oauth_token=hh5s93j4hdidpola'
     )
   end
 
   it 'should generate an authorization URI both a callback and ' +
       'a temporary credential' do
-    @client.authorization_uri.to_s.should include(
+    expect(@client.authorization_uri.to_s).to include(
       'oauth_callback=http://example.com/callback'
     )
-    @client.authorization_uri.to_s.should include(
+    expect(@client.authorization_uri.to_s).to include(
       'oauth_token=hh5s93j4hdidpola'
     )
   end
@@ -461,101 +455,101 @@ describe Signet::OAuth1::Client, 'configured' do
     authorization_uri = @client.authorization_uri(
       :additional_parameters => {:domain => 'www.example.com'}
     )
-    authorization_uri.to_s.should include(
+    expect(authorization_uri.to_s).to include(
       'oauth_callback=http://example.com/callback'
     )
-    authorization_uri.to_s.should include(
+    expect(authorization_uri.to_s).to include(
       'oauth_token=hh5s93j4hdidpola'
     )
-    authorization_uri.to_s.should include(
+    expect(authorization_uri.to_s).to include(
       'domain=www.example.com'
     )
   end
 
   it 'should raise an error if the verifier is not provided' do
-    (lambda do
+    expect(lambda do
       @client.generate_token_credential_request
-    end).should raise_error(ArgumentError)
-    (lambda do
+    end).to raise_error(ArgumentError)
+    expect(lambda do
       @client.generate_token_credential_request(:verifier => nil)
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if the token credentials URI is not set' do
     @client.token_credential_uri = nil
-    (lambda do
+    expect(lambda do
       @client.generate_token_credential_request(:verifier => '12345')
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if the client credential key is not set' do
     @client.client_credential_key = nil
-    (lambda do
+    expect(lambda do
       @client.generate_token_credential_request(:verifier => '12345')
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if the client credential secret is not set' do
     @client.client_credential_secret = nil
-    (lambda do
+    expect(lambda do
       @client.generate_token_credential_request(:verifier => '12345')
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if the temporary credential key is not set' do
     @client.temporary_credential_key = nil
-    (lambda do
+    expect(lambda do
       @client.generate_token_credential_request(:verifier => '12345')
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if the temporary credential secret is not set' do
     @client.temporary_credential_secret = nil
-    (lambda do
+    expect(lambda do
       @client.generate_token_credential_request(:verifier => '12345')
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if the client credential key is not set' do
     @client.client_credential_key = nil
-    (lambda do
+    expect(lambda do
       @client.generate_authenticated_request
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if the client credential secret is not set' do
     @client.client_credential_secret = nil
-    (lambda do
+    expect(lambda do
       @client.generate_authenticated_request
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if the token credential key is not set' do
     @client.token_credential_key = nil
-    (lambda do
+    expect(lambda do
       @client.generate_authenticated_request
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if the token credential secret is not set' do
     @client.token_credential_secret = nil
-    (lambda do
+    expect(lambda do
       @client.generate_authenticated_request
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if no request is provided' do
-    (lambda do
+    expect(lambda do
       @client.generate_authenticated_request
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if a bogus request is provided' do
-    (lambda do
+    expect(lambda do
       @client.generate_authenticated_request(
         :request => []
       )
-    end).should raise_error
+    end).to raise_error
   end
 
   it 'should not raise an error if a request is ' +
@@ -568,13 +562,13 @@ describe Signet::OAuth1::Client, 'configured' do
   end
 
   it 'should raise an error if no URI is provided' do
-    (lambda do
+    expect(lambda do
       @client.generate_authenticated_request(
         :method => 'GET',
         :headers => [],
         :body => ''
       )
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should not raise an error if a request body is chunked' do
@@ -583,8 +577,8 @@ describe Signet::OAuth1::Client, 'configured' do
       :uri => 'https://photos.example.net/photos',
       :body => ['A chunked body.']
     )
-    request.should be_kind_of(Faraday::Request)
-    request.body.should == 'A chunked body.'
+    expect(request).to be_kind_of(Faraday::Request)
+    expect(request.body).to eq 'A chunked body.'
   end
 
   it 'should not raise an error if a request body is chunked' do
@@ -596,40 +590,40 @@ describe Signet::OAuth1::Client, 'configured' do
       :uri => 'https://photos.example.net/photos',
       :body => chunked_body
     )
-    request.should be_kind_of(Faraday::Request)
-    request.body.should == 'A chunked body.'
+    expect(request).to be_kind_of(Faraday::Request)
+    expect(request.body).to eq 'A chunked body.'
   end
 
   it 'should raise an error if a request body is of a bogus type' do
-    (lambda do
+    expect(lambda do
       @client.generate_authenticated_request(
         :method => 'POST',
         :uri => 'https://photos.example.net/photos',
         :body => 42
       )
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should correctly fetch the temporary credentials' do
     # Repeat this because signatures change from test to test
     10.times do
       request = @client.generate_temporary_credential_request
-      request.method.should == :post
-      request.path.should === 'http://example.com/temporary_credentials'
+      expect(request.method).to eq :post
+      expect(request.path).to eq 'http://example.com/temporary_credentials'
       authorization_header = request.headers['Authorization']
       parameters = ::Signet::OAuth1.parse_authorization_header(
         authorization_header
       ).inject({}) { |h,(k,v)| h[k]=v; h }
-      parameters.should_not have_key('oauth_client_credential_key')
-      parameters.should_not have_key('oauth_temporary_credential_key')
-      parameters.should_not have_key('oauth_token')
-      parameters['oauth_nonce'].should =~ /^\w+$/
-      parameters['oauth_callback'].should == @client.callback
-      parameters['oauth_timestamp'].should =~ /^\d+$/
-      parameters['oauth_signature_method'].should == 'HMAC-SHA1'
-      parameters['oauth_consumer_key'].should == @client.client_credential_key
-      parameters['oauth_signature'].should =~ /^[a-zA-Z0-9\=\/\+]+$/
-      parameters['oauth_version'].should == '1.0'
+      expect(parameters).not_to have_key('oauth_client_credential_key')
+      expect(parameters).not_to have_key('oauth_temporary_credential_key')
+      expect(parameters).not_to have_key('oauth_token')
+      expect(parameters['oauth_nonce']).to match(/^\w+$/)
+      expect(parameters['oauth_callback']).to eq @client.callback
+      expect(parameters['oauth_timestamp']).to match(/^\d+$/)
+      expect(parameters['oauth_signature_method']).to eq 'HMAC-SHA1'
+      expect(parameters['oauth_consumer_key']).to eq @client.client_credential_key
+      expect(parameters['oauth_signature']).to match(/^[a-zA-Z0-9\=\/\+]+$/)
+      expect(parameters['oauth_version']).to eq '1.0'
     end
   end
 
@@ -639,23 +633,23 @@ describe Signet::OAuth1::Client, 'configured' do
       request = @client.generate_token_credential_request(
         :verifier => '473f82d3'
       )
-      request.method.should == :post
-      request.path.should === 'http://example.com/token_credentials'
+      expect(request.method).to eq :post
+      expect(request.path).to eq 'http://example.com/token_credentials'
       authorization_header = request.headers['Authorization']
       parameters = ::Signet::OAuth1.parse_authorization_header(
         authorization_header
       ).inject({}) { |h,(k,v)| h[k]=v; h }
-      parameters.should_not have_key('oauth_client_credential_key')
-      parameters.should_not have_key('oauth_temporary_credential_key')
-      parameters.should_not have_key('oauth_callback')
-      parameters['oauth_nonce'].should =~ /^\w+$/
-      parameters['oauth_timestamp'].should =~ /^\d+$/
-      parameters['oauth_signature_method'].should == 'HMAC-SHA1'
-      parameters['oauth_consumer_key'].should == @client.client_credential_key
-      parameters['oauth_token'].should == @client.temporary_credential_key
-      parameters['oauth_signature'].should =~ /^[a-zA-Z0-9\=\/\+]+$/
-      parameters['oauth_verifier'].should == '473f82d3'
-      parameters['oauth_version'].should == '1.0'
+      expect(parameters).not_to have_key('oauth_client_credential_key')
+      expect(parameters).not_to have_key('oauth_temporary_credential_key')
+      expect(parameters).not_to have_key('oauth_callback')
+      expect(parameters['oauth_nonce']).to match(/^\w+$/)
+      expect(parameters['oauth_timestamp']).to match(/^\d+$/)
+      expect(parameters['oauth_signature_method']).to eq 'HMAC-SHA1'
+      expect(parameters['oauth_consumer_key']).to eq @client.client_credential_key
+      expect(parameters['oauth_token']).to eq @client.temporary_credential_key
+      expect(parameters['oauth_signature']).to match(/^[a-zA-Z0-9\=\/\+]+$/)
+      expect(parameters['oauth_verifier']).to eq '473f82d3'
+      expect(parameters['oauth_version']).to eq '1.0'
     end
   end
 
@@ -671,27 +665,25 @@ describe Signet::OAuth1::Client, 'configured' do
       signed_request = @client.generate_authenticated_request(
         :request => original_request
       )
-      signed_request.method.should == :get
-      signed_request.path.should ===
-        'https://photos.example.net/photos'
-      signed_request.params.should ==
-        {"file"=>"vacation.jpg", "size"=>"original"}
+      expect(signed_request.method).to eq :get
+      expect(signed_request.path).to eq         'https://photos.example.net/photos'
+      expect(signed_request.params).to eq({"file"=>"vacation.jpg", "size"=>"original"})
       authorization_header = signed_request.headers['Authorization']
-      signed_request.body.should == ''
+      expect(signed_request.body).to eq ''
       parameters = ::Signet::OAuth1.parse_authorization_header(
         authorization_header
       ).inject({}) { |h,(k,v)| h[k]=v; h }
-      parameters.should_not have_key('oauth_client_credential_key')
-      parameters.should_not have_key('oauth_temporary_credential_key')
-      parameters.should_not have_key('oauth_token_credential_key')
-      parameters.should_not have_key('oauth_callback')
-      parameters['oauth_nonce'].should =~ /^\w+$/
-      parameters['oauth_timestamp'].should =~ /^\d+$/
-      parameters['oauth_signature_method'].should == 'HMAC-SHA1'
-      parameters['oauth_consumer_key'].should == @client.client_credential_key
-      parameters['oauth_token'].should == @client.token_credential_key
-      parameters['oauth_signature'].should =~ /^[a-zA-Z0-9\=\/\+]+$/
-      parameters['oauth_version'].should == '1.0'
+      expect(parameters).not_to have_key('oauth_client_credential_key')
+      expect(parameters).not_to have_key('oauth_temporary_credential_key')
+      expect(parameters).not_to have_key('oauth_token_credential_key')
+      expect(parameters).not_to have_key('oauth_callback')
+      expect(parameters['oauth_nonce']).to match(/^\w+$/)
+      expect(parameters['oauth_timestamp']).to match(/^\d+$/)
+      expect(parameters['oauth_signature_method']).to eq 'HMAC-SHA1'
+      expect(parameters['oauth_consumer_key']).to eq @client.client_credential_key
+      expect(parameters['oauth_token']).to eq @client.token_credential_key
+      expect(parameters['oauth_signature']).to match(/^[a-zA-Z0-9\=\/\+]+$/)
+      expect(parameters['oauth_version']).to eq '1.0'
     end
   end
 
@@ -711,25 +703,24 @@ describe Signet::OAuth1::Client, 'configured' do
       signed_request = @client.generate_authenticated_request(
         :request => original_request
       )
-      signed_request.method.should == :post
-      signed_request.path.should ===
-        'https://photos.example.net/photos'
+      expect(signed_request.method).to eq :post
+      expect(signed_request.path).to eq 'https://photos.example.net/photos'
       authorization_header = signed_request.headers['Authorization']
-      signed_request.body.should == 'file=vacation.jpg&size=original'
+      expect(signed_request.body).to eq 'file=vacation.jpg&size=original'
       parameters = ::Signet::OAuth1.parse_authorization_header(
         authorization_header
       ).inject({}) { |h,(k,v)| h[k]=v; h }
-      parameters.should_not have_key('oauth_client_credential_key')
-      parameters.should_not have_key('oauth_temporary_credential_key')
-      parameters.should_not have_key('oauth_token_credential_key')
-      parameters.should_not have_key('oauth_callback')
-      parameters['oauth_nonce'].should =~ /^\w+$/
-      parameters['oauth_timestamp'].should =~ /^\d+$/
-      parameters['oauth_signature_method'].should == 'HMAC-SHA1'
-      parameters['oauth_consumer_key'].should == @client.client_credential_key
-      parameters['oauth_token'].should == @client.token_credential_key
-      parameters['oauth_signature'].should =~ /^[a-zA-Z0-9\=\/\+]+$/
-      parameters['oauth_version'].should == '1.0'
+      expect(parameters).not_to have_key('oauth_client_credential_key')
+      expect(parameters).not_to have_key('oauth_temporary_credential_key')
+      expect(parameters).not_to have_key('oauth_token_credential_key')
+      expect(parameters).not_to have_key('oauth_callback')
+      expect(parameters['oauth_nonce']).to match(/^\w+$/)
+      expect(parameters['oauth_timestamp']).to match(/^\d+$/)
+      expect(parameters['oauth_signature_method']).to eq 'HMAC-SHA1'
+      expect(parameters['oauth_consumer_key']).to eq @client.client_credential_key
+      expect(parameters['oauth_token']).to eq @client.token_credential_key
+      expect(parameters['oauth_signature']).to match(/^[a-zA-Z0-9\=\/\+]+$/)
+      expect(parameters['oauth_version']).to eq '1.0'
     end
   end
 
@@ -753,29 +744,27 @@ describe Signet::OAuth1::Client, 'configured' do
         )
 
         # Should be same request object
-        original_request['Authorization'].should == signed_request['Authorization']
+        expect(original_request['Authorization']).to eq signed_request['Authorization']
 
-        signed_request.method.should == :get
-        signed_request.path.should ===
-          'https://photos.example.net/photos'
-        signed_request.params.should ===
-          {"file"=>"vacation.jpg", "size"=>"original"}
+        expect(signed_request.method).to eq :get
+        expect(signed_request.path).to eq 'https://photos.example.net/photos'
+        expect(signed_request.params).to eq ({"file"=>"vacation.jpg", "size"=>"original"})
         authorization_header = signed_request.headers['Authorization']
-        signed_request.body.should == ''
+        expect(signed_request.body).to eq ''
         parameters = ::Signet::OAuth1.parse_authorization_header(
           authorization_header
         ).inject({}) { |h,(k,v)| h[k]=v; h }
-        parameters.should_not have_key('oauth_client_credential_key')
-        parameters.should_not have_key('oauth_temporary_credential_key')
-        parameters.should_not have_key('oauth_token_credential_key')
-        parameters.should_not have_key('oauth_callback')
-        parameters['oauth_nonce'].should =~ /^\w+$/
-        parameters['oauth_timestamp'].should =~ /^\d+$/
-        parameters['oauth_signature_method'].should == 'HMAC-SHA1'
-        parameters['oauth_consumer_key'].should == @client.client_credential_key
-        parameters['oauth_token'].should == @client.token_credential_key
-        parameters['oauth_signature'].should =~ /^[a-zA-Z0-9\=\/\+]+$/
-        parameters['oauth_version'].should == '1.0'
+        expect(parameters).not_to have_key('oauth_client_credential_key')
+        expect(parameters).not_to have_key('oauth_temporary_credential_key')
+        expect(parameters).not_to have_key('oauth_token_credential_key')
+        expect(parameters).not_to have_key('oauth_callback')
+        expect(parameters['oauth_nonce']).to match(/^\w+$/)
+        expect(parameters['oauth_timestamp']).to match(/^\d+$/)
+        expect(parameters['oauth_signature_method']).to eq 'HMAC-SHA1'
+        expect(parameters['oauth_consumer_key']).to eq @client.client_credential_key
+        expect(parameters['oauth_token']).to eq @client.token_credential_key
+        expect(parameters['oauth_signature']).to match(/^[a-zA-Z0-9\=\/\+]+$/)
+        expect(parameters['oauth_version']).to eq '1.0'
       end
     end
 
@@ -800,29 +789,28 @@ describe Signet::OAuth1::Client, 'configured' do
         )
 
         # Should be same request object
-        original_request['Authorization'].should == signed_request['Authorization']
+        expect(original_request['Authorization']).to eq signed_request['Authorization']
 
-        signed_request.method.should == :post
-        signed_request.path.should ===
-          'https://photos.example.net/photos'
+        expect(signed_request.method).to eq :post
+        expect(signed_request.path).to eq           'https://photos.example.net/photos'
         authorization_header = signed_request.headers['Authorization']
         # Can't rely on the order post parameters are encoded in.
-        signed_request.body.should include('file=vacation.jpg')
-        signed_request.body.should include('size=original')
+        expect(signed_request.body).to include('file=vacation.jpg')
+        expect(signed_request.body).to include('size=original')
         parameters = ::Signet::OAuth1.parse_authorization_header(
           authorization_header
         ).inject({}) { |h,(k,v)| h[k]=v; h }
-        parameters.should_not have_key('oauth_client_credential_key')
-        parameters.should_not have_key('oauth_temporary_credential_key')
-        parameters.should_not have_key('oauth_token_credential_key')
-        parameters.should_not have_key('oauth_callback')
-        parameters['oauth_nonce'].should =~ /^\w+$/
-        parameters['oauth_timestamp'].should =~ /^\d+$/
-        parameters['oauth_signature_method'].should == 'HMAC-SHA1'
-        parameters['oauth_consumer_key'].should == @client.client_credential_key
-        parameters['oauth_token'].should == @client.token_credential_key
-        parameters['oauth_signature'].should =~ /^[a-zA-Z0-9\=\/\+]+$/
-        parameters['oauth_version'].should == '1.0'
+        expect(parameters).not_to have_key('oauth_client_credential_key')
+        expect(parameters).not_to have_key('oauth_temporary_credential_key')
+        expect(parameters).not_to have_key('oauth_token_credential_key')
+        expect(parameters).not_to have_key('oauth_callback')
+        expect(parameters['oauth_nonce']).to match(/^\w+$/)
+        expect(parameters['oauth_timestamp']).to match(/^\d+$/)
+        expect(parameters['oauth_signature_method']).to eq 'HMAC-SHA1'
+        expect(parameters['oauth_consumer_key']).to eq @client.client_credential_key
+        expect(parameters['oauth_token']).to eq @client.token_credential_key
+        expect(parameters['oauth_signature']).to match(/^[a-zA-Z0-9\=\/\+]+$/)
+        expect(parameters['oauth_version']).to eq '1.0'
       end
     end
   end

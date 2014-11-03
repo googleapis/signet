@@ -1,62 +1,10 @@
 require "rubygems/package_task"
 
 namespace :gem do
-  GEM_SPEC = Gem::Specification.new do |s|
-    unless s.respond_to?(:add_development_dependency)
-      puts "The gem spec requires a newer version of RubyGems."
-      exit(1)
-    end
 
-    s.name = PKG_NAME
-    s.version = PKG_VERSION
-    s.author = PKG_AUTHOR
-    s.email = PKG_AUTHOR_EMAIL
-    s.homepage = PKG_HOMEPAGE
-    s.summary = PKG_SUMMARY
-    s.description = PKG_DESCRIPTION
-
-    s.files = PKG_FILES.to_a
-
-    s.has_rdoc = true
-    s.extra_rdoc_files = %w( README.md )
-    s.rdoc_options.concat ["--main",  "README.md"]
-
-    s.add_runtime_dependency("addressable", ">= 2.2.3")
-    s.add_runtime_dependency("faraday", ">= 0.9.0.rc5")
-    s.add_runtime_dependency("multi_json", ">= 1.0.0")
-    s.add_runtime_dependency("jwt", ">= 0.1.5")
-
-    s.add_development_dependency("rake", ">= 0.9.0")
-    s.add_development_dependency("rspec", ">= 2.11.0")
-    s.add_development_dependency("launchy", ">= 2.1.1")
-
-    s.require_path = "lib"
-  end
-
-  Gem::PackageTask.new(GEM_SPEC) do |p|
-    p.gem_spec = GEM_SPEC
-    p.need_tar = true
-    p.need_zip = true
-  end
-
-  desc "Generates .gemspec file"
-  task :gemspec do
-    spec_string = GEM_SPEC.to_ruby
-
-    begin
-      Thread.new { eval("$SAFE = 3\n#{spec_string}", binding) }.join
-    rescue
-      abort "unsafe gemspec: #{$!}"
-    else
-      File.open("#{GEM_SPEC.name}.gemspec", 'w') do |file|
-        file.write spec_string
-      end
-    end
-  end
-
-  desc "Show information about the gem"
-  task :debug do
-    puts GEM_SPEC.to_ruby
+  desc "Build the gem"
+  task :build do
+    system "gem build signet.gemspec"
   end
 
   desc "Install the gem"
