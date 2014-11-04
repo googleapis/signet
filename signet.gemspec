@@ -25,26 +25,26 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<addressable>, [">= 2.2.3"])
       s.add_runtime_dependency(%q<faraday>, [">= 0.9.0.rc5"])
       s.add_runtime_dependency(%q<multi_json>, [">= 1.0.0"])
-      s.add_runtime_dependency(%q<jwt>, [">= 0.1.5"])
+      s.add_runtime_dependency(%q<jwt>, ["0.1.5"])
       s.add_development_dependency(%q<rake>, [">= 0.9.0"])
-      s.add_development_dependency(%q<rspec>, [">= 2.11.0"])
+      s.add_development_dependency(%q<rspec>, ["2.11.0"])
       s.add_development_dependency(%q<launchy>, [">= 2.1.1"])
     else
       s.add_dependency(%q<addressable>, [">= 2.2.3"])
       s.add_dependency(%q<faraday>, [">= 0.9.0.rc5"])
       s.add_dependency(%q<multi_json>, [">= 1.0.0"])
-      s.add_dependency(%q<jwt>, [">= 0.1.5"])
+      s.add_dependency(%q<jwt>, ["0.1.5"])
       s.add_dependency(%q<rake>, [">= 0.9.0"])
-      s.add_dependency(%q<rspec>, [">= 2.11.0"])
+      s.add_dependency(%q<rspec>, ["2.11.0"])
       s.add_dependency(%q<launchy>, [">= 2.1.1"])
     end
   else
     s.add_dependency(%q<addressable>, [">= 2.2.3"])
     s.add_dependency(%q<faraday>, [">= 0.9.0.rc5"])
     s.add_dependency(%q<multi_json>, [">= 1.0.0"])
-    s.add_dependency(%q<jwt>, [">= 0.1.5"])
+    s.add_dependency(%q<jwt>, ["0.1.5"])
     s.add_dependency(%q<rake>, [">= 0.9.0"])
-    s.add_dependency(%q<rspec>, [">= 2.11.0"])
+    s.add_dependency(%q<rspec>, ["2.11.0"])
     s.add_dependency(%q<launchy>, [">= 2.1.1"])
   end
 end

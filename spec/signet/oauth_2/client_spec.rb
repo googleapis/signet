@@ -200,6 +200,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       jwt.should_not == nil
 
       claim = JWT.decode(jwt, @key.public_key, true)
+      claim = claim[0] if claim.kind_of?(Array)
       claim["iss"].should == 'app@example.com'
       claim["scope"].should == 'https://www.googleapis.com/auth/userinfo.profile'
       claim["aud"].should == 'https://accounts.google.com/o/oauth2/token'
@@ -211,6 +212,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       jwt.should_not == nil
 
       claim = JWT.decode(jwt, @key.public_key, true)
+      claim = claim[0] if claim.kind_of?(Array)
       claim["iss"].should == 'app@example.com'
       claim["prn"].should == 'user@example.com'
       claim["scope"].should == 'https://www.googleapis.com/auth/userinfo.profile'
@@ -223,6 +225,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       jwt.should_not == nil
 
       claim = JWT.decode(jwt, @key.public_key, true)
+      claim = claim[0] if claim.kind_of?(Array)
       claim["iss"].should == 'app@example.com'
       claim["prn"].should == 'user@example.com'
       claim["scope"].should == 'https://www.googleapis.com/auth/userinfo.profile'
@@ -235,6 +238,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       jwt.should_not == nil
 
       claim = JWT.decode(jwt, @key.public_key, true)
+      claim = claim[0] if claim.kind_of?(Array)
       claim["iss"].should == 'app@example.com'
       claim["sub"].should == 'user@example.com'
       claim["scope"].should == 'https://www.googleapis.com/auth/userinfo.profile'
@@ -297,6 +301,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       jwt.should_not == nil
 
       claim = JWT.decode(jwt, @key, true)
+      claim = claim[0] if claim.kind_of?(Array)
       claim["iss"].should == 'app@example.com'
       claim["scope"].should == 'https://www.googleapis.com/auth/userinfo.profile'
       claim["aud"].should == 'https://accounts.google.com/o/oauth2/token'
