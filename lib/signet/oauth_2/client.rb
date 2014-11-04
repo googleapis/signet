@@ -273,11 +273,11 @@ module Signet
       #   The authorization URI.
       def authorization_uri=(new_authorization_uri)
         if new_authorization_uri != nil
-          new_authorization_uri = Addressable::URI.send(
-            new_authorization_uri.kind_of?(Hash) ? :new : :parse,
-            new_authorization_uri
-          )
-          @authorization_uri = new_authorization_uri
+          @authorization_uri = if new_authorization_uri.kind_of?(Hash)
+            Addressable::URI.send(:new, new_authorization_uri.inject({}) { |t,(k,v)| t[k.to_sym] = v; t })
+          else
+            Addressable::URI.send(:parse, new_authorization_uri)
+          end
         else
           @authorization_uri = nil
         end
@@ -298,11 +298,11 @@ module Signet
       #   The token credential URI.
       def token_credential_uri=(new_token_credential_uri)
         if new_token_credential_uri != nil
-          new_token_credential_uri = Addressable::URI.send(
-            new_token_credential_uri.kind_of?(Hash) ? :new : :parse,
-            new_token_credential_uri
-          )
-          @token_credential_uri = new_token_credential_uri
+          @token_credential_uri = if new_token_credential_uri.kind_of?(Hash)
+            Addressable::URI.send(:new, new_token_credential_uri.inject({}) { |t,(k,v)| t[k.to_sym] = v; t })
+          else
+            Addressable::URI.send(:parse, new_token_credential_uri)
+          end
         else
           @token_credential_uri = nil
         end
@@ -693,6 +693,7 @@ module Signet
       # @return [String] The decoded ID token.
       def decoded_id_token(public_key=nil)
         decoded = JWT.decode(self.id_token, public_key, !!public_key)
+        decoded = decoded[0] if decoded.kind_of?(Array)
         if !decoded.has_key?('aud')
           raise Signet::UnsafeOperationError, 'No ID token audience declared.'
         elsif decoded['aud'] != self.client_id
