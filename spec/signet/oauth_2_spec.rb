@@ -167,23 +167,33 @@ describe Signet::OAuth2 do
   end
 
   describe 'when parsing a token response body' do
+
     it 'should correctly handle just an access token' do
-      expect(Signet::OAuth2.parse_json_credentials(
-        '{"access_token": "12345"}'
+      expect(Signet::OAuth2.parse_credentials(
+        '{"access_token": "12345"}',
+        'application/json; charset=utf-8'
       )).to eq ({"access_token" => "12345"})
+    end
+
+    it 'should handle form encoded responses' do
+      expect(Signet::OAuth2.parse_credentials(
+        'access_token=12345&expires=1000',
+        'application/x-www-form-urlencoded; charset=utf-8'
+      )).to eq({"access_token" => "12345", "expires" => "1000" })
     end
 
     it 'should raise an error for an invalid body' do
       expect(lambda do
-        Signet::OAuth2.parse_json_credentials(
-          'This is not JSON.'
+        Signet::OAuth2.parse_credentials(
+          'This is not JSON.',
+          'application/json'
         )
       end).to raise_error(MultiJson::DecodeError)
     end
 
     it 'should raise an error for a bogus body' do
       expect(lambda do
-        Signet::OAuth2.parse_json_credentials(:bogus)
+        Signet::OAuth2.parse_credentials(:bogus, 'application/json')
       end).to raise_error(TypeError)
     end
   end

@@ -24,6 +24,14 @@ require 'jwt'
 
 conn = Faraday.default_connection
 
+def build_json_response(payload)
+  [200, { "Content-Type" => "application/json; charset=utf-8" }, MultiJson.dump(payload)]
+end
+
+def build_form_encoded_response(payload)
+  [200, { "Content-Type" => "application/json; charset=utf-8" }, Addressable::URI.form_encode(payload)]
+end
+
 describe Signet::OAuth2::Client, 'unconfigured' do
   before do
     @client = Signet::OAuth2::Client.new
@@ -197,7 +205,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       jwt = @client.to_jwt
       expect(jwt).not_to be_nil
 
-      claim = JWT.decode(jwt, @key.public_key, true)
+      claim, header = JWT.decode(jwt, @key.public_key, true)
       expect(claim["iss"]).to eq 'app@example.com'
       expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
       expect(claim["aud"]).to eq 'https://accounts.google.com/o/oauth2/token'
@@ -208,7 +216,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       jwt = @client.to_jwt
       expect(jwt).not_to be_nil
 
-      claim = JWT.decode(jwt, @key.public_key, true)
+      claim, header = JWT.decode(jwt, @key.public_key, true)
       expect(claim["iss"]).to eq 'app@example.com'
       expect(claim["prn"]).to eq 'user@example.com'
       expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
@@ -220,7 +228,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       jwt = @client.to_jwt
       expect(jwt).not_to be_nil
 
-      claim = JWT.decode(jwt, @key.public_key, true)
+      claim, header = JWT.decode(jwt, @key.public_key, true)
       expect(claim["iss"]).to eq 'app@example.com'
       expect(claim["prn"]).to eq 'user@example.com'
       expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
@@ -232,7 +240,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       jwt = @client.to_jwt
       expect(jwt).not_to be_nil
 
-      claim = JWT.decode(jwt, @key.public_key, true)
+      claim, header = JWT.decode(jwt, @key.public_key, true)
       expect(claim["iss"]).to eq 'app@example.com'
       expect(claim["sub"]).to eq 'user@example.com'
       expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
@@ -256,13 +264,13 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       stubs = Faraday::Adapter::Test::Stubs.new do |stub|
         stub.post('/o/oauth2/token') do |env|
           params = Addressable::URI.form_unencode(env[:body])
-          jwt = JWT.decode(params.assoc("assertion").last, @key.public_key)
+          claim, header = JWT.decode(params.assoc("assertion").last, @key.public_key)
           expect(params.assoc("grant_type")).to eq ['grant_type','urn:ietf:params:oauth:grant-type:jwt-bearer']
-          [200, {}, '{
-            "access_token" : "1/abcdef1234567890",
-            "token_type" : "Bearer",
-            "expires_in" : 3600
-          }']
+          build_json_response({
+            "access_token" => "1/abcdef1234567890",
+            "token_type" => "Bearer",
+            "expires_in" => 3600
+          })
         end
       end
       connection = Faraday.new(:url => 'https://www.google.com') do |builder|
@@ -292,7 +300,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       jwt = @client.to_jwt
       expect(jwt).not_to be_nil
 
-      claim = JWT.decode(jwt, @key, true)
+      claim, header = JWT.decode(jwt, @key, true)
       expect(claim["iss"]).to eq 'app@example.com'
       expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
       expect(claim["aud"]).to eq 'https://accounts.google.com/o/oauth2/token'
@@ -485,11 +493,11 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.redirect_uri = 'https://www.example.com/'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.dump({
+        build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600'
-        })]
+        })
       end
     end
     connection = Faraday.new(:url => 'https://www.google.com') do |builder|
@@ -511,11 +519,11 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.password = 'incognito'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.dump({
+        build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600'
-        })]
+        })
       end
     end
     connection = Faraday.new(:url => 'https://www.google.com') do |builder|
@@ -536,11 +544,11 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.refresh_token = '54321'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.dump({
+        build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600'
-        })]
+        })
       end
     end
     connection = Faraday.new(:url => 'https://www.google.com') do |builder|
@@ -722,7 +730,7 @@ JSON
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.dump({
+        build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600',
@@ -733,7 +741,7 @@ JSON
             'Y2xpZW50LTEyMzQ1IiwiaXNzIjoiZXhhbXBsZS5jb20ifQ.tsF3srlBaAh6pV3U' +
             'wfRrHSA3-jwnvOw6MMsQ6sO4kjc'
           )
-        })]
+        })
       end
     end
     connection = Faraday.new(:url => 'https://www.google.com') do |builder|
@@ -763,7 +771,7 @@ JSON
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.dump({
+        build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600',
@@ -774,7 +782,7 @@ JSON
             'Y2xpZW50LTEyMzQ1IiwiaXNzIjoiZXhhbXBsZS5jb20ifQ.tsF3srlBaAh6pV3U' +
             'wfRrHSA3-jwnvOw6MMsQ6sO4kjc'
           )
-        })]
+        })
       end
     end
     connection = Faraday.new(:url => 'https://www.google.com') do |builder|
@@ -798,7 +806,7 @@ JSON
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.dump({
+        build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600',
@@ -808,7 +816,7 @@ JSON
             'zgsImV4cCI6MTMyMDY3NDg3OCwiY2lkIjoiY2xpZW50LTEyMzQ1IiwiaXNzIjoi' +
             'ZXhhbXBsZS5jb20ifQ.7qj85CKbQyVdDe5y2ScdJAZNkEeKMPW9LIonLxG1vu8'
           )
-        })]
+        })
       end
     end
     connection = Faraday.new(:url => 'https://www.google.com') do |builder|
@@ -831,7 +839,7 @@ JSON
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.dump({
+        build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600',
@@ -845,7 +853,7 @@ JSON
             'wcy1PxsROY1fmBvXSer0IQesAqOW-rPOCNReSn-eY8d53ph1x2HAF-AzEi3GOl' +
             '6hFycH8wj7Su6JqqyEbIVLxE7q7DkAZGaMPkxbTHs1EhSd5_oaKQ6O4xO3ZnnT4'
           )
-        })]
+        })
       end
     end
     connection = Faraday.new(:url => 'https://www.google.com') do |builder|
