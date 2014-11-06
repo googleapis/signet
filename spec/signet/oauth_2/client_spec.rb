@@ -988,7 +988,7 @@ describe Signet::OAuth2::Client, 'configured with custom parameters' do
   end
 end
 
-describe Signet::OAuth2::Client, 'configured with custom parameters' do
+describe Signet::OAuth2::Client, 'configured with custom parameters a la JSON.load(credentials_file)' do
   before do
     @client = Signet::OAuth2::Client.new(
         "client_id" => 's6BhdRkqt3',
