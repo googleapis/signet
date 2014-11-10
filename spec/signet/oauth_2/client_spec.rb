@@ -389,6 +389,17 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     expect(@client).to_not be_expired
   end
 
+  it 'should handle expires as equivlanet to expires_in' do
+    issued_at = Time.now
+    @client.update_token!(
+      :access_token => '12345',
+      :refresh_token => '54321',
+      :expires => 600,
+      :issued_at => issued_at
+    )
+    expect(@client.expires_in).to eq 600
+  end
+
   it 'should allow the token to be updated without an expiration' do
     @client.update_token!(
       :access_token => '12345',

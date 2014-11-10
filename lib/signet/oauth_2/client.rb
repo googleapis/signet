@@ -209,6 +209,7 @@ module Signet
         # Normalize key to String to allow indifferent access.
         options = options.inject({}) { |accu, (k, v)| accu[k.to_s] = v; accu }
 
+        self.expires_in = options["expires"] if options.has_key?("expires") # Facebook uses expires instead of expires_in
         self.expires_in = options["expires_in"] if options.has_key?("expires_in")
         self.expires_at = options["expires_at"] if options.has_key?("expires_at")
 
