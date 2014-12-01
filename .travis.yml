@@ -8,7 +8,6 @@ rvm:
   - 2.0.0
   - rbx
   - jruby-19mode
-  - jruby-20mode
   - ree
 script: "bundle exec rake spec:normal"
 jdk: openjdk7
