@@ -26,8 +26,8 @@ describe Signet::OAuth1::Credential, 'with a Hash for initialization' do
       "oauth_token" => "dpf43f3p2l4k3l03",
       "oauth_token_secret" => "kd94hf93k423kf44"
     })
-    token.key.should == "dpf43f3p2l4k3l03"
-    token.secret.should == "kd94hf93k423kf44"
+    expect(token.key).to eq "dpf43f3p2l4k3l03"
+    expect(token.secret).to eq "kd94hf93k423kf44"
   end
 
   it 'should accept :oauth_token and :oauth_token_secret pairs' do
@@ -35,8 +35,8 @@ describe Signet::OAuth1::Credential, 'with a Hash for initialization' do
       :oauth_token => "dpf43f3p2l4k3l03",
       :oauth_token_secret => "kd94hf93k423kf44"
     })
-    token.key.should == "dpf43f3p2l4k3l03"
-    token.secret.should == "kd94hf93k423kf44"
+    expect(token.key).to eq "dpf43f3p2l4k3l03"
+    expect(token.secret).to eq "kd94hf93k423kf44"
   end
 
   it 'should accept "key" and "secret" pairs' do
@@ -44,8 +44,8 @@ describe Signet::OAuth1::Credential, 'with a Hash for initialization' do
       "key" => "dpf43f3p2l4k3l03",
       "secret" => "kd94hf93k423kf44"
     })
-    token.key.should == "dpf43f3p2l4k3l03"
-    token.secret.should == "kd94hf93k423kf44"
+    expect(token.key).to eq "dpf43f3p2l4k3l03"
+    expect(token.secret).to eq "kd94hf93k423kf44"
   end
 
   it 'should accept :key and :secret pairs' do
@@ -53,8 +53,8 @@ describe Signet::OAuth1::Credential, 'with a Hash for initialization' do
       :key => "dpf43f3p2l4k3l03",
       :secret => "kd94hf93k423kf44"
     )
-    token.key.should == "dpf43f3p2l4k3l03"
-    token.secret.should == "kd94hf93k423kf44"
+    expect(token.key).to eq "dpf43f3p2l4k3l03"
+    expect(token.secret).to eq "kd94hf93k423kf44"
   end
 
   it 'should not complain about additional parameters' do
@@ -63,8 +63,8 @@ describe Signet::OAuth1::Credential, 'with a Hash for initialization' do
       "oauth_token_secret" => "kd94hf93k423kf44",
       "oauth_version" => "1.0"
     })
-    token.key.should == "dpf43f3p2l4k3l03"
-    token.secret.should == "kd94hf93k423kf44"
+    expect(token.key).to eq "dpf43f3p2l4k3l03"
+    expect(token.secret).to eq "kd94hf93k423kf44"
   end
 
   it 'should allow parameters to be specified as an implicit Hash' do
@@ -83,8 +83,8 @@ describe Signet::OAuth1::Credential, 'with a Hash for initialization' do
       "oauth_token_secret" => "kd94hf93k423kf44",
       "oauth_version" => "1.0"
     }))
-    token.key.should == "dpf43f3p2l4k3l03"
-    token.secret.should == "kd94hf93k423kf44"
+    expect(token.key).to eq "dpf43f3p2l4k3l03"
+    expect(token.secret).to eq "kd94hf93k423kf44"
   end
 
   it 'should allow parameters to be specified as an Enumerable' do
@@ -93,8 +93,8 @@ describe Signet::OAuth1::Credential, 'with a Hash for initialization' do
       ["oauth_token_secret", "kd94hf93k423kf44"],
       ["oauth_version", "1.0"]
     ])
-    token.key.should == "dpf43f3p2l4k3l03"
-    token.secret.should == "kd94hf93k423kf44"
+    expect(token.key).to eq "dpf43f3p2l4k3l03"
+    expect(token.secret).to eq "kd94hf93k423kf44"
   end
 
   it 'should allow parameters to be specified as an implicit Array' do
@@ -113,47 +113,47 @@ describe Signet::OAuth1::Credential, 'with a Hash for initialization' do
       ["oauth_token_secret", "kd94hf93k423kf44"],
       ["oauth_version", "1.0"]
     ]))
-    token.key.should == "dpf43f3p2l4k3l03"
-    token.secret.should == "kd94hf93k423kf44"
+    expect(token.key).to eq "dpf43f3p2l4k3l03"
+    expect(token.secret).to eq "kd94hf93k423kf44"
   end
 
   it 'should raise an error if key and secret are not present' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1::Credential.new({})
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should allow key and secret to be passed in as a tuple' do
     token = Signet::OAuth1::Credential.new(
       ["dpf43f3p2l4k3l03", "kd94hf93k423kf44"]
     )
-    token.key.should == "dpf43f3p2l4k3l03"
-    token.secret.should == "kd94hf93k423kf44"
+    expect(token.key).to eq "dpf43f3p2l4k3l03"
+    expect(token.secret).to eq "kd94hf93k423kf44"
   end
 
   it 'should allow key and secret to be passed in as normal parameters' do
     token = Signet::OAuth1::Credential.new(
       "dpf43f3p2l4k3l03", "kd94hf93k423kf44"
     )
-    token.key.should == "dpf43f3p2l4k3l03"
-    token.secret.should == "kd94hf93k423kf44"
+    expect(token.key).to eq "dpf43f3p2l4k3l03"
+    expect(token.secret).to eq "kd94hf93k423kf44"
   end
 
   it 'should raise an error if key or secret are of the wrong type' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1::Credential.new("dpf43f3p2l4k3l03", 42)
-    end).should raise_error(TypeError)
-    (lambda do
+    end).to raise_error(TypeError)
+    expect(lambda do
       Signet::OAuth1::Credential.new(42, "kd94hf93k423kf44")
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should raise an error if the wrong number of arguments are passed' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1::Credential.new(
         "dpf43f3p2l4k3l03", "kd94hf93k423kf44", "something else"
       )
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should convert to a Hash object' do
@@ -161,7 +161,7 @@ describe Signet::OAuth1::Credential, 'with a Hash for initialization' do
       "dpf43f3p2l4k3l03", "kd94hf93k423kf44"
     )
     parameters = token.to_h
-    parameters['oauth_token'].should == "dpf43f3p2l4k3l03"
-    parameters['oauth_token_secret'].should == "kd94hf93k423kf44"
+    expect(parameters['oauth_token']).to eq "dpf43f3p2l4k3l03"
+    expect(parameters['oauth_token_secret']).to eq "kd94hf93k423kf44"
   end
 end

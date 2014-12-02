@@ -33,8 +33,8 @@ describe Signet::OAuth1 do
       ["z", "p"],
       ["z", "t"]
     ]
-    Signet::OAuth1.normalize_parameters(parameters).should ==
-      'a=1&c=hi%20there&f=25&f=50&f=a&z=p&z=t'
+    expect(Signet::OAuth1.normalize_parameters(parameters)).to eq(
+      'a=1&c=hi%20there&f=25&f=50&f=a&z=p&z=t')
   end
 
   it 'should correctly normalize parameters' do
@@ -51,10 +51,10 @@ describe Signet::OAuth1 do
       ["c2", ""],
       ["a3", "2 q"]
     ]
-    Signet::OAuth1.normalize_parameters(parameters).should ==
+    expect(Signet::OAuth1.normalize_parameters(parameters)).to eq(
       'a2=r%20b&a3=2%20q&a3=a&b5=%3D%253D&c%40=&c2=&oauth_consumer_key=9dj' +
       'dj82h48djs9d2&oauth_nonce=7d8f3e4a&oauth_signature_method=HMAC-SHA1' +
-      '&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7'
+      '&oauth_timestamp=137131201&oauth_token=kkk9d7dh3k39sjv7')
   end
 
   it 'should exclude the "oauth_signature" parameter when normalizing' do
@@ -64,22 +64,22 @@ describe Signet::OAuth1 do
       ["c", "3"],
       ["oauth_signature", "dpf43f3p2l4k3l03"]
     ]
-    Signet::OAuth1.normalize_parameters(parameters).should ==
-      "a=1&b=2&c=3"
+    expect(Signet::OAuth1.normalize_parameters(parameters)).to eq(
+      "a=1&b=2&c=3")
   end
 
   it 'should raise an error if normalizing parameters with bogus values' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.normalize_parameters(42)
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should raise an error if generating a base string with bogus values' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.generate_base_string(
         "GET", "http://photos.example.net/photos", 42
       )
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should correctly generate a base string' do
@@ -95,7 +95,7 @@ describe Signet::OAuth1 do
       "file" => "vacation.jpg",
       "size" => "original"
     }
-    Signet::OAuth1.generate_base_string(method, uri, parameters).should == (
+    expect(Signet::OAuth1.generate_base_string(method, uri, parameters)).to eq(
       "GET&http%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26" +
       "oauth_consumer_key%3Ddpf43f3p2l4k3l03%26" +
       "oauth_nonce%3Dkllo9940pd9333jh%26" +
@@ -118,7 +118,7 @@ describe Signet::OAuth1 do
       "file" => "vacation.jpg",
       "size" => "original"
     }
-    Signet::OAuth1.generate_base_string(method, uri, parameters).should == (
+    expect(Signet::OAuth1.generate_base_string(method, uri, parameters)).to eq(
       "GET&http%3A%2F%2Fphotos.example.net%2F" +
       "https%253A%252F%252Fwww.example.com&file%3Dvacation.jpg%26" +
       "oauth_consumer_key%3Ddpf43f3p2l4k3l03%26" +
@@ -140,7 +140,7 @@ describe Signet::OAuth1 do
       "oauth_nonce" => "kllo9940pd9333jh",
       "oauth_version" => "1.0"
     }
-    Signet::OAuth1.generate_base_string(method, uri, parameters).should == (
+    expect(Signet::OAuth1.generate_base_string(method, uri, parameters)).to eq(
       "GET&http%3A%2F%2Fexample.com%2Fr%2520v%2FX&" +
       "id%3D123%26oauth_consumer_key%3Ddpf43f3p2l4k3l03%26" +
       "oauth_nonce%3Dkllo9940pd9333jh%26" +
@@ -161,7 +161,7 @@ describe Signet::OAuth1 do
       "oauth_nonce" => "kllo9940pd9333jh",
       "oauth_version" => "1.0"
     }
-    Signet::OAuth1.generate_base_string(method, uri, parameters).should == (
+    expect(Signet::OAuth1.generate_base_string(method, uri, parameters)).to eq(
       "GET&http%3A%2F%2Fwww.example.net%3A8080%2F&" +
       "oauth_consumer_key%3Ddpf43f3p2l4k3l03%26" +
       "oauth_nonce%3Dkllo9940pd9333jh%26" +
@@ -183,7 +183,7 @@ describe Signet::OAuth1 do
       "file" => "vacation.jpg",
       "size" => "original"
     }
-    Signet::OAuth1.generate_base_string(method, uri, parameters).should == (
+    expect(Signet::OAuth1.generate_base_string(method, uri, parameters)).to eq(
       "GET&http%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26" +
       "oauth_consumer_key%3Ddpf43f3p2l4k3l03%26" +
       "oauth_nonce%3Dkllo9940pd9333jh%26" +
@@ -206,7 +206,7 @@ describe Signet::OAuth1 do
       "file" => "vacation.jpg",
       "size" => "original"
     }
-    Signet::OAuth1.generate_base_string(method, uri, parameters).should == (
+    expect(Signet::OAuth1.generate_base_string(method, uri, parameters)).to eq(
       "GET&https%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26" +
       "oauth_consumer_key%3Ddpf43f3p2l4k3l03%26" +
       "oauth_nonce%3Dkllo9940pd9333jh%26" +
@@ -229,7 +229,7 @@ describe Signet::OAuth1 do
       "oauth_version" => "1.0",
       "size" => "original"
     }
-    Signet::OAuth1.generate_base_string(method, uri, parameters).should == (
+    expect(Signet::OAuth1.generate_base_string(method, uri, parameters)).to eq(
       "GET&http%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26" +
       "oauth_consumer_key%3Ddpf43f3p2l4k3l03%26" +
       "oauth_nonce%3Dkllo9940pd9333jh%26" +
@@ -252,7 +252,7 @@ describe Signet::OAuth1 do
       "oauth_version" => "1.0",
       "size" => "original"
     }
-    Signet::OAuth1.generate_base_string(method, uri, parameters).should == (
+    expect(Signet::OAuth1.generate_base_string(method, uri, parameters)).to eq(
       "GET&http%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26" +
       "oauth_consumer_key%3Ddpf43f3p2l4k3l03%26" +
       "oauth_nonce%3Dkllo9940pd9333jh%26" +
@@ -275,7 +275,7 @@ describe Signet::OAuth1 do
       "oauth_version" => "1.0",
       "size" => "original"
     }
-    Signet::OAuth1.generate_base_string(method, uri, parameters).should == (
+    expect(Signet::OAuth1.generate_base_string(method, uri, parameters)).to eq(
       "GET&http%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26" +
       "oauth_consumer_key%3Ddpf43f3p2l4k3l03%26" +
       "oauth_nonce%3Dkllo9940pd9333jh%26" +
@@ -295,9 +295,9 @@ describe Signet::OAuth1 do
       ["oauth_nonce", "4572616e48616d6d65724c61686176"],
       ["oauth_version", "1.0"]
     ]
-    Signet::OAuth1.generate_authorization_header(
+    expect(Signet::OAuth1.generate_authorization_header(
       parameters, "http://sp.example.com/"
-    ).should == (
+    )).to eq (
       'OAuth realm="http://sp.example.com/", ' +
       'oauth_consumer_key="0685bd9184jfhq22", ' +
       'oauth_token="ad180jjd733klru7", ' +
@@ -311,9 +311,9 @@ describe Signet::OAuth1 do
 
   it 'should raise an error if generating an authorization header ' +
       'with bogus values' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.generate_authorization_header(42)
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should raise an error if generating an authorization header ' +
@@ -328,9 +328,9 @@ describe Signet::OAuth1 do
       ["oauth_nonce", "4572616e48616d6d65724c61686176"],
       ["oauth_version", "1.0"]
     ]
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.generate_authorization_header(parameters)
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should correctly parse an authorization header' do
@@ -344,14 +344,14 @@ describe Signet::OAuth1 do
       'oauth_nonce="4572616e48616d6d65724c61686176", ' +
       'oauth_version="1.0"'
     ).inject({}) { |h,(k,v)| h[k]=v; h }
-    parameters['realm'].should == 'http://sp.example.com/'
-    parameters['oauth_consumer_key'].should == '0685bd9184jfhq22'
-    parameters['oauth_token'].should == 'ad180jjd733klru7'
-    parameters['oauth_signature_method'].should == 'HMAC-SHA1'
-    parameters['oauth_signature'].should == 'wOJIO9A2W5mFwDgiDvZbTSMK/PY='
-    parameters['oauth_timestamp'].should == '137131200'
-    parameters['oauth_nonce'].should == '4572616e48616d6d65724c61686176'
-    parameters['oauth_version'].should == '1.0'
+    expect(parameters['realm']).to eq 'http://sp.example.com/'
+    expect(parameters['oauth_consumer_key']).to eq '0685bd9184jfhq22'
+    expect(parameters['oauth_token']).to eq 'ad180jjd733klru7'
+    expect(parameters['oauth_signature_method']).to eq 'HMAC-SHA1'
+    expect(parameters['oauth_signature']).to eq 'wOJIO9A2W5mFwDgiDvZbTSMK/PY='
+    expect(parameters['oauth_timestamp']).to eq '137131200'
+    expect(parameters['oauth_nonce']).to eq '4572616e48616d6d65724c61686176'
+    expect(parameters['oauth_version']).to eq '1.0'
   end
 
   it 'should not unescape a realm in an authorization header' do
@@ -366,38 +366,38 @@ describe Signet::OAuth1 do
       'oauth_nonce="4572616e48616d6d65724c61686176", ' +
       'oauth_version="1.0"'
     ).inject({}) { |h,(k,v)| h[k]=v; h }
-    parameters['realm'].should == 'http%3A%2F%2Fsp.example.com%2F'
-    parameters['domain'].should == 'http://sp.example.com/'
-    parameters['oauth_consumer_key'].should == '0685bd9184jfhq22'
-    parameters['oauth_token'].should == 'ad180jjd733klru7'
-    parameters['oauth_signature_method'].should == 'HMAC-SHA1'
-    parameters['oauth_signature'].should == 'wOJIO9A2W5mFwDgiDvZbTSMK/PY='
-    parameters['oauth_timestamp'].should == '137131200'
-    parameters['oauth_nonce'].should == '4572616e48616d6d65724c61686176'
-    parameters['oauth_version'].should == '1.0'
+    expect(parameters['realm']).to eq 'http%3A%2F%2Fsp.example.com%2F'
+    expect(parameters['domain']).to eq 'http://sp.example.com/'
+    expect(parameters['oauth_consumer_key']).to eq '0685bd9184jfhq22'
+    expect(parameters['oauth_token']).to eq 'ad180jjd733klru7'
+    expect(parameters['oauth_signature_method']).to eq 'HMAC-SHA1'
+    expect(parameters['oauth_signature']).to eq 'wOJIO9A2W5mFwDgiDvZbTSMK/PY='
+    expect(parameters['oauth_timestamp']).to eq '137131200'
+    expect(parameters['oauth_nonce']).to eq '4572616e48616d6d65724c61686176'
+    expect(parameters['oauth_version']).to eq '1.0'
   end
 
   it 'should raise an error if parsing an authorization header ' +
       'with bogus values' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.parse_authorization_header(42)
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should raise an error if parsing a non-OAuth authorization header' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.parse_authorization_header(
         'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=='
       )
-    end).should raise_error(Signet::ParseError)
+    end).to raise_error(Signet::ParseError)
   end
 
   it 'should correctly parse a form encoded credential' do
     credential = Signet::OAuth1.parse_form_encoded_credentials(
       'oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03'
     )
-    credential.key.should == 'hh5s93j4hdidpola'
-    credential.secret.should == 'hdhd0244k9j7ao03'
+    expect(credential.key).to eq 'hh5s93j4hdidpola'
+    expect(credential.secret).to eq 'hdhd0244k9j7ao03'
   end
 
   it 'should correctly parse a form encoded credential' do
@@ -405,15 +405,15 @@ describe Signet::OAuth1 do
       'oauth_token=hdk48Djdsa&oauth_token_secret=xyz4992k83j47x0b&' +
       'oauth_callback_confirmed=true'
     )
-    credential.key.should == 'hdk48Djdsa'
-    credential.secret.should == 'xyz4992k83j47x0b'
+    expect(credential.key).to eq 'hdk48Djdsa'
+    expect(credential.secret).to eq 'xyz4992k83j47x0b'
   end
 
   it 'should raise an error if parsing a form encoded credential ' +
       'with bogus values' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.parse_form_encoded_credentials(42)
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should correctly generate a signature for a set of parameters' do
@@ -431,13 +431,13 @@ describe Signet::OAuth1 do
       "file" => "vacation.jpg",
       "size" => "original"
     }
-    Signet::OAuth1.sign_parameters(
+    expect(Signet::OAuth1.sign_parameters(
       method,
       uri,
       parameters,
       client_credential_secret,
       token_credential_secret
-    ).should == "tR3+Ty81lMeYAr/Fid0kMTYa/WM="
+    )).to eq "tR3+Ty81lMeYAr/Fid0kMTYa/WM="
   end
 
   it 'should raise an error when trying to sign with with unknown method' do
@@ -455,7 +455,7 @@ describe Signet::OAuth1 do
       "file" => "vacation.jpg",
       "size" => "original"
     }
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.sign_parameters(
         method,
         uri,
@@ -463,7 +463,7 @@ describe Signet::OAuth1 do
         client_credential_secret,
         token_credential_secret
       )
-    end).should raise_error(NotImplementedError)
+    end).to raise_error(NotImplementedError)
   end
 
   it 'should correctly generate authorization URIs' do
@@ -477,10 +477,10 @@ describe Signet::OAuth1 do
         :callback => callback
       )
     )
-    parsed_uri.query_values.should have_key('oauth_token')
-    parsed_uri.query_values['oauth_token'].should == temporary_credential_key
-    parsed_uri.query_values.should have_key('oauth_callback')
-    parsed_uri.query_values['oauth_callback'].should == callback
+    expect(parsed_uri.query_values).to have_key('oauth_token')
+    expect(parsed_uri.query_values['oauth_token']).to eq temporary_credential_key
+    expect(parsed_uri.query_values).to have_key('oauth_callback')
+    expect(parsed_uri.query_values['oauth_callback']).to eq callback
   end
 end
 
@@ -501,55 +501,55 @@ describe Signet::OAuth1, 'when generating temporary credentials parameters' do
   end
 
   it 'should raise an error if the client credential key is missing' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.unsigned_temporary_credential_parameters(
         :client_credential_key => nil,
         :callback => @callback,
         :signature_method => @signature_method,
         :additional_parameters => @additional_parameters
       )
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should have the correct client credential key' do
-    @unsigned_parameters.should have_key('oauth_consumer_key')
-    @unsigned_parameters['oauth_consumer_key'].should == @client_credential_key
+    expect(@unsigned_parameters).to have_key('oauth_consumer_key')
+    expect(@unsigned_parameters['oauth_consumer_key']).to eq @client_credential_key
   end
 
   it 'should have the correct signature method' do
-    @unsigned_parameters.should have_key('oauth_signature_method')
-    @unsigned_parameters['oauth_signature_method'].should == @signature_method
+    expect(@unsigned_parameters).to have_key('oauth_signature_method')
+    expect(@unsigned_parameters['oauth_signature_method']).to eq @signature_method
   end
 
   it 'should have a valid timestamp' do
     # Verify that we have a timestamp, it's in the correct format and within
     # a reasonable range of the current time.
-    @unsigned_parameters.should have_key('oauth_timestamp')
-    @unsigned_parameters['oauth_timestamp'].should =~ /^[0-9]+$/
-    @unsigned_parameters['oauth_timestamp'].to_i.should <= Time.now.to_i
-    @unsigned_parameters['oauth_timestamp'].to_i.should >= Time.now.to_i - 1
+    expect(@unsigned_parameters).to have_key('oauth_timestamp')
+    expect(@unsigned_parameters['oauth_timestamp']).to match(/^[0-9]+$/)
+    expect(@unsigned_parameters['oauth_timestamp'].to_i).to be <= Time.now.to_i
+    expect(@unsigned_parameters['oauth_timestamp'].to_i).to be >= Time.now.to_i - 1
   end
 
   it 'should have a valid nonce' do
     # Verify that we have a nonce and that it has sufficient length for
     # uniqueness.
-    @unsigned_parameters.should have_key('oauth_nonce')
-    @unsigned_parameters['oauth_nonce'].should =~ /^[0-9a-zA-Z]{16,100}$/
+    expect(@unsigned_parameters).to have_key('oauth_nonce')
+    expect(@unsigned_parameters['oauth_nonce']).to match(/^[0-9a-zA-Z]{16,100}$/)
   end
 
   it 'should have the correct callback' do
-    @unsigned_parameters.should have_key('oauth_callback')
-    @unsigned_parameters['oauth_callback'].should == @callback
+    expect(@unsigned_parameters).to have_key('oauth_callback')
+    expect(@unsigned_parameters['oauth_callback']).to eq @callback
   end
 
   it 'should have the correct scope parameter' do
-    @unsigned_parameters.should have_key('scope')
-    @unsigned_parameters['scope'].should == @scope
+    expect(@unsigned_parameters).to have_key('scope')
+    expect(@unsigned_parameters['scope']).to eq @scope
   end
 
   it 'should have the correct OAuth version' do
-    @unsigned_parameters.should have_key('oauth_version')
-    @unsigned_parameters['oauth_version'].should == '1.0'
+    expect(@unsigned_parameters).to have_key('oauth_version')
+    expect(@unsigned_parameters['oauth_version']).to eq '1.0'
   end
 end
 
@@ -569,77 +569,77 @@ describe Signet::OAuth1, 'when generating token credential parameters' do
   end
 
   it 'should raise an error if the client credential key is missing' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.unsigned_token_credential_parameters(
         :client_credential_key => nil,
         :temporary_credential_key => @temporary_credential_key,
         :signature_method => @signature_method,
         :verifier => @verifier
       )
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if the temporary credential key is missing' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.unsigned_token_credential_parameters(
         :client_credential_key => @client_credential_key,
         :temporary_credential_key => nil,
         :signature_method => @signature_method,
         :verifier => @verifier
       )
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if the verifier is missing' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.unsigned_token_credential_parameters(
         :client_credential_key => @client_credential_key,
         :temporary_credential_key => @temporary_credential_key,
         :signature_method => @signature_method,
         :verifier => nil
       )
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should have the correct client credential key' do
-    @unsigned_parameters.should have_key('oauth_consumer_key')
-    @unsigned_parameters['oauth_consumer_key'].should == @client_credential_key
+    expect(@unsigned_parameters).to have_key('oauth_consumer_key')
+    expect(@unsigned_parameters['oauth_consumer_key']).to eq @client_credential_key
   end
 
   it 'should have the correct temporary credentials key' do
-    @unsigned_parameters.should have_key('oauth_token')
-    @unsigned_parameters['oauth_token'].should == @temporary_credential_key
+    expect(@unsigned_parameters).to have_key('oauth_token')
+    expect(@unsigned_parameters['oauth_token']).to eq @temporary_credential_key
   end
 
   it 'should have the correct signature method' do
-    @unsigned_parameters.should have_key('oauth_signature_method')
-    @unsigned_parameters['oauth_signature_method'].should == @signature_method
+    expect(@unsigned_parameters).to have_key('oauth_signature_method')
+    expect(@unsigned_parameters['oauth_signature_method']).to eq @signature_method
   end
 
   it 'should have a valid timestamp' do
     # Verify that we have a timestamp, it's in the correct format and within
     # a reasonable range of the current time.
-    @unsigned_parameters.should have_key('oauth_timestamp')
-    @unsigned_parameters['oauth_timestamp'].should =~ /^[0-9]+$/
-    @unsigned_parameters['oauth_timestamp'].to_i.should <= Time.now.to_i
-    @unsigned_parameters['oauth_timestamp'].to_i.should >= Time.now.to_i - 1
+    expect(@unsigned_parameters).to have_key('oauth_timestamp')
+    expect(@unsigned_parameters['oauth_timestamp']).to match(/^[0-9]+$/)
+    expect(@unsigned_parameters['oauth_timestamp'].to_i).to be <= Time.now.to_i
+    expect(@unsigned_parameters['oauth_timestamp'].to_i).to be >= Time.now.to_i - 1
   end
 
   it 'should have a valid nonce' do
     # Verify that we have a nonce and that it has sufficient length for
     # uniqueness.
-    @unsigned_parameters.should have_key('oauth_nonce')
-    @unsigned_parameters['oauth_nonce'].should =~ /^[0-9a-zA-Z]{16,100}$/
+    expect(@unsigned_parameters).to have_key('oauth_nonce')
+    expect(@unsigned_parameters['oauth_nonce']).to match(/^[0-9a-zA-Z]{16,100}$/)
   end
 
   it 'should have the verifier' do
-    @unsigned_parameters.should have_key('oauth_verifier')
-    @unsigned_parameters['oauth_verifier'].should == @verifier
+    expect(@unsigned_parameters).to have_key('oauth_verifier')
+    expect(@unsigned_parameters['oauth_verifier']).to eq @verifier
   end
 
   it 'should have the correct OAuth version' do
-    @unsigned_parameters.should have_key('oauth_version')
-    @unsigned_parameters['oauth_version'].should == '1.0'
+    expect(@unsigned_parameters).to have_key('oauth_version')
+    expect(@unsigned_parameters['oauth_version']).to eq '1.0'
   end
 end
 
@@ -657,59 +657,59 @@ describe Signet::OAuth1, 'when generating protected resource parameters' do
   end
 
   it 'should raise an error if the client credential key is missing' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.unsigned_resource_parameters(
         :client_credential_key => nil,
         :token_credential_key => @token_credential_key,
         :signature_method => @signature_method
       )
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if the token credential key is missing' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.unsigned_resource_parameters(
         :client_credential_key => @client_credential_key,
         :token_credential_key => nil,
         :signature_method => @signature_method
       )
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should have the correct client credential key' do
-    @unsigned_parameters.should have_key('oauth_consumer_key')
-    @unsigned_parameters['oauth_consumer_key'].should == @client_credential_key
+    expect(@unsigned_parameters).to have_key('oauth_consumer_key')
+    expect(@unsigned_parameters['oauth_consumer_key']).to eq @client_credential_key
   end
 
   it 'should have the correct token credentials key' do
-    @unsigned_parameters.should have_key('oauth_token')
-    @unsigned_parameters['oauth_token'].should == @token_credential_key
+    expect(@unsigned_parameters).to have_key('oauth_token')
+    expect(@unsigned_parameters['oauth_token']).to eq @token_credential_key
   end
 
   it 'should have the correct signature method' do
-    @unsigned_parameters.should have_key('oauth_signature_method')
-    @unsigned_parameters['oauth_signature_method'].should == @signature_method
+    expect(@unsigned_parameters).to have_key('oauth_signature_method')
+    expect(@unsigned_parameters['oauth_signature_method']).to eq @signature_method
   end
 
   it 'should have a valid timestamp' do
     # Verify that we have a timestamp, it's in the correct format and within
     # a reasonable range of the current time.
-    @unsigned_parameters.should have_key('oauth_timestamp')
-    @unsigned_parameters['oauth_timestamp'].should =~ /^[0-9]+$/
-    @unsigned_parameters['oauth_timestamp'].to_i.should <= Time.now.to_i
-    @unsigned_parameters['oauth_timestamp'].to_i.should >= Time.now.to_i - 1
+    expect(@unsigned_parameters).to have_key('oauth_timestamp')
+    expect(@unsigned_parameters['oauth_timestamp']).to match(/^[0-9]+$/)
+    expect(@unsigned_parameters['oauth_timestamp'].to_i).to be <= Time.now.to_i
+    expect(@unsigned_parameters['oauth_timestamp'].to_i).to be >= Time.now.to_i - 1
   end
 
   it 'should have a valid nonce' do
     # Verify that we have a nonce and that it has sufficient length for
     # uniqueness.
-    @unsigned_parameters.should have_key('oauth_nonce')
-    @unsigned_parameters['oauth_nonce'].should =~ /^[0-9a-zA-Z]{16,100}$/
+    expect(@unsigned_parameters).to have_key('oauth_nonce')
+    expect(@unsigned_parameters['oauth_nonce']).to match(/^[0-9a-zA-Z]{16,100}$/)
   end
 
   it 'should have the correct OAuth version' do
-    @unsigned_parameters.should have_key('oauth_version')
-    @unsigned_parameters['oauth_version'].should == '1.0'
+    expect(@unsigned_parameters).to have_key('oauth_version')
+    expect(@unsigned_parameters['oauth_version']).to eq '1.0'
   end
 end
 
@@ -734,39 +734,39 @@ describe Signet::OAuth1, 'when generating token credential parameters ' +
   end
 
   it 'should have the correct client credential key' do
-    @unsigned_parameters.should have_key('oauth_consumer_key')
-    @unsigned_parameters['oauth_consumer_key'].should == @client_credential.key
+    expect(@unsigned_parameters).to have_key('oauth_consumer_key')
+    expect(@unsigned_parameters['oauth_consumer_key']).to eq @client_credential.key
   end
 
   it 'should have the correct temporary credentials key' do
-    @unsigned_parameters.should have_key('oauth_token')
-    @unsigned_parameters['oauth_token'].should == @temporary_credential.key
+    expect(@unsigned_parameters).to have_key('oauth_token')
+    expect(@unsigned_parameters['oauth_token']).to eq @temporary_credential.key
   end
 
   it 'should have the correct signature method' do
-    @unsigned_parameters.should have_key('oauth_signature_method')
-    @unsigned_parameters['oauth_signature_method'].should == @signature_method
+    expect(@unsigned_parameters).to have_key('oauth_signature_method')
+    expect(@unsigned_parameters['oauth_signature_method']).to eq @signature_method
   end
 
   it 'should have a valid timestamp' do
     # Verify that we have a timestamp, it's in the correct format and within
     # a reasonable range of the current time.
-    @unsigned_parameters.should have_key('oauth_timestamp')
-    @unsigned_parameters['oauth_timestamp'].should =~ /^[0-9]+$/
-    @unsigned_parameters['oauth_timestamp'].to_i.should <= Time.now.to_i
-    @unsigned_parameters['oauth_timestamp'].to_i.should >= Time.now.to_i - 1
+    expect(@unsigned_parameters).to have_key('oauth_timestamp')
+    expect(@unsigned_parameters['oauth_timestamp']).to match(/^[0-9]+$/)
+    expect(@unsigned_parameters['oauth_timestamp'].to_i).to be <= Time.now.to_i
+    expect(@unsigned_parameters['oauth_timestamp'].to_i).to be >= Time.now.to_i - 1
   end
 
   it 'should have a valid nonce' do
     # Verify that we have a nonce and that it has sufficient length for
     # uniqueness.
-    @unsigned_parameters.should have_key('oauth_nonce')
-    @unsigned_parameters['oauth_nonce'].should =~ /^[0-9a-zA-Z]{16,100}$/
+    expect(@unsigned_parameters).to have_key('oauth_nonce')
+    expect(@unsigned_parameters['oauth_nonce']).to match(/^[0-9a-zA-Z]{16,100}$/)
   end
 
   it 'should have the correct OAuth version' do
-    @unsigned_parameters.should have_key('oauth_version')
-    @unsigned_parameters['oauth_version'].should == '1.0'
+    expect(@unsigned_parameters).to have_key('oauth_version')
+    expect(@unsigned_parameters['oauth_version']).to eq '1.0'
   end
 end
 
@@ -791,41 +791,39 @@ describe Signet::OAuth1, 'when generating token credential parameters ' +
   end
 
   it 'should have the correct client credential key' do
-    @unsigned_parameters.should have_key('oauth_consumer_key')
-    @unsigned_parameters['oauth_consumer_key'].should ==
-      @client.client_credential_key
+    expect(@unsigned_parameters).to have_key('oauth_consumer_key')
+    expect(@unsigned_parameters['oauth_consumer_key']).to eq @client.client_credential_key
   end
 
   it 'should have the correct temporary credentials key' do
-    @unsigned_parameters.should have_key('oauth_token')
-    @unsigned_parameters['oauth_token'].should ==
-      @client.temporary_credential_key
+    expect(@unsigned_parameters).to have_key('oauth_token')
+    expect(@unsigned_parameters['oauth_token']).to eq @client.temporary_credential_key
   end
 
   it 'should have the correct signature method' do
-    @unsigned_parameters.should have_key('oauth_signature_method')
-    @unsigned_parameters['oauth_signature_method'].should == @signature_method
+    expect(@unsigned_parameters).to have_key('oauth_signature_method')
+    expect(@unsigned_parameters['oauth_signature_method']).to eq @signature_method
   end
 
   it 'should have a valid timestamp' do
     # Verify that we have a timestamp, it's in the correct format and within
     # a reasonable range of the current time.
-    @unsigned_parameters.should have_key('oauth_timestamp')
-    @unsigned_parameters['oauth_timestamp'].should =~ /^[0-9]+$/
-    @unsigned_parameters['oauth_timestamp'].to_i.should <= Time.now.to_i
-    @unsigned_parameters['oauth_timestamp'].to_i.should >= Time.now.to_i - 1
+    expect(@unsigned_parameters).to have_key('oauth_timestamp')
+    expect(@unsigned_parameters['oauth_timestamp']).to match(/^[0-9]+$/)
+    expect(@unsigned_parameters['oauth_timestamp'].to_i).to be <= Time.now.to_i
+    expect(@unsigned_parameters['oauth_timestamp'].to_i).to be >= Time.now.to_i - 1
   end
 
   it 'should have a valid nonce' do
     # Verify that we have a nonce and that it has sufficient length for
     # uniqueness.
-    @unsigned_parameters.should have_key('oauth_nonce')
-    @unsigned_parameters['oauth_nonce'].should =~ /^[0-9a-zA-Z]{16,100}$/
+    expect(@unsigned_parameters).to have_key('oauth_nonce')
+    expect(@unsigned_parameters['oauth_nonce']).to match(/^[0-9a-zA-Z]{16,100}$/)
   end
 
   it 'should have the correct OAuth version' do
-    @unsigned_parameters.should have_key('oauth_version')
-    @unsigned_parameters['oauth_version'].should == '1.0'
+    expect(@unsigned_parameters).to have_key('oauth_version')
+    expect(@unsigned_parameters['oauth_version']).to eq '1.0'
   end
 end
 
@@ -850,83 +848,83 @@ describe Signet::OAuth1, 'when generating token credential parameters ' +
   end
 
   it 'should have the correct client credential key' do
-    @unsigned_parameters.should have_key('oauth_consumer_key')
-    @unsigned_parameters['oauth_consumer_key'].should == @client_credential.key
+    expect(@unsigned_parameters).to have_key('oauth_consumer_key')
+    expect(@unsigned_parameters['oauth_consumer_key']).to eq @client_credential.key
   end
 
   it 'should have the correct temporary credentials key' do
-    @unsigned_parameters.should have_key('oauth_token')
-    @unsigned_parameters['oauth_token'].should == @temporary_credential.key
+    expect(@unsigned_parameters).to have_key('oauth_token')
+    expect(@unsigned_parameters['oauth_token']).to eq @temporary_credential.key
   end
 
   it 'should have the correct signature method' do
-    @unsigned_parameters.should have_key('oauth_signature_method')
-    @unsigned_parameters['oauth_signature_method'].should == @signature_method
+    expect(@unsigned_parameters).to have_key('oauth_signature_method')
+    expect(@unsigned_parameters['oauth_signature_method']).to eq @signature_method
   end
 
   it 'should have a valid timestamp' do
     # Verify that we have a timestamp, it's in the correct format and within
     # a reasonable range of the current time.
-    @unsigned_parameters.should have_key('oauth_timestamp')
-    @unsigned_parameters['oauth_timestamp'].should =~ /^[0-9]+$/
-    @unsigned_parameters['oauth_timestamp'].to_i.should <= Time.now.to_i
-    @unsigned_parameters['oauth_timestamp'].to_i.should >= Time.now.to_i - 1
+    expect(@unsigned_parameters).to have_key('oauth_timestamp')
+    expect(@unsigned_parameters['oauth_timestamp']).to match(/^[0-9]+$/)
+    expect(@unsigned_parameters['oauth_timestamp'].to_i).to be <= Time.now.to_i
+    expect(@unsigned_parameters['oauth_timestamp'].to_i).to be >= Time.now.to_i - 1
   end
 
   it 'should have a valid nonce' do
     # Verify that we have a nonce and that it has sufficient length for
     # uniqueness.
-    @unsigned_parameters.should have_key('oauth_nonce')
-    @unsigned_parameters['oauth_nonce'].should =~ /^[0-9a-zA-Z]{16,100}$/
+    expect(@unsigned_parameters).to have_key('oauth_nonce')
+    expect(@unsigned_parameters['oauth_nonce']).to match(/^[0-9a-zA-Z]{16,100}$/)
   end
 
   it 'should have the correct OAuth version' do
-    @unsigned_parameters.should have_key('oauth_version')
-    @unsigned_parameters['oauth_version'].should == '1.0'
+    expect(@unsigned_parameters).to have_key('oauth_version')
+    expect(@unsigned_parameters['oauth_version']).to eq '1.0'
   end
 end
 
 describe Signet::OAuth1, 'extracting credential keys from options' do
   it 'should raise an error for bogus credentials' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.extract_credential_key_option(
         :client, {:client_credential_key => true}
       )
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should raise an error for bogus credentials' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.extract_credential_key_option(
         :client, {:client_credential => 42}
       )
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should raise an error for bogus credentials' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.extract_credential_key_option(
         :client, {:client => 42}
       )
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should return nil for missing credential key' do
-    Signet::OAuth1.extract_credential_key_option(:client, {}).should == nil
+    expect(Signet::OAuth1.extract_credential_key_option(:client, {})).to eq nil
   end
 
   it 'should find the correct credential key' do
-    Signet::OAuth1.extract_credential_key_option(
+    expect(Signet::OAuth1.extract_credential_key_option(
       :client, {:client_credential_key => 'dpf43f3p2l4k3l03'}
-    ).should == 'dpf43f3p2l4k3l03'
+    )).to eq 'dpf43f3p2l4k3l03'
   end
 
   it 'should find the correct credential key' do
-    Signet::OAuth1.extract_credential_key_option(
+    expect(Signet::OAuth1.extract_credential_key_option(
       :client, {:client_credential => Signet::OAuth1::Credential.new(
         'dpf43f3p2l4k3l03', 'kd94hf93k423kf44'
       )}
-    ).should == 'dpf43f3p2l4k3l03'
+    )).to eq 'dpf43f3p2l4k3l03'
   end
 
   it 'should find the correct credential key' do
@@ -934,9 +932,9 @@ describe Signet::OAuth1, 'extracting credential keys from options' do
     client.client_credential = Signet::OAuth1::Credential.new(
       'dpf43f3p2l4k3l03', 'kd94hf93k423kf44'
     )
-    Signet::OAuth1.extract_credential_key_option(
+    expect(Signet::OAuth1.extract_credential_key_option(
       :client, {:client => client}
-    ).should == 'dpf43f3p2l4k3l03'
+    )).to eq 'dpf43f3p2l4k3l03'
   end
 
   it 'should find the correct credential key' do
@@ -944,53 +942,53 @@ describe Signet::OAuth1, 'extracting credential keys from options' do
     client.temporary_credential = Signet::OAuth1::Credential.new(
       'hh5s93j4hdidpola', 'hdhd0244k9j7ao03'
     )
-    Signet::OAuth1.extract_credential_key_option(
+    expect(Signet::OAuth1.extract_credential_key_option(
       :temporary, {:client => client}
-    ).should == 'hh5s93j4hdidpola'
+    )).to eq 'hh5s93j4hdidpola'
   end
 end
 
 describe Signet::OAuth1, 'extracting credential secrets from options' do
   it 'should raise an error for bogus credentials' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.extract_credential_secret_option(
         :client, {:client_credential_secret => true}
       )
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should raise an error for bogus credentials' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.extract_credential_secret_option(
         :client, {:client_credential => 42}
       )
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should raise an error for bogus credentials' do
-    (lambda do
+    expect(lambda do
       Signet::OAuth1.extract_credential_secret_option(
         :client, {:client => 42}
       )
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should raise an error for missing credential secret' do
-    Signet::OAuth1.extract_credential_secret_option(:client, {}).should == nil
+    expect(Signet::OAuth1.extract_credential_secret_option(:client, {})).to eq nil
   end
 
   it 'should find the correct credential secret' do
-    Signet::OAuth1.extract_credential_secret_option(
+    expect(Signet::OAuth1.extract_credential_secret_option(
       :client, {:client_credential_secret => 'kd94hf93k423kf44'}
-    ).should == 'kd94hf93k423kf44'
+    )).to eq 'kd94hf93k423kf44'
   end
 
   it 'should find the correct credential secret' do
-    Signet::OAuth1.extract_credential_secret_option(
+    expect(Signet::OAuth1.extract_credential_secret_option(
       :client, {:client_credential => Signet::OAuth1::Credential.new(
         'dpf43f3p2l4k3l03', 'kd94hf93k423kf44'
       )}
-    ).should == 'kd94hf93k423kf44'
+    )).to eq 'kd94hf93k423kf44'
   end
 
   it 'should find the correct credential secret' do
@@ -998,9 +996,9 @@ describe Signet::OAuth1, 'extracting credential secrets from options' do
     client.client_credential = Signet::OAuth1::Credential.new(
       'dpf43f3p2l4k3l03', 'kd94hf93k423kf44'
     )
-    Signet::OAuth1.extract_credential_secret_option(
+    expect(Signet::OAuth1.extract_credential_secret_option(
       :client, {:client => client}
-    ).should == 'kd94hf93k423kf44'
+    )).to eq 'kd94hf93k423kf44'
   end
 
   it 'should find the correct credential secret' do
@@ -1008,8 +1006,8 @@ describe Signet::OAuth1, 'extracting credential secrets from options' do
     client.temporary_credential = Signet::OAuth1::Credential.new(
       'hh5s93j4hdidpola', 'hdhd0244k9j7ao03'
     )
-    Signet::OAuth1.extract_credential_secret_option(
+    expect(Signet::OAuth1.extract_credential_secret_option(
       :temporary, {:client => client}
-    ).should == 'hdhd0244k9j7ao03'
+    )).to eq 'hdhd0244k9j7ao03'
   end
 end

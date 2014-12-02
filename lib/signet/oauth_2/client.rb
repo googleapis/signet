@@ -209,6 +209,7 @@ module Signet
         # Normalize key to String to allow indifferent access.
         options = options.inject({}) { |accu, (k, v)| accu[k.to_s] = v; accu }
 
+        self.expires_in = options["expires"] if options.has_key?("expires") # Facebook uses expires instead of expires_in
         self.expires_in = options["expires_in"] if options.has_key?("expires_in")
         self.expires_at = options["expires_at"] if options.has_key?("expires_at")
 
@@ -692,14 +693,14 @@ module Signet
       #
       # @return [String] The decoded ID token.
       def decoded_id_token(public_key=nil)
-        decoded = JWT.decode(self.id_token, public_key, !!public_key)
-        if !decoded.has_key?('aud')
+        payload, header = JWT.decode(self.id_token, public_key, !!public_key)
+        if !payload.has_key?('aud')
           raise Signet::UnsafeOperationError, 'No ID token audience declared.'
-        elsif decoded['aud'] != self.client_id
+        elsif payload['aud'] != self.client_id
           raise Signet::UnsafeOperationError,
             'ID token audience did not match Client ID.'
         end
-        return decoded
+        return payload
       end
 
       ##
@@ -932,7 +933,8 @@ module Signet
         request_env[:request] ||= request
         response = options[:connection].app.call(request_env)
         if response.status.to_i == 200
-          return ::Signet::OAuth2.parse_json_credentials(response.body)
+          content_type = response.headers['content-type']
+          return ::Signet::OAuth2.parse_credentials(response.body, content_type)
         elsif [400, 401, 403].include?(response.status.to_i)
           message = 'Authorization failed.'
           if response.body.to_s.strip.length > 0

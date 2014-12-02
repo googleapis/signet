@@ -24,86 +24,92 @@ require 'jwt'
 
 conn = Faraday.default_connection
 
+def build_json_response(payload)
+  [200, { "Content-Type" => "application/json; charset=utf-8" }, MultiJson.dump(payload)]
+end
+
+def build_form_encoded_response(payload)
+  [200, { "Content-Type" => "application/json; charset=utf-8" }, Addressable::URI.form_encode(payload)]
+end
+
 describe Signet::OAuth2::Client, 'unconfigured' do
   before do
     @client = Signet::OAuth2::Client.new
   end
   it 'should allow additional paraemters to be set.' do
-    @client.additional_parameters['type'] =
-        'web_server'
-    @client.additional_parameters.should ==
-        {'type' => 'web_server'}
+    @client.additional_parameters['type'] = 'web_server'
+    expect(@client.additional_parameters).to eq({'type' => 'web_server'})
   end
   it 'should raise an error if a bogus scope is provided' do
-    (lambda do
+    expect(lambda do
       @client = Signet::OAuth2::Client.new(:scope => :bogus)
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should raise an error if a scope array is provided with spaces' do
-    (lambda do
+    expect(lambda do
       @client = Signet::OAuth2::Client.new(:scope => [
         'legit',
         'bogus bogus'
       ])
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should allow the scope to be set to a String' do
     @client.scope = 'legit'
-    @client.scope.should == ['legit']
+    expect(@client.scope).to eq ['legit']
     @client.scope = 'legit alsolegit'
-    @client.scope.should == ['legit', 'alsolegit']
+    expect(@client.scope).to eq ['legit', 'alsolegit']
   end
 
   it 'should allow the scope to be set to an Array' do
     @client.scope = ['legit']
-    @client.scope.should == ['legit']
+    expect(@client.scope).to eq ['legit']
     @client.scope = ['legit', 'alsolegit']
-    @client.scope.should == ['legit', 'alsolegit']
+    expect(@client.scope).to eq ['legit', 'alsolegit']
   end
 
   it 'should raise an error if a bogus redirect URI is provided' do
-    (lambda do
+    expect(lambda do
       @client = Signet::OAuth2::Client.new(:redirect_uri => :bogus)
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should raise an error if a relative redirect URI is provided' do
-    (lambda do
+    expect(lambda do
       @client = Signet::OAuth2::Client.new(:redirect_uri => '/relative/path')
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should allow "postmessage" as a redirect URI (Google hack)' do
     @client.authorization_uri = 'https://example.com/authorize'
     @client.client_id = 's6BhdRkqt3'
     @client.redirect_uri = 'postmessage'
-    @client.authorization_uri.query_values['redirect_uri'].should == 'postmessage'
+    expect(@client.authorization_uri.query_values['redirect_uri']).to eq 'postmessage'
   end
 
   it 'should allow oob values as a redirect URI (for installed apps)' do
     @client.authorization_uri = 'https://example.com/authorize'
     @client.client_id = 's6BhdRkqt3'
     @client.redirect_uri = 'urn:ietf:wg:oauth:2.0:oob'
-    @client.authorization_uri.query_values['redirect_uri'].should == 'urn:ietf:wg:oauth:2.0:oob'
+    expect(@client.authorization_uri.query_values['redirect_uri']).to eq 'urn:ietf:wg:oauth:2.0:oob'
     @client.redirect_uri = 'oob'
-    @client.authorization_uri.query_values['redirect_uri'].should == 'oob'
+    expect(@client.authorization_uri.query_values['redirect_uri']).to eq 'oob'
   end
 
   it 'should have no authorization_uri' do
-    @client.authorization_uri.should == nil
+    expect(@client.authorization_uri).to eq nil
   end
 
   it 'should allow the authorization_uri to be set to a String' do
     @client.authorization_uri = 'https://example.com/authorize'
     @client.client_id = 's6BhdRkqt3'
     @client.redirect_uri = 'https://example.client.com/callback'
-    @client.authorization_uri.to_s.should include(
+    expect(@client.authorization_uri.to_s).to include(
       'https://example.com/authorize'
     )
-    @client.authorization_uri.query_values['client_id'].should == 's6BhdRkqt3'
-    @client.authorization_uri.query_values['redirect_uri'].should == (
+    expect(@client.authorization_uri.query_values['client_id']).to eq 's6BhdRkqt3'
+    expect(@client.authorization_uri.query_values['redirect_uri']).to eq (
       'https://example.client.com/callback'
     )
   end
@@ -114,11 +120,11 @@ describe Signet::OAuth2::Client, 'unconfigured' do
     }
     @client.client_id = 's6BhdRkqt3'
     @client.redirect_uri = 'https://example.client.com/callback'
-    @client.authorization_uri.to_s.should include(
+    expect(@client.authorization_uri.to_s).to include(
       'https://example.com/authorize'
     )
-    @client.authorization_uri.query_values['client_id'].should == 's6BhdRkqt3'
-    @client.authorization_uri.query_values['redirect_uri'].should == (
+    expect(@client.authorization_uri.query_values['client_id']).to eq 's6BhdRkqt3'
+    expect(@client.authorization_uri.query_values['redirect_uri']).to eq (
       'https://example.client.com/callback'
     )
   end
@@ -129,11 +135,11 @@ describe Signet::OAuth2::Client, 'unconfigured' do
     @client.client_id = 's6BhdRkqt3'
     @client.redirect_uri =
       Addressable::URI.parse('https://example.client.com/callback')
-    @client.authorization_uri.to_s.should include(
+    expect(@client.authorization_uri.to_s).to include(
       'https://example.com/authorize'
     )
-    @client.authorization_uri.query_values['client_id'].should == 's6BhdRkqt3'
-    @client.authorization_uri.query_values['redirect_uri'].should == (
+    expect(@client.authorization_uri.query_values['client_id']).to eq 's6BhdRkqt3'
+    expect(@client.authorization_uri.query_values['redirect_uri']).to eq (
       'https://example.client.com/callback'
     )
   end
@@ -142,9 +148,9 @@ describe Signet::OAuth2::Client, 'unconfigured' do
     @client.authorization_uri =
       Addressable::URI.parse('https://example.com/authorize')
     @client.client_id = 's6BhdRkqt3'
-    (lambda do
+    expect(lambda do
       @client.authorization_uri
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should require a client ID when getting the authorization_uri' do
@@ -152,31 +158,31 @@ describe Signet::OAuth2::Client, 'unconfigured' do
       Addressable::URI.parse('https://example.com/authorize')
     @client.redirect_uri =
       Addressable::URI.parse('https://example.client.com/callback')
-    (lambda do
+    expect(lambda do
       @client.authorization_uri
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should have no token_credential_uri' do
-    @client.token_credential_uri.should == nil
+    expect(@client.token_credential_uri).to eq nil
   end
 
   it 'should allow the token_credential_uri to be set to a String' do
     @client.token_credential_uri = "https://example.com/token"
-    @client.token_credential_uri.should === "https://example.com/token"
+    expect(@client.token_credential_uri.to_s).to eq "https://example.com/token"
   end
 
   it 'should allow the token_credential_uri to be set to a Hash' do
     @client.token_credential_uri = {
       :scheme => 'https', :host => 'example.com', :path => '/token'
     }
-    @client.token_credential_uri.to_s.should === 'https://example.com/token'
+    expect(@client.token_credential_uri.to_s).to eq 'https://example.com/token'
   end
 
   it 'should allow the token_credential_uri to be set to a URI' do
     @client.token_credential_uri =
       Addressable::URI.parse("https://example.com/token")
-    @client.token_credential_uri.should === "https://example.com/token"
+    expect(@client.token_credential_uri.to_s).to eq "https://example.com/token"
   end
 end
 
@@ -197,76 +203,74 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
 
     it 'should generate valid JWTs' do
       jwt = @client.to_jwt
-      jwt.should_not == nil
+      expect(jwt).not_to be_nil
 
-      claim = JWT.decode(jwt, @key.public_key, true)
-      claim["iss"].should == 'app@example.com'
-      claim["scope"].should == 'https://www.googleapis.com/auth/userinfo.profile'
-      claim["aud"].should == 'https://accounts.google.com/o/oauth2/token'
+      claim, header = JWT.decode(jwt, @key.public_key, true)
+      expect(claim["iss"]).to eq 'app@example.com'
+      expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
+      expect(claim["aud"]).to eq 'https://accounts.google.com/o/oauth2/token'
     end
 
     it 'should generate valid JWTs for impersonation' do
       @client.principal = 'user@example.com'
       jwt = @client.to_jwt
-      jwt.should_not == nil
+      expect(jwt).not_to be_nil
 
-      claim = JWT.decode(jwt, @key.public_key, true)
-      claim["iss"].should == 'app@example.com'
-      claim["prn"].should == 'user@example.com'
-      claim["scope"].should == 'https://www.googleapis.com/auth/userinfo.profile'
-      claim["aud"].should == 'https://accounts.google.com/o/oauth2/token'
+      claim, header = JWT.decode(jwt, @key.public_key, true)
+      expect(claim["iss"]).to eq 'app@example.com'
+      expect(claim["prn"]).to eq 'user@example.com'
+      expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
+      expect(claim["aud"]).to eq 'https://accounts.google.com/o/oauth2/token'
     end
 
     it 'should generate valid JWTs for impersonation using deprecated person attribute' do
       @client.person = 'user@example.com'
       jwt = @client.to_jwt
-      jwt.should_not == nil
+      expect(jwt).not_to be_nil
 
-      claim = JWT.decode(jwt, @key.public_key, true)
-      claim["iss"].should == 'app@example.com'
-      claim["prn"].should == 'user@example.com'
-      claim["scope"].should == 'https://www.googleapis.com/auth/userinfo.profile'
-      claim["aud"].should == 'https://accounts.google.com/o/oauth2/token'
+      claim, header = JWT.decode(jwt, @key.public_key, true)
+      expect(claim["iss"]).to eq 'app@example.com'
+      expect(claim["prn"]).to eq 'user@example.com'
+      expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
+      expect(claim["aud"]).to eq 'https://accounts.google.com/o/oauth2/token'
     end
 
     it 'should generate valid JWTs for impersonation using the sub attribute' do
       @client.sub = 'user@example.com'
       jwt = @client.to_jwt
-      jwt.should_not == nil
+      expect(jwt).not_to be_nil
 
-      claim = JWT.decode(jwt, @key.public_key, true)
-      claim["iss"].should == 'app@example.com'
-      claim["sub"].should == 'user@example.com'
-      claim["scope"].should == 'https://www.googleapis.com/auth/userinfo.profile'
-      claim["aud"].should == 'https://accounts.google.com/o/oauth2/token'
+      claim, header = JWT.decode(jwt, @key.public_key, true)
+      expect(claim["iss"]).to eq 'app@example.com'
+      expect(claim["sub"]).to eq 'user@example.com'
+      expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
+      expect(claim["aud"]).to eq 'https://accounts.google.com/o/oauth2/token'
     end
 
     it 'should generate a JSON representation of the client' do
       @client.principal = 'user@example.com'
       json = @client.to_json
-      json.should_not == nil
+      expect(json).not_to be_nil
 
       deserialized = MultiJson.load(json)
-      deserialized["token_credential_uri"].should ==
-        'https://accounts.google.com/o/oauth2/token'
-      deserialized["scope"].should ==
-        ['https://www.googleapis.com/auth/userinfo.profile']
-      deserialized["issuer"].should == 'app@example.com'
-      deserialized["audience"].should == 'https://accounts.google.com/o/oauth2/token'
-      deserialized["signing_key"].should == @key.to_s
+      expect(deserialized["token_credential_uri"]).to eq 'https://accounts.google.com/o/oauth2/token'
+      expect(deserialized["scope"]).to eq ['https://www.googleapis.com/auth/userinfo.profile']
+      expect(deserialized["issuer"]).to eq 'app@example.com'
+      expect(deserialized["audience"]).to eq 'https://accounts.google.com/o/oauth2/token'
+      expect(deserialized["signing_key"]).to eq @key.to_s
     end
 
     it 'should send valid access token request' do
       stubs = Faraday::Adapter::Test::Stubs.new do |stub|
         stub.post('/o/oauth2/token') do |env|
           params = Addressable::URI.form_unencode(env[:body])
-          jwt = JWT.decode(params.assoc("assertion").last, @key.public_key)
-          params.assoc("grant_type").should == ['grant_type','urn:ietf:params:oauth:grant-type:jwt-bearer']
-          [200, {}, '{
-            "access_token" : "1/abcdef1234567890",
-            "token_type" : "Bearer",
-            "expires_in" : 3600
-          }']
+          claim, header = JWT.decode(params.assoc("assertion").last, @key.public_key)
+          expect(params.assoc("grant_type")).to eq ['grant_type','urn:ietf:params:oauth:grant-type:jwt-bearer']
+          build_json_response({
+            "access_token" => "1/abcdef1234567890",
+            "token_type" => "Bearer",
+            "expires_in" => 3600
+          })
         end
       end
       connection = Faraday.new(:url => 'https://www.google.com') do |builder|
@@ -274,7 +278,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       end
 
       @client.fetch_access_token!(:connection => connection)
-      @client.access_token.should == "1/abcdef1234567890"
+      expect(@client.access_token).to eq "1/abcdef1234567890"
       stubs.verify_stubbed_calls
     end
   end
@@ -294,12 +298,12 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
 
     it 'should generate valid JWTs' do
       jwt = @client.to_jwt
-      jwt.should_not == nil
+      expect(jwt).not_to be_nil
 
-      claim = JWT.decode(jwt, @key, true)
-      claim["iss"].should == 'app@example.com'
-      claim["scope"].should == 'https://www.googleapis.com/auth/userinfo.profile'
-      claim["aud"].should == 'https://accounts.google.com/o/oauth2/token'
+      claim, header = JWT.decode(jwt, @key, true)
+      expect(claim["iss"]).to eq 'app@example.com'
+      expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
+      expect(claim["aud"]).to eq 'https://accounts.google.com/o/oauth2/token'
     end
   end
 end
@@ -316,33 +320,33 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
   end
 
   it 'should not have a grant type by default' do
-    @client.grant_type.should == nil
+    expect(@client.grant_type).to eq nil
   end
 
   it 'should use the authorization_code grant type if given code' do
     @client.code = '00000'
     @client.redirect_uri = 'http://www.example.com/'
-    @client.grant_type.should == 'authorization_code'
+    expect(@client.grant_type).to eq 'authorization_code'
   end
 
   it 'should use the refresh_token grant type if given refresh token' do
     @client.refresh_token = '54321'
-    @client.grant_type.should == 'refresh_token'
+    expect(@client.grant_type).to eq 'refresh_token'
   end
 
   it 'should use the password grant type if given username and password' do
     @client.username = 'johndoe'
     @client.password = 'incognito'
-    @client.grant_type.should == 'password'
+    expect(@client.grant_type).to eq 'password'
   end
 
   it 'should allow the grant type to be set manually' do
     @client.grant_type = 'authorization_code'
-    @client.grant_type.should == 'authorization_code'
+    expect(@client.grant_type).to eq 'authorization_code'
     @client.grant_type = 'refresh_token'
-    @client.grant_type.should == 'refresh_token'
+    expect(@client.grant_type).to eq 'refresh_token'
     @client.grant_type = 'password'
-    @client.grant_type.should == 'password'
+    expect(@client.grant_type).to eq 'password'
   end
 
   it 'should allow the grant type to be set to an extension' do
@@ -350,16 +354,14 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.extension_parameters['assertion'] =
       'PEFzc2VydGlvbiBJc3N1ZUluc3RhbnQ9IjIwMTEtMDU'
 
-    @client.grant_type.should ==
-      Addressable::URI.parse('urn:ietf:params:oauth:grant-type:saml2-bearer')
-    @client.extension_parameters.should ==
-      {'assertion' => 'PEFzc2VydGlvbiBJc3N1ZUluc3RhbnQ9IjIwMTEtMDU'}
+    expect(@client.grant_type).to eq Addressable::URI.parse('urn:ietf:params:oauth:grant-type:saml2-bearer')
+    expect(@client.extension_parameters).to eq ({'assertion' => 'PEFzc2VydGlvbiBJc3N1ZUluc3RhbnQ9IjIwMTEtMDU'})
   end
 
   it 'should raise an error if extension parameters are bogus' do
-    (lambda do
+    expect(lambda do
       @client.extension_parameters = :bogus
-    end).should raise_error(TypeError)
+    end).to raise_error(TypeError)
   end
 
   it 'should include extension parameters in token request' do
@@ -369,7 +371,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
 
     request = @client.generate_access_token_request
     params = Addressable::URI.form_unencode(request.body)
-    params.should include(['assertion', 'PEFzc2VydGlvbiBJc3N1ZUluc3RhbnQ9IjIwMTEtMDU'])
+    expect(params).to include(['assertion', 'PEFzc2VydGlvbiBJc3N1ZUluc3RhbnQ9IjIwMTEtMDU'])
   end
 
   it 'should allow the token to be updated' do
@@ -380,11 +382,22 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
       :expires_in => 3600,
       :issued_at => issued_at
     )
-    @client.access_token.should == '12345'
-    @client.refresh_token.should == '54321'
-    @client.expires_in.should == 3600
-    @client.issued_at.should == issued_at
-    @client.should_not be_expired
+    expect(@client.access_token).to eq '12345'
+    expect(@client.refresh_token).to eq '54321'
+    expect(@client.expires_in).to eq 3600
+    expect(@client.issued_at).to eq issued_at
+    expect(@client).to_not be_expired
+  end
+
+  it 'should handle expires as equivlanet to expires_in' do
+    issued_at = Time.now
+    @client.update_token!(
+      :access_token => '12345',
+      :refresh_token => '54321',
+      :expires => 600,
+      :issued_at => issued_at
+    )
+    expect(@client.expires_in).to eq 600
   end
 
   it 'should allow the token to be updated without an expiration' do
@@ -392,11 +405,11 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
       :access_token => '12345',
       :refresh_token => '54321'
     )
-    @client.access_token.should == '12345'
-    @client.refresh_token.should == '54321'
-    @client.expires_in.should == nil
-    @client.issued_at.should == nil
-    @client.should_not be_expired
+    expect(@client.access_token).to eq '12345'
+    expect(@client.refresh_token).to eq '54321'
+    expect(@client.expires_in).to eq nil
+    expect(@client.issued_at).to eq nil
+    expect(@client).to_not be_expired
   end
 
   it 'should allow the token expiration to be cleared' do
@@ -409,7 +422,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     )
     @client.expires_in = nil
     @client.issued_at = nil
-    @client.should_not be_expired
+    expect(@client).to_not be_expired
   end
 
   it 'should allow the expires_at time to be updated' do
@@ -418,15 +431,15 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
       :expires_at => expires_at.to_i,
       :expires_in => nil
     )
-    @client.expires_at.should be_within(1).of(expires_at)
-    @client.should be_expired
+    expect(@client.expires_at).to be_within(1).of(expires_at)
+    expect(@client).to be_expired
   end
 
   it 'should allow setting expires_at manually' do
     expires_at = Time.now+100
     @client.expires_at = expires_at.to_i
-    @client.expires_at.should be_within(1).of(expires_at)
-    @client.should_not be_expired
+    expect(@client.expires_at).to be_within(1).of(expires_at)
+    expect(@client).to_not be_expired
   end
 
   it 'should raise an error if the authorization endpoint is not secure' do
@@ -434,16 +447,16 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.client_secret = 'secret-12345'
     @client.redirect_uri = 'http://www.example.com/'
     @client.authorization_uri = 'http://accounts.google.com/o/oauth2/auth'
-    (lambda do
+    expect(lambda do
       @client.authorization_uri
-    end).should raise_error(Signet::UnsafeOperationError)
+    end).to raise_error(Signet::UnsafeOperationError)
   end
 
   it 'should raise an error if token credential URI is missing' do
     @client.token_credential_uri = nil
-    (lambda do
+    expect(lambda do
       @client.fetch_access_token!
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if unauthorized' do
@@ -454,14 +467,14 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
         [401, {}, 'User authorization failed or something.']
       end
     end
-    (lambda do
+    expect(lambda do
       connection = Faraday.new(:url => 'https://www.google.com') do |builder|
         builder.adapter(:test, stubs)
       end
       @client.fetch_access_token!(
         :connection => connection
       )
-    end).should raise_error(Signet::AuthorizationError)
+    end).to raise_error(Signet::AuthorizationError)
     stubs.verify_stubbed_calls
   end
 
@@ -473,14 +486,14 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
         [509, {}, 'Rate limit hit or something.']
       end
     end
-    (lambda do
+    expect(lambda do
       connection = Faraday.new(:url => 'https://www.google.com') do |builder|
         builder.adapter(:test, stubs)
       end
       @client.fetch_access_token!(
         :connection => connection
       )
-    end).should raise_error(Signet::AuthorizationError)
+    end).to raise_error(Signet::AuthorizationError)
     stubs.verify_stubbed_calls
   end
 
@@ -491,11 +504,11 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.redirect_uri = 'https://www.example.com/'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.dump({
+        build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600'
-        })]
+        })
       end
     end
     connection = Faraday.new(:url => 'https://www.google.com') do |builder|
@@ -504,9 +517,9 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.fetch_access_token!(
       :connection => connection
     )
-    @client.access_token.should == '12345'
-    @client.refresh_token.should == '54321'
-    @client.expires_in.should == 3600
+    expect(@client.access_token).to eq '12345'
+    expect(@client.refresh_token).to eq '54321'
+    expect(@client.expires_in).to eq 3600
     stubs.verify_stubbed_calls
   end
 
@@ -517,11 +530,11 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.password = 'incognito'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.dump({
+        build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600'
-        })]
+        })
       end
     end
     connection = Faraday.new(:url => 'https://www.google.com') do |builder|
@@ -530,9 +543,9 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.fetch_access_token!(
       :connection => connection
     )
-    @client.access_token.should == '12345'
-    @client.refresh_token.should == '54321'
-    @client.expires_in.should == 3600
+    expect(@client.access_token).to eq '12345'
+    expect(@client.refresh_token).to eq '54321'
+    expect(@client.expires_in).to eq 3600
     stubs.verify_stubbed_calls
   end
 
@@ -542,11 +555,11 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.refresh_token = '54321'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.dump({
+        build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600'
-        })]
+        })
       end
     end
     connection = Faraday.new(:url => 'https://www.google.com') do |builder|
@@ -555,9 +568,9 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.fetch_access_token!(
       :connection => connection
     )
-    @client.access_token.should == '12345'
-    @client.refresh_token.should == '54321'
-    @client.expires_in.should == 3600
+    expect(@client.access_token).to eq '12345'
+    expect(@client.refresh_token).to eq '54321'
+    expect(@client.expires_in).to eq 3600
     stubs.verify_stubbed_calls
   end
 
@@ -565,9 +578,9 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     @client.redirect_uri = 'https://www.example.com/'
-    (lambda do
+    expect(lambda do
       @client.fetch_access_token!
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should correctly fetch protected resources' do
@@ -594,8 +607,8 @@ JSON
       :connection => connection,
       :uri => 'https://www.googleapis.com/oauth2/v1/userinfo?alt=json'
     )
-    response.status.should == 200
-    response.body.should == <<-JSON
+    expect(response.status).to eq 200
+    expect(response.body).to eq <<-JSON
 {
   "id": "116452824309856782163",
   "name": "Bob Aman",
@@ -621,7 +634,7 @@ JSON
         req.url('https://www.googleapis.com/oauth2/v1/userinfo?alt=json')
       end
     )
-    request.headers['Authorization'].should == 'Bearer 12345, realm="Example"'
+    expect(request.headers['Authorization']).to eq 'Bearer 12345, realm="Example"'
   end
 
   it 'should correctly send the realm in the Authorization header' do
@@ -641,7 +654,7 @@ JSON
         ['']
       ]
     )
-    request.headers['Authorization'].should == 'Bearer 12345, realm="Example"'
+    expect(request.headers['Authorization']).to eq 'Bearer 12345, realm="Example"'
   end
 
   it 'should not raise an error if a request is ' +
@@ -662,20 +675,20 @@ JSON
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     @client.access_token = '12345'
-    (lambda do
+    expect(lambda do
       @client.generate_authenticated_request(
         :realm => 'Example',
         :method => 'POST'
       )
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should raise an error if the client does not have an access token' do
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
-    (lambda do
+    expect(lambda do
       @client.fetch_protected_resource
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 
   it 'should not raise an error if the API server gives an error status' do
@@ -694,8 +707,8 @@ JSON
       :connection => connection,
       :uri => 'https://www.googleapis.com/oauth2/v1/userinfo?alt=json'
     )
-    response.status.should == 509
-    response.body.should == 'Rate limit hit or something.'
+    expect(response.status).to eq 509
+    expect(response.body).to eq 'Rate limit hit or something.'
     stubs.verify_stubbed_calls
   end
 
@@ -709,7 +722,7 @@ JSON
         [401, {}, 'User authorization failed or something.']
       end
     end
-    (lambda do
+    expect(lambda do
       connection = Faraday.new(
         :url => 'https://www.googleapis.com'
       ) do |builder|
@@ -719,7 +732,7 @@ JSON
         :connection => connection,
         :uri => 'https://www.googleapis.com/oauth2/v1/userinfo?alt=json'
       )
-    end).should raise_error(Signet::AuthorizationError)
+    end).to raise_error(Signet::AuthorizationError)
     stubs.verify_stubbed_calls
   end
 
@@ -728,7 +741,7 @@ JSON
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.dump({
+        build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600',
@@ -739,7 +752,7 @@ JSON
             'Y2xpZW50LTEyMzQ1IiwiaXNzIjoiZXhhbXBsZS5jb20ifQ.tsF3srlBaAh6pV3U' +
             'wfRrHSA3-jwnvOw6MMsQ6sO4kjc'
           )
-        })]
+        })
       end
     end
     connection = Faraday.new(:url => 'https://www.google.com') do |builder|
@@ -748,9 +761,9 @@ JSON
     @client.fetch_access_token!(
       :connection => connection
     )
-    @client.access_token.should == '12345'
-    @client.refresh_token.should == '54321'
-    @client.decoded_id_token.should == {
+    expect(@client.access_token).to eq '12345'
+    expect(@client.refresh_token).to eq '54321'
+    expect(@client.decoded_id_token).to eq ({
       "token_hash" => "tghD9J7n8V0N2vcw6eMijg",
       "id" => "12345",
       "aud" => "client-12345",
@@ -758,8 +771,8 @@ JSON
       "exp" => 1320674878,
       "cid" => "client-12345",
       "iss" => "example.com"
-    }
-    @client.expires_in.should == 3600
+    })
+    expect(@client.expires_in).to eq 3600
     stubs.verify_stubbed_calls
   end
 
@@ -769,7 +782,7 @@ JSON
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.dump({
+        build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600',
@@ -780,7 +793,7 @@ JSON
             'Y2xpZW50LTEyMzQ1IiwiaXNzIjoiZXhhbXBsZS5jb20ifQ.tsF3srlBaAh6pV3U' +
             'wfRrHSA3-jwnvOw6MMsQ6sO4kjc'
           )
-        })]
+        })
       end
     end
     connection = Faraday.new(:url => 'https://www.google.com') do |builder|
@@ -789,12 +802,12 @@ JSON
     @client.fetch_access_token!(
       :connection => connection
     )
-    @client.access_token.should == '12345'
-    @client.refresh_token.should == '54321'
-    @client.expires_in.should == 3600
-    (lambda do
+    expect(@client.access_token).to eq '12345'
+    expect(@client.refresh_token).to eq '54321'
+    expect(@client.expires_in).to eq 3600
+    expect(lambda do
       @client.decoded_id_token
-    end).should raise_error(Signet::UnsafeOperationError)
+    end).to raise_error(Signet::UnsafeOperationError)
     stubs.verify_stubbed_calls
   end
 
@@ -804,7 +817,7 @@ JSON
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.dump({
+        build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600',
@@ -814,7 +827,7 @@ JSON
             'zgsImV4cCI6MTMyMDY3NDg3OCwiY2lkIjoiY2xpZW50LTEyMzQ1IiwiaXNzIjoi' +
             'ZXhhbXBsZS5jb20ifQ.7qj85CKbQyVdDe5y2ScdJAZNkEeKMPW9LIonLxG1vu8'
           )
-        })]
+        })
       end
     end
     connection = Faraday.new(:url => 'https://www.google.com') do |builder|
@@ -823,12 +836,12 @@ JSON
     @client.fetch_access_token!(
       :connection => connection
     )
-    @client.access_token.should == '12345'
-    @client.refresh_token.should == '54321'
-    @client.expires_in.should == 3600
-    (lambda do
+    expect(@client.access_token).to eq '12345'
+    expect(@client.refresh_token).to eq '54321'
+    expect(@client.expires_in).to eq 3600
+    expect(lambda do
       @client.decoded_id_token
-    end).should raise_error(Signet::UnsafeOperationError)
+    end).to raise_error(Signet::UnsafeOperationError)
     stubs.verify_stubbed_calls
   end
 
@@ -837,7 +850,7 @@ JSON
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
-        [200, {}, MultiJson.dump({
+        build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
           'expires_in' => '3600',
@@ -851,7 +864,7 @@ JSON
             'wcy1PxsROY1fmBvXSer0IQesAqOW-rPOCNReSn-eY8d53ph1x2HAF-AzEi3GOl' +
             '6hFycH8wj7Su6JqqyEbIVLxE7q7DkAZGaMPkxbTHs1EhSd5_oaKQ6O4xO3ZnnT4'
           )
-        })]
+        })
       end
     end
     connection = Faraday.new(:url => 'https://www.google.com') do |builder|
@@ -860,10 +873,10 @@ JSON
     @client.fetch_access_token!(
       :connection => connection
     )
-    @client.access_token.should == '12345'
-    @client.refresh_token.should == '54321'
-    @client.expires_in.should == 3600
-    (lambda do
+    expect(@client.access_token).to eq '12345'
+    expect(@client.refresh_token).to eq '54321'
+    expect(@client.expires_in).to eq 3600
+    expect(lambda do
       pubkey = OpenSSL::PKey::RSA.new(<<-PUBKEY)
 -----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxCaY7425h964bjaoLeUm
@@ -876,7 +889,7 @@ xwIDAQAB
 -----END PUBLIC KEY-----
 PUBKEY
       @client.decoded_id_token(pubkey)
-    end).should raise_error(JWT::DecodeError, "Signature verification failed")
+    end).to raise_error(JWT::DecodeError, "Signature verification failed")
     stubs.verify_stubbed_calls
   end
 end
@@ -891,17 +904,17 @@ describe Signet::OAuth2::Client, 'authorization_uri' do
   end
 
   it 'should set access_type to offline by default' do
-    @client.authorization_uri.query_values['access_type'].should == 'offline'
+    expect(@client.authorization_uri.query_values['access_type']).to eq 'offline'
   end
 
   it 'should set response_type to code by default' do
-    @client.authorization_uri.query_values['response_type'].should == 'code'
+    expect(@client.authorization_uri.query_values['response_type']).to eq 'code'
   end
 
   it 'should raise an error when setting both prompt and approval_prompt' do
-    (lambda do
+    expect(lambda do
       @client.authorization_uri(:approval_prompt => 'force', :prompt => 'consent')
-    end).should raise_error(ArgumentError)
+    end).to raise_error(ArgumentError)
   end
 end
 
@@ -917,25 +930,36 @@ describe Signet::OAuth2::Client, 'configured with custom parameters' do
   end
 
   it 'should allow custom parameters to be set on init' do
-    @client.additional_parameters.should == {'type' => 'web_server'}
+    expect(@client.additional_parameters).to eq({'type' => 'web_server'})
   end
 
   it 'should allow custom parameters to be updated' do
     @client.update!(:additional_parameters => {'type' => 'new_type'})
-    @client.additional_parameters.should == {'type' => 'new_type'}
+    expect(@client.additional_parameters).to eq ({'type' => 'new_type'})
   end
 
   it 'should use custom parameters when generating authorization_uri' do
-    @client.authorization_uri().query_values.should == {"access_type"=>"offline", "client_id"=>"s6BhdRkqt3", "redirect_uri"=>"https://example.client.com/callback", "response_type"=>"code", "type"=>"web_server"}
+    expect(@client.authorization_uri().query_values).to eq ({
+      "access_type"=>"offline",
+      "client_id"=>"s6BhdRkqt3",
+      "redirect_uri"=>"https://example.client.com/callback",
+      "response_type"=>"code",
+      "type"=>"web_server"})
   end
   it 'should merge new authorization_uri custom parameters' do
-    @client.authorization_uri(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).query_values.should == {"access_type"=>"offline", "client_id"=>"s6BhdRkqt3", "new_param"=>"new_val",  "response_type"=>"code","redirect_uri"=>"https://example.client.com/callback", "type"=>"new_type"}
+    expect(@client.authorization_uri(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).query_values).to eq ({
+      "access_type"=>"offline",
+      "client_id"=>"s6BhdRkqt3",
+      "new_param"=>"new_val",
+      "response_type"=>"code",
+      "redirect_uri"=>"https://example.client.com/callback",
+      "type"=>"new_type"})
   end
 
   it 'should merge new generate_access_token_request custom parameters' do
     @client.update!(:code=>'12345')
     body = @client.generate_access_token_request(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).body
-    body.should include("type=new_type")
-    body.should include("new_param=new_val")
+    expect(body).to include("type=new_type")
+    expect(body).to include("new_param=new_val")
   end
 end

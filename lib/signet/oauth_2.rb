@@ -74,11 +74,18 @@ module Signet #:nodoc:
       return Signet.parse_auth_param_list(challenge_string)
     end
 
-    def self.parse_json_credentials(body)
+    def self.parse_credentials(body, content_type)
       if !body.kind_of?(String)
         raise TypeError, "Expected String, got #{body.class}."
       end
-      return MultiJson.load(body)
+      case content_type
+      when /^application\/json.*/
+        return MultiJson.load(body)
+      when /^application\/x-www-form-urlencoded.*/
+        return Hash[Addressable::URI.form_unencode(body)]
+      else
+        raise ArgumentError, "Invalid content type '#{content_type}'"
+      end
     end
 
     ##

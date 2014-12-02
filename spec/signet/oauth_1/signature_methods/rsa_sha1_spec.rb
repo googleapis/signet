@@ -51,9 +51,9 @@ Lw03eHTNQghS0A==
     token_credential_secret = "pfkkdhi9sl3r4s00"
     base_string = Signet::OAuth1.generate_base_string(method, uri, parameters)
 
-    Signet::OAuth1::RSASHA1.generate_signature(
+    expect(Signet::OAuth1::RSASHA1.generate_signature(
         base_string, client_credential_secret, token_credential_secret
-    ).should == "P72T4RS8dVBneQPJSY71D3iLEjge2tiivxEasPVoaoDldDgPdwpQfhS1q0th19jB3B3+9P6tBWjpWaVPxrNZe3ssBCiwS/EmXZ/6VCJGU3YoDHMtz+0jCd36NjHj5I6TpLVQ8/rtfy6+EzpdUMz7ydnhKXYqJFPOWnNv8HM1W7I="
+    )).to eq "P72T4RS8dVBneQPJSY71D3iLEjge2tiivxEasPVoaoDldDgPdwpQfhS1q0th19jB3B3+9P6tBWjpWaVPxrNZe3ssBCiwS/EmXZ/6VCJGU3YoDHMtz+0jCd36NjHj5I6TpLVQ8/rtfy6+EzpdUMz7ydnhKXYqJFPOWnNv8HM1W7I="
   end
 end
 
@@ -89,9 +89,9 @@ Lw03eHTNQghS0A==
     token_credential_secret = "pfkkdhi9sl3r4s00"
     base_string = Signet::OAuth1.generate_base_string(method, uri, parameters)
 
-    Signet::OAuth1::RSASHA1.generate_signature(
+    expect(Signet::OAuth1::RSASHA1.generate_signature(
         base_string, client_credential_secret, token_credential_secret
-    ).should == "jvTp/wX1TYtByB1m+Pbyo0lnCOLIsyGCH7wke8AUs3BpnwZJtAuEJkvQL2/9n4s5wUmUl4aCI4BwpraNx4RtEXMe5qg5T1LVTGliMRpKasKsW//e+RinhejgCuzoH26dyF8iY2ZZ/5D1ilgeijhV/vBka5twt399mXwaYdCwFYE="
+    )).to eq "jvTp/wX1TYtByB1m+Pbyo0lnCOLIsyGCH7wke8AUs3BpnwZJtAuEJkvQL2/9n4s5wUmUl4aCI4BwpraNx4RtEXMe5qg5T1LVTGliMRpKasKsW//e+RinhejgCuzoH26dyF8iY2ZZ/5D1ilgeijhV/vBka5twt399mXwaYdCwFYE="
   end
 
 
@@ -124,9 +124,9 @@ Lw03eHTNQghS0A==
 -----END PRIVATE KEY-----"
     token_credential_secret = "QllSuL9eQ5FXFO1Z/HcgL4ON"
     base_string = Signet::OAuth1.generate_base_string(method, uri, parameters)
-    Signet::OAuth1::RSASHA1.generate_signature(
+    expect(Signet::OAuth1::RSASHA1.generate_signature(
         base_string, client_credential_secret, token_credential_secret
-    ).should == "Q1O7Ovi0jdacl/OTJoH3MAyOO/9H/tTXmoJzP/YqiKEJ+/wfShXo1RXX0xmlcjDR1XYxB1RMgHkFWQYYwz1qGCUhkXlH1c/to2qxPksptfPHRe7PJTxRClrdqLFOlhN7w2kO7tHVCeEp8IJIKON9q7cdXroTP7ctPPS+Q883SS0="
+    )).to eq "Q1O7Ovi0jdacl/OTJoH3MAyOO/9H/tTXmoJzP/YqiKEJ+/wfShXo1RXX0xmlcjDR1XYxB1RMgHkFWQYYwz1qGCUhkXlH1c/to2qxPksptfPHRe7PJTxRClrdqLFOlhN7w2kO7tHVCeEp8IJIKON9q7cdXroTP7ctPPS+Q883SS0="
   end
 
 end
