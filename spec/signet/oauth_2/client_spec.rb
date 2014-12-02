@@ -389,7 +389,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     expect(@client).to_not be_expired
   end
 
-  it 'should handle expires as equivlanet to expires_in' do
+  it 'should handle expires as equivalent to expires_in' do
     issued_at = Time.now
     @client.update_token!(
       :access_token => '12345',
@@ -929,13 +929,16 @@ describe Signet::OAuth2::Client, 'configured with custom parameters' do
     )
   end
 
+  # Normalizing to symbols - good test case example here for changes to normalized input.
+  # Also tests Addressable's output.
+  # Note: The only changes made here are to testing the **INTERNAL** representation of options.
   it 'should allow custom parameters to be set on init' do
-    expect(@client.additional_parameters).to eq({'type' => 'web_server'})
+    expect(@client.additional_parameters).to eq({:type => 'web_server'})
   end
 
   it 'should allow custom parameters to be updated' do
-    @client.update!(:additional_parameters => {'type' => 'new_type'})
-    expect(@client.additional_parameters).to eq ({'type' => 'new_type'})
+    @client.update!(:additional_parameters => {:type => 'new_type'})
+    @client.additional_parameters.should == { :type => 'new_type'}
   end
 
   it 'should use custom parameters when generating authorization_uri' do
@@ -946,6 +949,94 @@ describe Signet::OAuth2::Client, 'configured with custom parameters' do
       "response_type"=>"code",
       "type"=>"web_server"})
   end
+
+  it 'should merge new authorization_uri custom parameters' do
+    @client.authorization_uri(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).query_values.should == {"access_type"=>"offline", "client_id"=>"s6BhdRkqt3", "new_param"=>"new_val",  "response_type"=>"code","redirect_uri"=>"https://example.client.com/callback", "type"=>"new_type"}
+  end
+
+  it 'should merge new generate_access_token_request custom parameters' do
+    @client.update!(:code=>'12345')
+    body = @client.generate_access_token_request(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).body
+    body.should include("type=new_type")
+    body.should include("new_param=new_val")
+  end
+end
+
+describe Signet::OAuth2::Client, 'configured with custom parameters' do
+  before do
+    @client = Signet::OAuth2::Client.new(
+        "client_id" => 's6BhdRkqt3',
+        "redirect_uri" => 'https://example.client.com/callback',
+        "authorization_uri" => 'https://example.com/authorize',
+        "token_credential_uri" => 'https://example.com/token',
+        "additional_parameters" => {'type' => 'web_server'}
+    )
+  end
+
+  # Normalizing to symbols - good test case example here for changes to normalized input.
+  # Also tests Addressable's output.
+  # Note: The only changes made here are to testing the **INTERNAL** representation of options.
+  it 'should allow custom parameters to be set on init' do
+    @client.additional_parameters.should == { :type => 'web_server'}
+  end
+
+  it 'should allow custom parameters to be updated' do
+    @client.update!(:additional_parameters => {'type' => 'new_type'})
+    @client.additional_parameters.should == { :type => 'new_type'}
+  end
+
+  it 'should use custom parameters when generating authorization_uri' do
+    @client.authorization_uri().query_values.should == {"access_type"=>"offline", "client_id"=>"s6BhdRkqt3", "redirect_uri"=>"https://example.client.com/callback", "response_type"=>"code", "type"=>"web_server"}
+  end
+
+  it 'should have the correct authorization_uri' do
+    @client.authorization_uri.host.should == 'example.com'
+    @client.authorization_uri.path.should == '/authorize'
+  end
+
+  it 'should merge new authorization_uri custom parameters' do
+    @client.authorization_uri(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).query_values.should == {"access_type"=>"offline", "client_id"=>"s6BhdRkqt3", "new_param"=>"new_val",  "response_type"=>"code","redirect_uri"=>"https://example.client.com/callback", "type"=>"new_type"}
+  end
+
+  it 'should merge new generate_access_token_request custom parameters' do
+    @client.update!(:code=>'12345')
+    body = @client.generate_access_token_request(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).body
+    body.should include("type=new_type")
+    body.should include("new_param=new_val")
+  end
+end
+
+describe Signet::OAuth2::Client, 'configured with custom parameters a la JSON.load(credentials_file)' do
+  before do
+    @client = Signet::OAuth2::Client.new(
+        "client_id" => 's6BhdRkqt3',
+        "redirect_uri" => 'https://example.client.com/callback',
+        "authorization_uri" => {"scheme"=>"https", "user"=>nil, "password"=>nil, "host"=>"accounts.google.com", "port"=>nil, "path"=>"/o/oauth2/auth", "query"=>nil, "fragment"=>nil},
+        "token_credential_uri" => 'https://example.com/token',
+        "additional_parameters" => {'type' => 'web_server'}
+    )
+  end
+
+  it 'should allow custom parameters to be set on init' do
+    @client.additional_parameters.should == {:type => 'web_server'}
+  end
+
+  it 'should allow custom parameters to be updated' do
+    @client.update!(:additional_parameters => {'type' => 'new_type'})
+    @client.additional_parameters.should == {:type => 'new_type'}
+  end
+
+  it 'should have correct authorization_uri hash options' do
+    @client.authorization_uri.host.should == "accounts.google.com"
+    @client.authorization_uri.path.should == "/o/oauth2/auth"
+  end
+
+  it 'should use custom parameters when generating authorization_uri' do
+    @client.authorization_uri().query_values.should == {"access_type"=>"offline", "client_id"=>"s6BhdRkqt3", "redirect_uri"=>"https://example.client.com/callback", "response_type"=>"code", "type"=>"web_server"}
+  end
+
+  # , "path" => "/o/oauth2/oauth", "host" => "accounts.google.com"
+
   it 'should merge new authorization_uri custom parameters' do
     expect(@client.authorization_uri(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).query_values).to eq ({
       "access_type"=>"offline",
