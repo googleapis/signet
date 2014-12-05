@@ -10,6 +10,5 @@ version="$(script/package | grep Version: | awk '{print $2}')"
 
 git commit --allow-empty -a -m "Release $version"
 git tag "$version"
-git push origin
-git push origin "v$version"
+git push --tags origin
 gem push pkg/*-${version}.gem
