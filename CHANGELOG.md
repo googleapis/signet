@@ -1,3 +1,10 @@
+# 0.6.0
+
+* Drop support for ruby versions < 1.9.3
+* Update gem dependencies and lock down versions tighter
+* Allow form encoded responses when exchanging OAuth 2 authorization codes
+* Normalize options keys for indifferent access
+
 # 0.5.1
 
 * Allow Hash objects to be used to initialize authorization URI
