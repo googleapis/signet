@@ -297,7 +297,7 @@ module Signet
         @token_credential_uri = coerce_uri(new_token_credential_uri)
       end
 
-      # Addressable expects URIs formatted as hashes to come in with symbols as keys. 
+      # Addressable expects URIs formatted as hashes to come in with symbols as keys.
       # Returns nil implicitly for the nil case.
       def coerce_uri(incoming_uri)
         if incoming_uri.is_a? Hash
@@ -738,7 +738,7 @@ module Signet
       # @param [String] new_issued_at
       #    The access token issuance time.
       def issued_at=(new_issued_at)
-        @issued_at = new_issued_at
+        @issued_at = Time.at new_issued_at
       end
 
       ##
@@ -864,6 +864,8 @@ module Signet
           'audience' => self.audience,
           'person' => self.person,
           'expiry' => self.expiry,
+          'expires_in' => self.expires_in,
+          'issued_at' => self.issued_at.to_i,
           'signing_key' => self.signing_key,
           'refresh_token' => self.refresh_token,
           'access_token' => self.access_token,
@@ -1130,7 +1132,7 @@ module Signet
       def uri_is_oob?(uri)
         return uri.to_s == 'urn:ietf:wg:oauth:2.0:oob' || uri.to_s == 'oob'
       end
-      
+
       # Convert all keys in this hash (nested) to symbols for uniform retrieval
       def recursive_hash_normalize_keys(val)
         if val.is_a? Hash
