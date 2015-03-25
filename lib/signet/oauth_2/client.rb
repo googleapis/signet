@@ -1157,10 +1157,10 @@ module Signet
       end
 
       def deep_hash_normalize(old_hash)
-        old_hash.inject(formatted_hash={}) do |formatted_hash,(k,v)|
+        old_hash.inject(formatted_hash={}) do |hash,(k,v)|
 
-          formatted_hash[k.to_sym] = recursive_hash_normalize_keys(v)
-          formatted_hash
+          hash[k.to_sym] = recursive_hash_normalize_keys(v)
+          hash
         end
 
         formatted_hash
