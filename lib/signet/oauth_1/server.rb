@@ -250,7 +250,7 @@ module Signet
                                                          )
             }
         }
-        verifications.each do |(key, value)|
+        verifications.each do |(key, _value)|
           raise ArgumentError, "#{key} was not set." unless self.send(key)
         end
 
@@ -321,7 +321,7 @@ module Signet
           :verifier =>
             lambda {|x| 'Verifier' }
         }
-        verifications.each do |(key, value)|
+        verifications.each do |(key, _value)|
           unless self.send(key)
             raise ArgumentError, "#{key} was not set."
           end
@@ -405,7 +405,7 @@ module Signet
           )
         end
         # Make sure all required state is set
-        verifications.each do |(key, value)|
+        verifications.each do |(key, _value)|
           unless self.send(key)
             raise ArgumentError, "#{key} was not set."
           end

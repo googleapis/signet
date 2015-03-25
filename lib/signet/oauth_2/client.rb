@@ -297,7 +297,7 @@ module Signet
         @token_credential_uri = coerce_uri(new_token_credential_uri)
       end
 
-      # Addressable expects URIs formatted as hashes to come in with symbols as keys. 
+      # Addressable expects URIs formatted as hashes to come in with symbols as keys.
       # Returns nil implicitly for the nil case.
       def coerce_uri(incoming_uri)
         if incoming_uri.is_a? Hash
@@ -691,7 +691,7 @@ module Signet
       #
       # @return [String] The decoded ID token.
       def decoded_id_token(public_key=nil)
-        payload, header = JWT.decode(self.id_token, public_key, !!public_key)
+        payload, _header = JWT.decode(self.id_token, public_key, !!public_key)
         if !payload.has_key?('aud')
           raise Signet::UnsafeOperationError, 'No ID token audience declared.'
         elsif payload['aud'] != self.client_id
@@ -1130,7 +1130,7 @@ module Signet
       def uri_is_oob?(uri)
         return uri.to_s == 'urn:ietf:wg:oauth:2.0:oob' || uri.to_s == 'oob'
       end
-      
+
       # Convert all keys in this hash (nested) to symbols for uniform retrieval
       def recursive_hash_normalize_keys(val)
         if val.is_a? Hash

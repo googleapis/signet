@@ -592,7 +592,7 @@ module Signet
           :client_credential_secret => 'Client credential secret'
         }
         # Make sure all required state is set
-        verifications.each do |(key, value)|
+        verifications.each do |(key, _value)|
           unless self.send(key)
             raise ArgumentError, "#{key} was not set."
           end
@@ -748,7 +748,7 @@ module Signet
           :temporary_credential_secret => 'Temporary credential secret'
         }
         # Make sure all required state is set
-        verifications.each do |(key, value)|
+        verifications.each do |(key, _value)|
           unless self.send(key)
             raise ArgumentError, "#{key} was not set."
           end
@@ -912,7 +912,7 @@ module Signet
           )
         end
         # Make sure all required state is set
-        verifications.each do |(key, value)|
+        verifications.each do |(key, _value)|
           unless self.send(key)
             raise ArgumentError, "#{key} was not set."
           end
