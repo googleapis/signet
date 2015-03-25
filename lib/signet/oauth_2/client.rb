@@ -89,6 +89,22 @@ module Signet
       #
       # @see Signet::OAuth2::Client#update!
       def initialize(options={})
+        @authorization_uri    = nil
+        @client_id            = nil
+        @client_secret        = nil
+        @code                 = nil
+        @expires_at           = nil
+        @expires_in           = nil
+        @issued_at            = nil
+        @issued_at            = nil
+        @issuer               = nil
+        @password             = nil
+        @principal            = nil
+        @redirect_uri         = nil
+        @scope                = nil
+        @state                = nil
+        @token_credential_uri = nil
+        @username             = nil
         self.update!(options)
       end
 
