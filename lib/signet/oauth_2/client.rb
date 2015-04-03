@@ -259,6 +259,9 @@ module Signet
         options[:state] = self.state unless options[:state]
         options.merge!(self.additional_parameters.merge(options[:additional_parameters] || {}))
         options.delete(:additional_parameters)
+        options = Hash[options.map do |key, option|
+          [key.to_s, option]
+        end]
         uri = Addressable::URI.parse(
           ::Signet::OAuth2.generate_authorization_uri(
             @authorization_uri, options
