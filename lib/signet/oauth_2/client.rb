@@ -749,7 +749,7 @@ module Signet
         if @expires_at
           @expires_at
         elsif @issued_at && @expires_in
-          return @issued_at + @expires_in
+          return (@issued_at.class.name.string? ? Time.new(@issued_at) : @issued_at ) + @expires_in
         else
           return nil
         end
