@@ -77,9 +77,9 @@ module Signet
       #
       # @example
       #   client = Signet::OAuth2::Client.new(
-      #     :authorization_endpoint_uri =>
+      #     :authorization_uri =>
       #       'https://example.server.com/authorization',
-      #     :token_endpoint_uri =>
+      #     :token_credential_uri =>
       #       'https://example.server.com/token',
       #     :client_id => 'anonymous',
       #     :client_secret => 'anonymous',
