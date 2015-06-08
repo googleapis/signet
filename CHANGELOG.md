@@ -1,3 +1,10 @@
+# 0.6.1
+* Fix language warnings for unused & shadowed variables ((@blowmage)[])
+* Update SSL cert path for OSX ((@gambaroff)[])
+* Update JWT library and fix broken tests
+* Fix incorrect parameter name in OAuth2 client docs ((@samuelreh)[])
+* Fix symbolization of URL parameter keys ((@swifthand)[])
+
 # 0.6.0
 
 * Drop support for ruby versions < 1.9.3
