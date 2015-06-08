@@ -851,11 +851,11 @@ module Signet
         skew = options[:skew] || 60
         assertion = {
           "iss" => self.issuer,
-          "scope" => self.scope.join(' '),
           "aud" => self.audience,
           "exp" => (now + self.expiry).to_i,
           "iat" => (now - skew).to_i
         }
+        assertion['scope'] = self.scope.join(' ') unless self.scope.nil?
         assertion['prn'] = self.person unless self.person.nil?
         assertion['sub'] = self.sub unless self.sub.nil?
         JWT.encode(assertion, self.signing_key, self.signing_algorithm)
