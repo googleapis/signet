@@ -16,6 +16,7 @@ if (!ENV['SSL_CERT_FILE'] || !File.exist?(ENV['SSL_CERT_FILE'])) &&
     '/usr/ssl/certs/ca-certificates.crt',
     '/usr/share/curl/curl-ca-bundle.crt',
     '/etc/ssl/certs/ca-certificates.crt',
+    '/etc/openssl/cert.pem',
     '/etc/pki/tls/cert.pem',
     '/etc/pki/CA/cacert.pem',
     'C:\Windows\curl-ca-bundle.crt',
