@@ -29,7 +29,6 @@ module Signet #:nodoc:
     # Combine the above production rules to find valid auth-param pairs.
     auth_param = /((?:#{token})\s*=\s*(?:#{d_qs}|#{s_qs}|#{token}))/
     auth_param_pairs = []
-    position = 0
     last_match = nil
     remainder = auth_param_string
     # Iterate over the string, consuming pair matches as we go.  Verify that
