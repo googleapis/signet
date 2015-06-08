@@ -592,7 +592,7 @@ module Signet
           :client_credential_secret => 'Client credential secret'
         }
         # Make sure all required state is set
-        verifications.each do |(key, value)|
+        verifications.each do |(key, _value)|
           unless self.send(key)
             raise ArgumentError, "#{key} was not set."
           end
@@ -748,7 +748,7 @@ module Signet
           :temporary_credential_secret => 'Temporary credential secret'
         }
         # Make sure all required state is set
-        verifications.each do |(key, value)|
+        verifications.each do |(key, _value)|
           unless self.send(key)
             raise ArgumentError, "#{key} was not set."
           end
@@ -912,7 +912,7 @@ module Signet
           )
         end
         # Make sure all required state is set
-        verifications.each do |(key, value)|
+        verifications.each do |(key, _value)|
           unless self.send(key)
             raise ArgumentError, "#{key} was not set."
           end
@@ -979,7 +979,7 @@ module Signet
         content_type = content_type.split(';', 2).first if content_type.index(';')
         if request.method == :post && content_type == 'application/x-www-form-urlencoded'
           # Serializes the body in case a hash/array was passed. Noop if already string like
-          encoder = Faraday::Request::UrlEncoded.new(lambda { |env| })
+          encoder = Faraday::Request::UrlEncoded.new(lambda { |_env| })
           encoder.call(env)
           request.body = env[:body]
 
