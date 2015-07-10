@@ -96,7 +96,6 @@ module Signet
         @expires_at           = nil
         @expires_in           = nil
         @issued_at            = nil
-        @issued_at            = nil
         @issuer               = nil
         @password             = nil
         @principal            = nil
