@@ -889,7 +889,7 @@ xwIDAQAB
 -----END PUBLIC KEY-----
 PUBKEY
       @client.decoded_id_token(pubkey)
-    end).to raise_error(JWT::DecodeError, "Signature verification failed")
+    end).to raise_error(JWT::VerificationError)
     stubs.verify_stubbed_calls
   end
 end

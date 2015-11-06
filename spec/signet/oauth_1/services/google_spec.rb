@@ -95,14 +95,16 @@ describe Signet::OAuth1::Client, 'configured for standard Google APIs' do
   end
 
   it 'should raise an error if the token credentials are bogus' do
-    expect(lambda do
+    expect do
+      skip 'Need to replace with mocked response as google endpoints no longer use oauth1'
       @client.token_credential_key = '12345'
       @client.token_credential_secret = '12345'
-      @client.fetch_protected_resource(
+      res = @client.fetch_protected_resource(
         :uri =>
           'https://www.google.com/m8/feeds/'
       )
-    end).to raise_error(Signet::AuthorizationError)
+      puts "Res = #{res.status}"
+    end.to raise_error(Signet::AuthorizationError)
   end
 
   # We have to stub responses for the token credentials
@@ -228,6 +230,7 @@ describe Signet::OAuth1::Client, 'configured for two-legged OAuth' do
   end
 
   it 'should raise an error if the client credentials are bogus' do
+    skip 'Need to replace with mocked response as google endpoints no longer use oauth1'
     expect(lambda do
       @client.fetch_protected_resource(
         :uri =>
