@@ -1159,13 +1159,9 @@ module Signet
       end
 
       def deep_hash_normalize(old_hash)
-        old_hash.inject(formatted_hash={}) do |hash,(k,v)|
-
-          hash[k.to_sym] = recursive_hash_normalize_keys(v)
-          hash
-        end
-
-        formatted_hash
+        sym_hash = {}
+        old_hash and old_hash.each {|k,v| sym_hash[k.to_sym] = recursive_hash_normalize_keys(v)}
+        sym_hash
       end
     end
   end
