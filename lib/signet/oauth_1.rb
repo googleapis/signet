@@ -7,8 +7,6 @@ rescue LoadError
   require 'compat/securerandom'
 end
 
-require 'signet/ssl_config'
-
 module Signet #:nodoc:
   module OAuth1
     OUT_OF_BAND = 'oob'

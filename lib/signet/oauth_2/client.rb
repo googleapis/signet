@@ -13,19 +13,19 @@
 #    limitations under the License.
 
 require 'faraday'
-#require 'faraday/utils'
-
 require 'stringio'
 require 'addressable/uri'
 require 'signet'
 require 'signet/errors'
 require 'signet/oauth_2'
-
 require 'jwt'
 
 module Signet
   module OAuth2
     class Client
+
+      OOB_MODES = %w(urn:ietf:wg:oauth:2.0:oob:auto urn:ietf:wg:oauth:2.0:oob oob)
+
       ##
       # Creates an OAuth 2.0 client.
       #
@@ -90,6 +90,7 @@ module Signet
       # @see Signet::OAuth2::Client#update!
       def initialize(options={})
         @authorization_uri    = nil
+        @token_credential_uri = nil
         @client_id            = nil
         @client_secret        = nil
         @code                 = nil
@@ -103,7 +104,6 @@ module Signet
         @redirect_uri         = nil
         @scope                = nil
         @state                = nil
-        @token_credential_uri = nil
         @username             = nil
         self.update!(options)
       end
@@ -899,6 +899,7 @@ module Signet
       #   - <code>:code</code> -
       #     The authorization code.
       #
+      # @private
       # @return [Array] The request object.
       def generate_access_token_request(options={})
         options = deep_hash_normalize(options)
@@ -1147,7 +1148,7 @@ module Signet
       # Check if the URI is a out-of-band
       # @private
       def uri_is_oob?(uri)
-        return uri.to_s == 'urn:ietf:wg:oauth:2.0:oob' || uri.to_s == 'oob'
+        return OOB_MODES.include?(uri.to_s)
       end
 
       # Convert all keys in this hash (nested) to symbols for uniform retrieval

@@ -16,7 +16,6 @@ require 'base64'
 require 'signet'
 require 'multi_json'
 require 'compat/multi_json'
-require 'signet/ssl_config'
 
 module Signet #:nodoc:
   ##
