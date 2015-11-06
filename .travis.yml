@@ -1,23 +1,21 @@
-branches:
-  only:
-    - master
-    - travis
 language: ruby
 rvm:
-  - 1.9.3
+  - 2.2
   - 2.0.0
-  - rbx
-  - jruby-19mode
-  - ree
-script: "bundle exec rake spec:normal"
-jdk: openjdk7
+  - 2.1
+  - jruby-9000
+env:
+  - RAILS_VERSION="~>3.2"
+  - RAILS_VERSION="~>4.0.0"
+  - RAILS_VERSION="~>4.1.0"
+  - RAILS_VERSION="~>4.2.0"
+script: "rake spec:all"
+before_install:
+ - sudo apt-get update
+ - sudo apt-get install idn
 notifications:
   email:
     recipients:
-      - bobaman@google.com
       - sbazyl@google.com
     on_success: change
     on_failure: change
-matrix:
-  allow_failures:
-    - rvm: rbx
