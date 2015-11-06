@@ -1,3 +1,6 @@
+# 0.7
+* Blah
+
 # 0.6.1
 * Fix language warnings for unused & shadowed variables ((@blowmage)[])
 * Update SSL cert path for OSX ((@gambaroff)[])

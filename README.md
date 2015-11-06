@@ -25,26 +25,30 @@ Signet is an OAuth 1.0 / OAuth 2.0 implementation.
 
 ## Example Usage for Google
 
+# Initialize the client
+
 ``` ruby
-require 'signet/oauth_1/client'
-client = Signet::OAuth1::Client.new(
-  :temporary_credential_uri =>
-    'https://www.google.com/accounts/OAuthGetRequestToken',
-  :authorization_uri =>
-    'https://www.google.com/accounts/OAuthAuthorizeToken',
-  :token_credential_uri =>
-    'https://www.google.com/accounts/OAuthGetAccessToken',
-  :client_credential_key => 'anonymous',
-  :client_credential_secret => 'anonymous'
+require 'signet/oauth_2/client'
+client = Signet::OAuth2::Client.new(
+  :authorization_uri => 'https://accounts.google.com/o/oauth2/auth',
+  :token_credential_uri =>  'https://www.googleapis.com/oauth2/v3/token',
+  :client_id => '44410190108-74nkm6jc5e3vvjqis803frkvmu88cu3a.apps.googleusercontent.com',
+  :client_secret => 'X1NUhvO-rQr9sm8uUSMY8i7v',
+  :scope => 'email profile',
+  :redirect_uri => 'https://example.client.com/oauth'
 )
-client.fetch_temporary_credential!(:additional_parameters => {
-  :scope => 'https://mail.google.com/mail/feed/atom'
-})
-# Send the user to client.authorization_uri, obtain verifier
-client.fetch_token_credential!(:verifier => '12345')
-response = client.fetch_protected_resource(
-  :uri => 'https://mail.google.com/mail/feed/atom'
-)
+
+# Request an authorization code
+
+```
+redirect_to(client.authorization_uri)
+```
+
+# Obtain an access token
+
+```
+client.code = request.query['code']
+client.fetch_access_token!
 ```
 
 ## Install
