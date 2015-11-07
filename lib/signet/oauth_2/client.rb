@@ -756,7 +756,7 @@ module Signet
       # @param [String] new_issued_at
       #    The access token issuance time.
       def issued_at=(new_issued_at)
-        @issued_at = new_issued_at
+        @issued_at = Time.at(new_issued_at) rescue nil
       end
 
       ##
@@ -882,6 +882,8 @@ module Signet
           'audience' => self.audience,
           'person' => self.person,
           'expiry' => self.expiry,
+          'expires_in' => self.expires_in,
+          'issued_at' => self.issued_at.to_i,
           'signing_key' => self.signing_key,
           'refresh_token' => self.refresh_token,
           'access_token' => self.access_token,

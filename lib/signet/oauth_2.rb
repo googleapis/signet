@@ -147,6 +147,9 @@ module Signet #:nodoc:
       end
       parsed_uri = Addressable::URI.parse(authorization_uri).dup
       query_values = parsed_uri.query_values || {}
+      query_values.keys.each do |key|
+        query_values[(key.to_sym rescue key) || key] = query_values.delete(key)
+      end
       query_values = query_values.merge(parameters)
       parsed_uri.query_values = query_values
       return parsed_uri.normalize.to_s
