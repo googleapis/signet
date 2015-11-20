@@ -570,10 +570,10 @@ module Signet
       # Sets the number of seconds assertions are valid for
       # Used only by the assertion grant type.
       #
-      # @param [String] new_expiry
+      # @param [Fixnum, String] new_expiry
       #   Assertion expiry, in seconds
       def expiry=(new_expiry)
-        @expiry = new_expiry
+        @expiry = new_expiry ? new_expiry.to_i : nil
       end
 
 
@@ -722,7 +722,7 @@ module Signet
       ##
       # Returns the lifetime of the access token in seconds.
       #
-      # @return [Integer] The access token lifetime.
+      # @return [Fixnum] The access token lifetime.
       def expires_in
         return @expires_in
       end
@@ -731,21 +731,21 @@ module Signet
       # Sets the lifetime of the access token in seconds.  Resets the issued
       # timestamp.
       #
-      # @param [String] new_expires_in
+      # @param [String, Fixnum] new_expires_in
       #   The access token lifetime.
       def expires_in=(new_expires_in)
         if new_expires_in != nil
           @expires_in = new_expires_in.to_i
           @issued_at = Time.now
         else
-          @expires_in, @issued_at = nil, nil
+          @expires_in, @issued_at, @expires_at = nil, nil, nil
         end
       end
 
       ##
       # Returns the timestamp the access token was issued at.
       #
-      # @return [Integer] The access token issuance time.
+      # @return [Time] The access token issuance time.
       def issued_at
         return @issued_at
       end
@@ -753,16 +753,16 @@ module Signet
       ##
       # Sets the timestamp the access token was issued at.
       #
-      # @param [String] new_issued_at
+      # @param [String,Fixnum,Time] new_issued_at
       #    The access token issuance time.
       def issued_at=(new_issued_at)
-        @issued_at = new_issued_at
+        @issued_at = normalize_timestamp(new_issued_at)
       end
 
       ##
       # Returns the timestamp the access token will expire at.
       #
-      # @return [Integer] The access token lifetime.
+      # @return [Time] The access token lifetime.
       def expires_at
         if @expires_at
           @expires_at
@@ -776,8 +776,10 @@ module Signet
       ##
       # Limits the lifetime of the access token as number of seconds since
       # the Epoch
+      # @param [String,Fixnum,Time] new_expires_at
+      #    The access token issuance time.
       def expires_at=(new_expires_at)
-        @expires_at = Time.at new_expires_at
+        @expires_at = normalize_timestamp(new_expires_at)
       end
 
       ##
@@ -882,6 +884,7 @@ module Signet
           'audience' => self.audience,
           'person' => self.person,
           'expiry' => self.expiry,
+          'expires_at' => self.expires_at ? self.expires_at.to_i : nil,
           'signing_key' => self.signing_key,
           'refresh_token' => self.refresh_token,
           'access_token' => self.access_token,
@@ -935,6 +938,7 @@ module Signet
           ['Cache-Control', 'no-store'],
           ['Content-Type', 'application/x-www-form-urlencoded']
         ]
+        parameters['scope'] = options[:scope] if options[:scope]
         parameters.merge!(self.additional_parameters.merge(options[:additional_parameters] || {}))
         return options[:connection].build_request(
           method.to_s.downcase.to_sym
@@ -1163,6 +1167,21 @@ module Signet
         sym_hash = {}
         old_hash and old_hash.each {|k,v| sym_hash[k.to_sym] = recursive_hash_normalize_keys(v)}
         sym_hash
+      end
+
+      def normalize_timestamp(time)
+        case time
+        when NilClass
+          nil
+        when Time
+          time
+        when String
+          Time.parse(issued_at)
+        when Fixnum
+          Time.at(time)
+        else
+          fail "Invalid time value #{time}"
+        end
       end
     end
   end
