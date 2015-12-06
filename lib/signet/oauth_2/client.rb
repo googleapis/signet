@@ -1014,21 +1014,6 @@ module Signet
         self.fetch_access_token!(options)
       end
 
-      # Updates a_hash updated with the authentication token
-      def apply!(a_hash, opts = {})
-        # fetch the access token there is currently not one, or if the client
-        # has expired or will shortly expire.
-        fetch_access_token!(opts) if access_token.nil? || expires_within?(60)
-        a_hash['Authorization'] = "Bearer #{access_token}"
-      end
-
-      # Returns a clone of a_hash updated with the authentication token
-      def apply(a_hash, opts = {})
-        a_copy = a_hash.clone
-        apply!(a_copy, opts)
-        a_copy
-      end
-
       ##
       # Generates an authenticated request for protected resources.
       #
