@@ -13,6 +13,7 @@ script: "rake spec:all"
 before_install:
  - sudo apt-get update
  - sudo apt-get install idn
+ - gem install bundler
 notifications:
   email:
     recipients:
