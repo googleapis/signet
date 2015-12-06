@@ -791,6 +791,18 @@ module Signet
         return self.expires_at != nil && Time.now >= self.expires_at
       end
 
+      ##
+      # Returns true if the access token has expired or expires within
+      # the next n seconds
+      #
+      # @param [Fixnum] sec
+      #  Max number of seconds from now where a token is still considered
+      #  expired.
+      # @return [TrueClass, FalseClass]
+      #   The expiration state of the access token.
+      def expires_within?(sec)
+        return self.expires_at != nil && Time.now >= (self.expires_at - sec)
+      end
 
       ##
       # Removes all credentials from the client.
@@ -870,14 +882,14 @@ module Signet
       # @return [String] A serialized JSON representation of the client.
       def to_json
         return MultiJson.dump({
-          'authorization_uri' => self.authorization_uri,
-          'token_credential_uri' => self.token_credential_uri,
+          'authorization_uri' => self.authorization_uri ? self.authorization_uri.to_s : nil,
+          'token_credential_uri' => self.token_credential_uri ? self.token_credential_uri.to_s : nil,
           'client_id' => self.client_id,
           'client_secret' => self.client_secret,
           'scope' => self.scope,
           'state' => self.state,
           'code' => self.code,
-          'redirect_uri' => self.redirect_uri,
+          'redirect_uri' => self.redirect_uri ? self.redirect_uri.to_s : nil,
           'username' => self.username,
           'password' => self.password,
           'issuer' => self.issuer,
@@ -906,12 +918,6 @@ module Signet
       def generate_access_token_request(options={})
         options = deep_hash_normalize(options)
 
-        if self.token_credential_uri == nil
-          raise ArgumentError, 'Missing token endpoint URI.'
-        end
-
-        options[:connection] ||= Faraday.default_connection
-        method = 'POST'
         parameters = {"grant_type" => self.grant_type}
         case self.grant_type
         when 'authorization_code'
@@ -934,49 +940,53 @@ module Signet
         end
         parameters['client_id'] = self.client_id unless self.client_id.nil?
         parameters['client_secret'] = self.client_secret unless self.client_secret.nil?
-        headers = [
-          ['Cache-Control', 'no-store'],
-          ['Content-Type', 'application/x-www-form-urlencoded']
-        ]
         parameters['scope'] = options[:scope] if options[:scope]
-        parameters.merge!(self.additional_parameters.merge(options[:additional_parameters] || {}))
-        return options[:connection].build_request(
-          method.to_s.downcase.to_sym
-        ) do |req|
-          req.url(Addressable::URI.parse(
-            self.token_credential_uri
-          ).normalize.to_s)
-          req.headers = Faraday::Utils::Headers.new(headers)
-          req.body = Addressable::URI.form_encode(parameters)
-        end
+        additional = self.additional_parameters.merge(options[:additional_parameters] || {})
+        additional.each { |k, v| parameters[k.to_s] = v }
+        parameters
       end
 
       def fetch_access_token(options={})
+        if self.token_credential_uri == nil
+          raise ArgumentError, 'Missing token endpoint URI.'
+        end
+
         options = deep_hash_normalize(options)
 
-        options[:connection] ||= Faraday.default_connection
-        request = self.generate_access_token_request(options)
-        request_env = request.to_env(options[:connection])
-        request_env[:request] ||= request
-        response = options[:connection].app.call(request_env)
-        if response.status.to_i == 200
-          content_type = response.headers['content-type']
-          return ::Signet::OAuth2.parse_credentials(response.body, content_type)
-        elsif [400, 401, 403].include?(response.status.to_i)
+        client = options[:connection] ||= Faraday.default_connection
+        url = Addressable::URI.parse(self.token_credential_uri).normalize.to_s
+        parameters = self.generate_access_token_request(options)
+
+        response = client.post url, parameters
+        if response.respond_to?(:status)
+          # Faraday connection
+          status = response.status.to_i
+          body = response.body
+          content_type = response.headers['Content-type']
+        else
+          # Hurley
+          status = response.status_code.to_i
+          body = response.body
+          content_type = response.header[:content_type]
+        end
+
+        if status == 200
+          return ::Signet::OAuth2.parse_credentials(body, content_type)
+        elsif [400, 401, 403].include?(status)
           message = 'Authorization failed.'
-          if response.body.to_s.strip.length > 0
+          if body.to_s.strip.length > 0
             message += "  Server message:\n#{response.body.to_s.strip}"
           end
           raise ::Signet::AuthorizationError.new(
-            message, :request => request, :response => response
+            message, :response => response
           )
         else
           message = "Unexpected status code: #{response.status}."
-          if response.body.to_s.strip.length > 0
+          if body.to_s.strip.length > 0
             message += "  Server message:\n#{response.body.to_s.strip}"
           end
           raise ::Signet::AuthorizationError.new(
-            message, :request => request, :response => response
+            message, :response => response
           )
         end
       end
@@ -1004,6 +1014,21 @@ module Signet
         self.fetch_access_token!(options)
       end
 
+      # Updates a_hash updated with the authentication token
+      def apply!(a_hash, opts = {})
+        # fetch the access token there is currently not one, or if the client
+        # has expired or will shortly expire.
+        fetch_access_token!(opts) if access_token.nil? || expires_within?(60)
+        a_hash['Authorization'] = "Bearer #{access_token}"
+      end
+
+      # Returns a clone of a_hash updated with the authentication token
+      def apply(a_hash, opts = {})
+        a_copy = a_hash.clone
+        apply!(a_copy, opts)
+        a_copy
+      end
+
       ##
       # Generates an authenticated request for protected resources.
       #
@@ -1023,7 +1048,6 @@ module Signet
       #     The HTTP body for the request.
       #   - <code>:realm</code> -
       #     The Authorization realm.  See RFC 2617.
-      #
       # @return [Faraday::Request] The request object.
       def generate_authenticated_request(options={})
         options = deep_hash_normalize(options)
@@ -1102,16 +1126,6 @@ module Signet
       #   # Using Net::HTTP
       #   response = client.fetch_protected_resource(
       #     :uri => 'http://www.example.com/protected/resource'
-      #   )
-      #
-      # @example
-      #   # Using Typhoeus
-      #   response = client.fetch_protected_resource(
-      #     :request => Typhoeus::Request.new(
-      #       'http://www.example.com/protected/resource'
-      #     ),
-      #     :adapter => HTTPAdapter::TyphoeusAdapter.new,
-      #     :connection => connection
       #   )
       #
       # @return [Array] The response object.

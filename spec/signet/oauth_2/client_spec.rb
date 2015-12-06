@@ -263,7 +263,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
     it 'should send valid access token request' do
       stubs = Faraday::Adapter::Test::Stubs.new do |stub|
         stub.post('/o/oauth2/token') do |env|
-          params = Addressable::URI.form_unencode(env[:body])
+          params = env[:body]
           claim, header = JWT.decode(params.assoc("assertion").last, @key.public_key)
           expect(params.assoc("grant_type")).to eq ['grant_type','urn:ietf:params:oauth:grant-type:jwt-bearer']
           build_json_response({
@@ -370,8 +370,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
       'PEFzc2VydGlvbiBJc3N1ZUluc3RhbnQ9IjIwMTEtMDU'
 
     request = @client.generate_access_token_request
-    params = Addressable::URI.form_unencode(request.body)
-    expect(params).to include(['assertion', 'PEFzc2VydGlvbiBJc3N1ZUluc3RhbnQ9IjIwMTEtMDU'])
+    expect(request).to include('assertion' => 'PEFzc2VydGlvbiBJc3N1ZUluc3RhbnQ9IjIwMTEtMDU')
   end
 
   it 'should allow the token to be updated' do
@@ -956,9 +955,9 @@ describe Signet::OAuth2::Client, 'configured with custom parameters' do
 
   it 'should merge new generate_access_token_request custom parameters' do
     @client.update!(:code=>'12345')
-    body = @client.generate_access_token_request(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).body
-    expect(body).to include("type=new_type")
-    expect(body).to include("new_param=new_val")
+    params = @client.generate_access_token_request(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'})
+    expect(params).to include('type' => 'new_type')
+    expect(params).to include('new_param' => 'new_val')
   end
 end
 
@@ -1000,9 +999,9 @@ describe Signet::OAuth2::Client, 'configured with custom parameters' do
 
   it 'should merge new generate_access_token_request custom parameters' do
     @client.update!(:code=>'12345')
-    body = @client.generate_access_token_request(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).body
-    expect(body).to include("type=new_type")
-    expect(body).to include("new_param=new_val")
+    params = @client.generate_access_token_request(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'})
+    expect(params).to include("type" => "new_type")
+    expect(params).to include("new_param" => "new_val")
   end
 end
 
@@ -1049,8 +1048,8 @@ describe Signet::OAuth2::Client, 'configured with custom parameters a la JSON.lo
 
   it 'should merge new generate_access_token_request custom parameters' do
     @client.update!(:code=>'12345')
-    body = @client.generate_access_token_request(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).body
-    expect(body).to include("type=new_type")
-    expect(body).to include("new_param=new_val")
+    params = @client.generate_access_token_request(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'})
+    expect(params).to include("type" => "new_type")
+    expect(params).to include("new_param" => "new_val")
   end
 end
