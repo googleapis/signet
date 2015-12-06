@@ -1,5 +1,9 @@
 # 0.7
-* Blah
+* No longer overwrite SSL environment variables.
+* Tighten up date & URL (de)serialization for OAuth2 client
+* Allow Hurley as a connection
+* Add expires_within(sec) method to oauth2 client to facilitate proactive
+  refreshes
 
 # 0.6.1
 * Fix language warnings for unused & shadowed variables ((@blowmage)[])
