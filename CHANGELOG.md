@@ -2,6 +2,7 @@
 * No longer overwrite SSL environment variables.
 * Tighten up date & URL (de)serialization for OAuth2 client
 * Allow Hurley as a connection
+* Allow scope as an option in `fetch_access_token!` to request downscoped access tokens
 * Add expires_within(sec) method to oauth2 client to facilitate proactive
   refreshes
 
