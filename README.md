@@ -37,6 +37,7 @@ client = Signet::OAuth2::Client.new(
   :scope => 'email profile',
   :redirect_uri => 'https://example.client.com/oauth'
 )
+```
 
 # Request an authorization code
 
