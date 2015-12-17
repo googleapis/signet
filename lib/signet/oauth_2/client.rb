@@ -1175,7 +1175,7 @@ module Signet
         when Time
           time
         when String
-          Time.parse(issued_at)
+          Time.parse(time)
         when Fixnum
           Time.at(time)
         else

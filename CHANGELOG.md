@@ -1,3 +1,7 @@
+# 0.7.1
+
+* Fix an issue with date parsing
+
 # 0.7
 * No longer overwrite SSL environment variables.
 * Tighten up date & URL (de)serialization for OAuth2 client
