@@ -956,15 +956,16 @@ module Signet
         client = options[:connection] ||= Faraday.default_connection
         url = Addressable::URI.parse(self.token_credential_uri).normalize.to_s
         parameters = self.generate_access_token_request(options)
-
-        response = client.post url, parameters
-        if response.respond_to?(:status)
-          # Faraday connection
+        if client.is_a?(Faraday::Connection)
+          response = client.post url,
+            Addressable::URI.form_encode(parameters),
+            { 'Content-Type' => 'application/x-www-form-urlencoded' }
           status = response.status.to_i
           body = response.body
           content_type = response.headers['Content-type']
         else
           # Hurley
+          response = client.post url, parameters
           status = response.status_code.to_i
           body = response.body
           content_type = response.header[:content_type]

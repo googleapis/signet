@@ -263,7 +263,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
     it 'should send valid access token request' do
       stubs = Faraday::Adapter::Test::Stubs.new do |stub|
         stub.post('/o/oauth2/token') do |env|
-          params = env[:body]
+          params = Addressable::URI.form_unencode(env[:body])
           claim, header = JWT.decode(params.assoc("assertion").last, @key.public_key)
           expect(params.assoc("grant_type")).to eq ['grant_type','urn:ietf:params:oauth:grant-type:jwt-bearer']
           build_json_response({
