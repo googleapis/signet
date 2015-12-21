@@ -1,3 +1,7 @@
+# 0.7.2
+
+* Don't assume Faraday form encoding middleware is present
+
 # 0.7.1
 
 * Fix an issue with date parsing
