@@ -1177,7 +1177,7 @@ module Signet
           time
         when String
           Time.parse(time)
-        when Fixnum
+        when Fixnum, Bignum
           Time.at(time)
         else
           fail "Invalid time value #{time}"
