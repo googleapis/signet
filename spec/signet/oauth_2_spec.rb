@@ -12,6 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 require 'spec_helper'
+require 'signet/errors'
 require 'signet/oauth_2'
 
 describe Signet::OAuth2 do

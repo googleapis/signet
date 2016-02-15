@@ -13,6 +13,7 @@
 #    limitations under the License.
 require 'spec_helper'
 require 'signet'
+require 'signet/oauth_1'
 require 'signet/oauth_1/signature_methods/plaintext'
 
 describe Signet::OAuth1::PLAINTEXT do

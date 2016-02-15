@@ -13,6 +13,7 @@
 #    limitations under the License.
 require 'spec_helper'
 require 'signet'
+require 'signet/oauth_1'
 require 'signet/oauth_1/signature_methods/rsa_sha1'
 
 describe Signet::OAuth1::RSASHA1 do
