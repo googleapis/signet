@@ -756,7 +756,7 @@ module Signet
       # @param [String,Fixnum,Time] new_issued_at
       #    The access token issuance time.
       def issued_at=(new_issued_at)
-        @issued_at = normalize_timestamp(new_issued_at)
+        @issued_at = Time.at(new_issued_at)
       end
 
       ##
