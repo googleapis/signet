@@ -1,3 +1,9 @@
+# 0.7.3
+
+* Fix timestamp parsing on 32-bit systems
+* Fix expiration check when issue/expiry times are nil
+
+
 # 0.7.2
 
 * Don't assume Faraday form encoding middleware is present
