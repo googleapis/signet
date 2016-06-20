@@ -11,13 +11,7 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-
-spec_dir = File.expand_path(File.join(File.dirname(__FILE__), ".."))
-$:.unshift(spec_dir)
-$:.uniq!
-
 require 'spec_helper'
-
 require 'signet/oauth_1'
 require 'signet/oauth_1/client'
 require 'signet/oauth_1/credential'
