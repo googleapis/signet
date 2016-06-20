@@ -435,6 +435,21 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     expect(@client).to_not be_expired
   end
 
+  it 'should indicate the token is expired if expired_at nil' do
+    @client.expires_at = nil
+    expect(@client.expires_within?(60)).to be true
+  end
+
+  it 'should indicate the token is not expiring when expiry beyond window' do
+    @client.expires_at = Time.now+100
+    expect(@client.expires_within?(60)).to be false
+  end
+
+  it 'should indicate the token is expiring soon when expiry within window' do
+    @client.expires_at = Time.now+30
+    expect(@client.expires_within?(60)).to be true
+  end
+
   it 'should raise an error if the authorization endpoint is not secure' do
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
