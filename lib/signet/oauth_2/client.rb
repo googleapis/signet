@@ -1175,6 +1175,8 @@ module Signet
           nil
         when Time
           time
+        when DateTime
+          time.to_time
         when String
           Time.parse(time)
         when Fixnum, Bignum
