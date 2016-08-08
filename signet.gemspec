@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/google/signet/"
   s.rdoc_options = ["--main", "README.md"]
   s.summary = "Signet is an OAuth 1.0 / OAuth 2.0 implementation."
+  s.required_ruby_version = ">= 2.0.0"
 
   s.add_runtime_dependency 'addressable', '~> 2.3'
   s.add_runtime_dependency 'faraday', '~> 0.9'
