@@ -540,11 +540,11 @@ describe Signet::OAuth1::Client, 'configured' do
   end
 
   it 'should raise an error if a bogus request is provided' do
-    expect(lambda do
+    expect {
       @client.generate_authenticated_request(
         :request => []
       )
-    end).to raise_error
+      }.to raise_error(ArgumentError)
   end
 
   it 'should not raise an error if a request is ' +

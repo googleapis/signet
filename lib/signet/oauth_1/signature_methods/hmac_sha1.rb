@@ -1,8 +1,4 @@
-
-require 'digest/hmac'
-require 'digest/sha1'
-require 'base64'
-
+require 'openssl'
 require 'signet'
 
 module Signet #:nodoc:
@@ -19,8 +15,8 @@ module Signet #:nodoc:
         # secret joined by the '&' character.  If the token secret is omitted,
         # the '&' must still be present.
         key = [client_credential_secret, token_credential_secret].join("&")
-        return Base64.encode64(Digest::HMAC.digest(
-          base_string, key, Digest::SHA1
+        return Base64.encode64(OpenSSL::HMAC.digest(
+            OpenSSL::Digest.new('sha1'), key, base_string
         )).strip
       end
     end

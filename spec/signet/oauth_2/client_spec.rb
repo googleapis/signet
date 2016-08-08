@@ -897,7 +897,7 @@ xwIDAQAB
 -----END PUBLIC KEY-----
 PUBKEY
       @client.decoded_id_token(pubkey)
-    end).to raise_error
+    end).to raise_error(JWT::ExpiredSignature)
     stubs.verify_stubbed_calls
   end
 end
