@@ -1,8 +1,5 @@
-begin
-  require 'digest/hmac'
-rescue LoadError
-  require 'compat/digest/hmac'
-end
+
+require 'digest/hmac'
 require 'digest/sha1'
 require 'base64'
 
