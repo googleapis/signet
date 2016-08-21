@@ -738,8 +738,9 @@ module Signet
           @expires_in = new_expires_in.to_i
           @issued_at = Time.now
         else
-          @expires_in, @issued_at, @expires_at = nil, nil, nil
+          @expires_in, @issued_at = nil, nil
         end
+        @expires_at = nil
       end
 
       ##
