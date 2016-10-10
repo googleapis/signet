@@ -35,7 +35,7 @@ describe Signet::OAuth1::PLAINTEXT do
     base_string = Signet::OAuth1.generate_base_string(method, uri, parameters)
     expect(Signet::OAuth1::PLAINTEXT.generate_signature(
         base_string, client_credential_secret, token_credential_secret
-    )).to eq "kd94hf93k423kf44%26pfkkdhi9sl3r4s00"
+    )).to eq "kd94hf93k423kf44&pfkkdhi9sl3r4s00"
   end
 
   it 'should correctly generate a signature' do
@@ -56,6 +56,6 @@ describe Signet::OAuth1::PLAINTEXT do
     base_string = Signet::OAuth1.generate_base_string(method, uri, parameters)
     expect(Signet::OAuth1::PLAINTEXT.generate_signature(
         base_string, client_credential_secret, token_credential_secret
-    )).to eq "Kv%252Bo2XXL%252F9RxkQW3lO3QTVlH%26QllSuL9eQ5FXFO1Z%252FHcgL4ON"
+    )).to eq "Kv%2Bo2XXL%2F9RxkQW3lO3QTVlH&QllSuL9eQ5FXFO1Z%2FHcgL4ON"
   end
 end

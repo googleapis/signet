@@ -13,8 +13,7 @@ module Signet #:nodoc:
         # The key for the signature is just the client secret and token
         # secret joined by the '&' character.  If the token secret is omitted,
         # the '&' must still be present.
-        key = [client_credential_secret, token_credential_secret].join("&")
-        return Signet::OAuth1.encode(key).strip
+        [client_credential_secret, token_credential_secret].join("&").strip
       end
     end
   end
