@@ -734,7 +734,7 @@ module Signet
       # @param [String, Fixnum] new_expires_in
       #   The access token lifetime.
       def expires_in=(new_expires_in)
-        if new_expires_in != nil
+        if !new_expires_in.nil?
           @expires_in = new_expires_in.to_i
           @issued_at = Time.now
         else
@@ -788,7 +788,7 @@ module Signet
       # @return [TrueClass, FalseClass]
       #   The expiration state of the access token.
       def expired?
-        return self.expires_at != nil && Time.now >= self.expires_at
+        return !self.expires_at.nil? && Time.now >= self.expires_at
       end
 
       ##

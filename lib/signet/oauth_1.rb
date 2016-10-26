@@ -91,7 +91,7 @@ module Signet #:nodoc:
       else
         credential_key = nil
       end
-      if credential_key != nil && !credential_key.kind_of?(String)
+      if !credential_key.nil? && !credential_key.kind_of?(String)
         raise TypeError,
           "Expected String, got #{credential_key.class}."
       end
@@ -133,7 +133,7 @@ module Signet #:nodoc:
       else
         credential_secret = nil
       end
-      if credential_secret != nil && !credential_secret.kind_of?(String)
+      if !credential_secret.nil? && !credential_secret.kind_of?(String)
         raise TypeError,
           "Expected String, got #{credential_secret.class}."
       end
