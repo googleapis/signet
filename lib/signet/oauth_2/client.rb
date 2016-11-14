@@ -788,7 +788,7 @@ module Signet
       # @return [TrueClass, FalseClass]
       #   The expiration state of the access token.
       def expired?
-        return self.expires_at != nil && Time.now >= self.expires_at
+        return self.expires_at.nil? || Time.now >= self.expires_at
       end
 
       ##
