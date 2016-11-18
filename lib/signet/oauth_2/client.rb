@@ -227,12 +227,19 @@ module Signet
 
         self.expires_in = options[:expires] if options.has_key?(:expires)
         self.expires_in = options[:expires_in] if options.has_key?(:expires_in)
-        self.expires_at = options[:expires_at] if options.has_key?(:expires_at)
 
         # By default, the token is issued at `Time.now` when `expires_in` is
         # set, but this can be used to supply a more precise time.
         self.issued_at = options[:issued_at] if options.has_key?(:issued_at)
 
+        # Once the token is refreshed, the expires_at should be updated by
+        # doing issued_at + expires_in
+        if options.has_key?(:expires_at)
+          self.expires_at = options[:expires_at] 
+        else 
+          self.expires_at = self.issued_at + self.expires_in if options.has_key?(:issued_at) && options.has_key?(:expires_in)
+        end
+        
         self.access_token = options[:access_token] if options.has_key?(:access_token)
         self.refresh_token = options[:refresh_token] if options.has_key?(:refresh_token)
         self.id_token = options[:id_token] if options.has_key?(:id_token)
