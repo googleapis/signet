@@ -246,9 +246,9 @@ module Signet
       # @return [Addressable::URI] The authorization URI.
       #
       # @see Signet::OAuth2.generate_authorization_uri
-      def authorization_uri(options={})
+      def authorization_uri(options = {})
         # Normalize external input
-        options = deep_hash_normalize(options)
+        options = deep_hash_normalize(options || {})
 
         return nil if @authorization_uri == nil
         unless options[:response_type]
