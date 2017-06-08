@@ -940,7 +940,11 @@ module Signet
         end
         parameters['client_id'] = self.client_id unless self.client_id.nil?
         parameters['client_secret'] = self.client_secret unless self.client_secret.nil?
-        parameters['scope'] = options[:scope] if options[:scope]
+        if options[:scope]
+          parameters['scope'] = options[:scope]
+        elsif !self.scope.nil?
+          parameters['scope'] = self.scope
+        end
         additional = self.additional_parameters.merge(options[:additional_parameters] || {})
         additional.each { |k, v| parameters[k.to_s] = v }
         parameters
