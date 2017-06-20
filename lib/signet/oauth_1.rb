@@ -1,11 +1,7 @@
 require 'addressable/uri'
 require 'signet'
 
-begin
-  require 'securerandom'
-rescue LoadError
-  require 'compat/securerandom'
-end
+require 'securerandom'
 
 module Signet #:nodoc:
   module OAuth1

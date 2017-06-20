@@ -1,6 +1,3 @@
-compat_dir = File.expand_path(File.join('..', 'force_compat'))
-
-$:.unshift(compat_dir)
 $:.uniq!
 
 require 'rubygems'

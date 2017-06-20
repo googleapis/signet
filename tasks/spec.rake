@@ -6,7 +6,7 @@ CLOBBER.include('coverage', 'specdoc')
 namespace :spec do
 
   RSpec::Core::RakeTask.new(:normal) do |t|
-    t.pattern = FileList['spec/**/*_spec.rb'].exclude(/compat/)
+    t.pattern = FileList['spec/**/*_spec.rb']
     t.rspec_opts = ['--color', '--format', 'documentation']
   end
 
