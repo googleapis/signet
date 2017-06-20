@@ -561,7 +561,7 @@ module Signet
       # Returns the number of seconds assertions are valid for
       # Used only by the assertion grant type.
       #
-      # @return [Fixnum] Assertion expiry, in seconds
+      # @return [Integer] Assertion expiry, in seconds
       def expiry
         return @expiry
       end
@@ -570,7 +570,7 @@ module Signet
       # Sets the number of seconds assertions are valid for
       # Used only by the assertion grant type.
       #
-      # @param [Fixnum, String] new_expiry
+      # @param [Integer, String] new_expiry
       #   Assertion expiry, in seconds
       def expiry=(new_expiry)
         @expiry = new_expiry ? new_expiry.to_i : nil
@@ -722,7 +722,7 @@ module Signet
       ##
       # Returns the lifetime of the access token in seconds.
       #
-      # @return [Fixnum] The access token lifetime.
+      # @return [Integer] The access token lifetime.
       def expires_in
         return @expires_in
       end
@@ -731,7 +731,7 @@ module Signet
       # Sets the lifetime of the access token in seconds.  Resets the issued
       # timestamp.
       #
-      # @param [String, Fixnum] new_expires_in
+      # @param [String, Integer] new_expires_in
       #   The access token lifetime.
       def expires_in=(new_expires_in)
         if new_expires_in != nil
@@ -753,7 +753,7 @@ module Signet
       ##
       # Sets the timestamp the access token was issued at.
       #
-      # @param [String,Fixnum,Time] new_issued_at
+      # @param [String,Integer,Time] new_issued_at
       #    The access token issuance time.
       def issued_at=(new_issued_at)
         @issued_at = normalize_timestamp(new_issued_at)
@@ -776,7 +776,7 @@ module Signet
       ##
       # Limits the lifetime of the access token as number of seconds since
       # the Epoch
-      # @param [String,Fixnum,Time] new_expires_at
+      # @param [String,Integer,Time] new_expires_at
       #    The access token issuance time.
       def expires_at=(new_expires_at)
         @expires_at = normalize_timestamp(new_expires_at)
@@ -795,7 +795,7 @@ module Signet
       # Returns true if the access token has expired or expires within
       # the next n seconds
       #
-      # @param [Fixnum] sec
+      # @param [Integer] sec
       #  Max number of seconds from now where a token is still considered
       #  expired.
       # @return [TrueClass, FalseClass]
@@ -1177,7 +1177,7 @@ module Signet
           time
         when String
           Time.parse(time)
-        when Fixnum, Bignum
+        when Integer
           Time.at(time)
         else
           fail "Invalid time value #{time}"
