@@ -367,6 +367,13 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     expect(request).to include('assertion' => 'PEFzc2VydGlvbiBJc3N1ZUluc3RhbnQ9IjIwMTEtMDU')
   end
 
+  it 'should include the scope in token request' do
+    @client.scope = ['https://www.googleapis.com/auth/userinfo.profile']
+
+    request = @client.generate_access_token_request
+    expect(request).to include('scope' => ['https://www.googleapis.com/auth/userinfo.profile'])
+  end
+
   it 'should allow the token to be updated' do
     issued_at = Time.now
     @client.update_token!(
