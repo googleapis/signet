@@ -113,7 +113,7 @@ module Signet #:nodoc:
     # @param [String] access_token
     #   The access token.
     # @param [Hash] auth_params
-    #   Additonal parameters to be encoded in the header
+    #   Additional parameters to be encoded in the header
     #
     # @return [String]
     #   The value for the HTTP Basic Authorization header.
