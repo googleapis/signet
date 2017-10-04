@@ -199,7 +199,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       jwt = @client.to_jwt
       expect(jwt).not_to be_nil
 
-      claim, header = JWT.decode(jwt, @key.public_key, true)
+      claim, header = JWT.decode(jwt, @key.public_key, true, algorithm: 'RS256')
       expect(claim["iss"]).to eq 'app@example.com'
       expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
       expect(claim["aud"]).to eq 'https://accounts.google.com/o/oauth2/token'
@@ -210,7 +210,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       jwt = @client.to_jwt
       expect(jwt).not_to be_nil
 
-      claim, header = JWT.decode(jwt, @key.public_key, true)
+      claim, header = JWT.decode(jwt, @key.public_key, true, algorithm: 'RS256')
       expect(claim["iss"]).to eq 'app@example.com'
       expect(claim["prn"]).to eq 'user@example.com'
       expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
@@ -222,7 +222,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       jwt = @client.to_jwt
       expect(jwt).not_to be_nil
 
-      claim, header = JWT.decode(jwt, @key.public_key, true)
+      claim, header = JWT.decode(jwt, @key.public_key, true, algorithm: 'RS256')
       expect(claim["iss"]).to eq 'app@example.com'
       expect(claim["prn"]).to eq 'user@example.com'
       expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
@@ -234,7 +234,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       jwt = @client.to_jwt
       expect(jwt).not_to be_nil
 
-      claim, header = JWT.decode(jwt, @key.public_key, true)
+      claim, header = JWT.decode(jwt, @key.public_key, true, algorithm: 'RS256')
       expect(claim["iss"]).to eq 'app@example.com'
       expect(claim["sub"]).to eq 'user@example.com'
       expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
@@ -258,7 +258,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       stubs = Faraday::Adapter::Test::Stubs.new do |stub|
         stub.post('/o/oauth2/token') do |env|
           params = Addressable::URI.form_unencode(env[:body])
-          claim, header = JWT.decode(params.assoc("assertion").last, @key.public_key)
+          claim, header = JWT.decode(params.assoc("assertion").last, @key.public_key, true, algorithm: 'RS256')
           expect(params.assoc("grant_type")).to eq ['grant_type','urn:ietf:params:oauth:grant-type:jwt-bearer']
           build_json_response({
             "access_token" => "1/abcdef1234567890",
@@ -294,7 +294,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       jwt = @client.to_jwt
       expect(jwt).not_to be_nil
 
-      claim, header = JWT.decode(jwt, @key, true)
+      claim, header = JWT.decode(jwt, @key, true, algorithm: 'HS256')
       expect(claim["iss"]).to eq 'app@example.com'
       expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
       expect(claim["aud"]).to eq 'https://accounts.google.com/o/oauth2/token'

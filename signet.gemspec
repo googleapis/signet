@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'addressable', '~> 2.3'
   s.add_runtime_dependency 'faraday', '~> 0.9'
   s.add_runtime_dependency 'multi_json', '~> 1.10'
-  s.add_runtime_dependency 'jwt', '~> 1.5'
+  s.add_runtime_dependency 'jwt', '>= 1.5', '< 3.0'
 
   s.add_development_dependency 'rake', '~> 10.0'
   s.add_development_dependency 'yard', '~> 0.8'
