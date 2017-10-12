@@ -708,9 +708,10 @@ module Signet
       #   omitted.
       #
       # @return [String] The decoded ID token.
-      def decoded_id_token(public_key=nil, options = {})
+      def decoded_id_token(public_key=nil, options = {}, &keyfinder)
         options[:algorithm] ||= signing_algorithm
-        payload, _header = JWT.decode(self.id_token, public_key, !!public_key, options)
+        verify = !!(public_key || keyfinder)
+        payload, _header = JWT.decode(self.id_token, public_key, verify, options, &keyfinder)
         if !payload.has_key?('aud')
           raise Signet::UnsafeOperationError, 'No ID token audience declared.'
         elsif payload['aud'] != self.client_id
