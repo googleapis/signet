@@ -944,7 +944,7 @@ module Signet
         parameters['client_secret'] = self.client_secret unless self.client_secret.nil?
         if options[:scope]
           parameters['scope'] = options[:scope]
-        elsif !self.scope.nil?
+        elsif options[:use_configured_scope] && !self.scope.nil?
           parameters['scope'] = self.scope
         end
         additional = self.additional_parameters.merge(options[:additional_parameters] || {})

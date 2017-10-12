@@ -370,7 +370,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
   it 'should include the scope in token request' do
     @client.scope = ['https://www.googleapis.com/auth/userinfo.profile']
 
-    request = @client.generate_access_token_request
+    request = @client.generate_access_token_request(:use_configured_scope => true)
     expect(request).to include('scope' => ['https://www.googleapis.com/auth/userinfo.profile'])
   end
 
