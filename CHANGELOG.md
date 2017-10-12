@@ -1,9 +1,10 @@
 # 0.8.0 (2017-10-11)
 
-* Ensure the "expires_at" attribte is recalculated on refresh (chutzimir)
+* Ensure the "expires_at" attribute is recalculated on refresh (chutzimir)
 * Fix warnings on Ruby 2.4 (koic)
 * Allow DateTime objects to be passed into attributes (foxtacles)
-* Support ruby-jwt 2.0 (jurriaan)
+* Provide signature verification algorithm for compatibility with ruby-jwt 2.0 (jurriaan)
+* Signet::OAuth2::Client#decoded_id_token can take a keyfinder block (mvastola)
 
 # 0.7.3
 
