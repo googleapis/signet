@@ -883,7 +883,7 @@ module Signet
       # @note A serialized client contains sensitive information. Persist or transmit with care.
       #
       # @return [String] A serialized JSON representation of the client.
-      def to_json
+      def to_json(options={})
         return MultiJson.dump({
           'authorization_uri' => self.authorization_uri ? self.authorization_uri.to_s : nil,
           'token_credential_uri' => self.token_credential_uri ? self.token_credential_uri.to_s : nil,
