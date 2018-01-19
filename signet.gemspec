@@ -29,8 +29,8 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'multi_json', '~> 1.10'
   s.add_runtime_dependency 'jwt', '>= 1.5', '< 3.0'
 
-  s.add_development_dependency 'rake', '~> 10.0'
-  s.add_development_dependency 'yard', '~> 0.8'
+  s.add_development_dependency 'rake', '~> 12.0'
+  s.add_development_dependency 'yard', '~> 0.9', '>= 0.9.12'
   s.add_development_dependency 'rspec', '~> 3.1'
   s.add_development_dependency 'launchy', '~> 2.4'
   s.add_development_dependency 'kramdown', '~> 1.5'
