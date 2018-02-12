@@ -1026,7 +1026,7 @@ describe Signet::OAuth2::Client, 'configured with custom parameters a la JSON.lo
   before do
     @client = Signet::OAuth2::Client.new(
         "client_id" => 's6BhdRkqt3',
-        "redirect_uri" => 'https://example.client.com/callback',
+        "redirect_uri" => {"scheme"=>"https", "user"=>nil, "password"=>nil, "host"=>"example.client.com", "port"=>nil, "path"=>"/callback", "query"=>nil, "fragment"=>nil},
         "authorization_uri" => {"scheme"=>"https", "user"=>nil, "password"=>nil, "host"=>"accounts.google.com", "port"=>nil, "path"=>"/o/oauth2/auth", "query"=>nil, "fragment"=>nil},
         "token_credential_uri" => 'https://example.com/token',
         "additional_parameters" => {'type' => 'web_server'}
