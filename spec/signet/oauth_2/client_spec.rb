@@ -493,12 +493,31 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     stubs.verify_stubbed_calls
   end
 
-  it 'should raise an error if the token server gives an unexpected status' do
+  it 'should raise a remote server error if the server gives a 5xx status' do
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post('/o/oauth2/token') do
         [509, {}, 'Rate limit hit or something.']
+      end
+    end
+    expect(lambda do
+      connection = Faraday.new(:url => 'https://www.google.com') do |builder|
+        builder.adapter(:test, stubs)
+      end
+      @client.fetch_access_token!(
+        :connection => connection
+      )
+    end).to raise_error(Signet::RemoteServerError)
+    stubs.verify_stubbed_calls
+  end
+
+  it 'should raise an error if the token server gives an unexpected status' do
+    @client.client_id = 'client-12345'
+    @client.client_secret = 'secret-12345'
+    stubs = Faraday::Adapter::Test::Stubs.new do |stub|
+      stub.post('/o/oauth2/token') do
+        [309, {}, 'Rate limit hit or something.']
       end
     end
     expect(lambda do

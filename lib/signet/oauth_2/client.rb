@@ -988,6 +988,12 @@ module Signet
           raise ::Signet::AuthorizationError.new(
             message, :response => response
           )
+        elsif status.to_s[0] == "5"
+          message = 'Remote server error.'
+          if body.to_s.strip.length > 0
+            message += "  Server message:\n#{response.body.to_s.strip}"
+          end
+          raise ::Signet::RemoteServerError.new(message)
         else
           message = "Unexpected status code: #{response.status}."
           if body.to_s.strip.length > 0

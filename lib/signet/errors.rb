@@ -34,6 +34,12 @@ module Signet
   end
 
   ##
+  # An error indicating that the server failed at processing the request
+  # due to a internal error
+  class RemoteServerError < StandardError
+  end
+
+  ##
   # An error indicating the remote server refused to authorize the client.
   class AuthorizationError < StandardError
     ##
