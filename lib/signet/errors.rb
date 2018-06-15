@@ -40,6 +40,11 @@ module Signet
   end
 
   ##
+  # An error indicating that the server sent an unexpected http status
+  class UnexpectedStatusError < StandardError
+  end
+
+  ##
   # An error indicating the remote server refused to authorize the client.
   class AuthorizationError < StandardError
     ##

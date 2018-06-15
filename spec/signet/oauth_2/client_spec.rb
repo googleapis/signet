@@ -554,7 +554,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     stubs.verify_stubbed_calls
   end
 
-  it 'should raise an error if the token server gives an unexpected status' do
+  it 'should raise an unexpected error if the token server gives an unexpected status' do
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
@@ -569,7 +569,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
       @client.fetch_access_token!(
         :connection => connection
       )
-    end).to raise_error(Signet::AuthorizationError)
+    end).to raise_error(Signet::UnexpectedStatusError)
     stubs.verify_stubbed_calls
   end
 

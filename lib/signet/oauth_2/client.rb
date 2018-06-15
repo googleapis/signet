@@ -1001,9 +1001,7 @@ module Signet
           if body.to_s.strip.length > 0
             message += "  Server message:\n#{response.body.to_s.strip}"
           end
-          raise ::Signet::AuthorizationError.new(
-            message, :response => response
-          )
+          raise ::Signet::UnexpectedStatusError.new(message)
         end
       end
 
