@@ -797,7 +797,7 @@ module Signet
       # @return [TrueClass, FalseClass]
       #   The expiration state of the access token.
       def expired?
-        return self.expires_at != nil && Time.now >= self.expires_at
+        return self.expires_at.nil? || Time.now >= self.expires_at
       end
 
       ##
@@ -1012,8 +1012,6 @@ module Signet
       end
 
       def fetch_access_token!(options={})
-        options = deep_hash_normalize(options)
-
         token_hash = self.fetch_access_token(options)
         if token_hash
           # No-op for grant types other than `authorization_code`.
