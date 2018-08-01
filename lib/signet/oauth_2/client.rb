@@ -783,11 +783,7 @@ module Signet
       #    The access token issuance time.
       def expires_at=(new_expires_at)
         new_timestamp = normalize_timestamp new_expires_at
-        if new_timestamp.nil?
-          @expires_in, @expires_at, @issued_at = nil, nil, nil
-        else
-          self.expires_in = new_timestamp - Time.now
-        end
+        self.expires_in = new_timestamp - Time.now
         self.expires_at
       end
 
