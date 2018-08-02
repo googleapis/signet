@@ -788,7 +788,6 @@ module Signet
         else
           self.expires_in = new_timestamp - Time.now
         end
-        self.expires_at
       end
 
       ##
