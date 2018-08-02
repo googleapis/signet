@@ -782,7 +782,13 @@ module Signet
       # @param [String,Integer,Time] new_expires_at
       #    The access token issuance time.
       def expires_at=(new_expires_at)
-        @expires_at = normalize_timestamp(new_expires_at)
+        new_timestamp = normalize_timestamp new_expires_at
+        if new_timestamp.nil?
+          self.expires_in = nil
+        else
+          self.expires_in = new_timestamp - Time.now
+        end
+        self.expires_at
       end
 
       ##
@@ -1006,8 +1012,6 @@ module Signet
       end
 
       def fetch_access_token!(options={})
-        options = deep_hash_normalize(options)
-
         token_hash = self.fetch_access_token(options)
         if token_hash
           # No-op for grant types other than `authorization_code`.
@@ -1023,8 +1027,6 @@ module Signet
       ##
       # Refresh the access token, if possible
       def refresh!(options={})
-        options = deep_hash_normalize(options)
-
         self.fetch_access_token!(options)
       end
 
