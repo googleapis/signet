@@ -230,7 +230,7 @@ module Signet
 
         # By default, the token is issued at `Time.now` when `expires_in` is
         # set, but this can be used to supply a more precise time.
-        self.issued_at = options[:issued_at] || self.issued_at || Time.now
+        self.issued_at = options[:issued_at] if options.has_key?(:issued_at)
 
         self.access_token = options[:access_token] if options.has_key?(:access_token)
         self.refresh_token = options[:refresh_token] if options.has_key?(:refresh_token)
@@ -1008,6 +1008,7 @@ module Signet
           # An authorization code is a one-time use token and is immediately
           # revoked after usage.
           self.code = nil
+          self.issued_at = Time.now
           self.update_token!(token_hash)
         end
         return token_hash
