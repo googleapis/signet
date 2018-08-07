@@ -256,7 +256,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
 
     it 'should send valid access token request' do
       stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-        stub.post('/o/oauth2/token') do |env|
+        stub.post('/token') do |env|
           params = Addressable::URI.form_unencode(env[:body])
           claim, header = JWT.decode(params.assoc("assertion").last, @key.public_key, true, algorithm: 'RS256')
           expect(params.assoc("grant_type")).to eq ['grant_type','urn:ietf:params:oauth:grant-type:jwt-bearer']
@@ -478,7 +478,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         [401, {}, 'User authorization failed or something.']
       end
     end
@@ -497,7 +497,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         [509, {}, 'Rate limit hit or something.']
       end
     end
@@ -516,7 +516,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         [309, {}, 'Rate limit hit or something.']
       end
     end
@@ -537,7 +537,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.code = '00000'
     @client.redirect_uri = 'https://www.example.com/'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
@@ -563,7 +563,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.username = 'johndoe'
     @client.password = 'incognito'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
@@ -588,7 +588,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.client_secret = 'secret-12345'
     @client.refresh_token = '54321'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
@@ -774,7 +774,7 @@ JSON
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
@@ -815,7 +815,7 @@ JSON
     @client.client_id = 'client-54321'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
@@ -850,7 +850,7 @@ JSON
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
@@ -884,7 +884,7 @@ JSON
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
