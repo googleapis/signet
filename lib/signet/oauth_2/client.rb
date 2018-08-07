@@ -95,7 +95,6 @@ module Signet
         @client_secret        = nil
         @code                 = nil
         @expires_at           = nil
-        @expires_in           = nil
         @issued_at            = nil
         @issuer               = nil
         @password             = nil
@@ -231,7 +230,7 @@ module Signet
 
         # By default, the token is issued at `Time.now` when `expires_in` is
         # set, but this can be used to supply a more precise time.
-        self.issued_at = options[:issued_at] if options.has_key?(:issued_at)
+        self.issued_at = options[:issued_at] || self.issued_at || Time.now
 
         self.access_token = options[:access_token] if options.has_key?(:access_token)
         self.refresh_token = options[:refresh_token] if options.has_key?(:refresh_token)
@@ -726,7 +725,11 @@ module Signet
       #
       # @return [Integer] The access token lifetime.
       def expires_in
-        return @expires_in
+        if @expires_at.nil? || @issued_at.nil?
+          nil
+        else
+          (@expires_at - @issued_at).to_i
+        end
       end
 
       ##
@@ -737,12 +740,11 @@ module Signet
       #   The access token lifetime.
       def expires_in=(new_expires_in)
         if new_expires_in != nil
-          @expires_in = new_expires_in.to_i
           @issued_at = Time.now
+          @expires_at = @issued_at + new_expires_in.to_i
         else
-          @expires_in, @issued_at = nil, nil
+          @expires_at, @issued_at = nil, nil
         end
-        @expires_at = nil
       end
 
       ##
@@ -767,13 +769,7 @@ module Signet
       #
       # @return [Time] The access token lifetime.
       def expires_at
-        if @expires_at
-          @expires_at
-        elsif @issued_at && @expires_in
-          return @issued_at + @expires_in
-        else
-          return nil
-        end
+        @expires_at
       end
 
       ##
@@ -782,12 +778,7 @@ module Signet
       # @param [String,Integer,Time] new_expires_at
       #    The access token issuance time.
       def expires_at=(new_expires_at)
-        new_timestamp = normalize_timestamp new_expires_at
-        if new_timestamp.nil?
-          self.expires_in = nil
-        else
-          self.expires_in = new_timestamp - Time.now
-        end
+        @expires_at = normalize_timestamp new_expires_at
       end
 
       ##
@@ -822,7 +813,7 @@ module Signet
         @password = nil
         @code = nil
         @issued_at = nil
-        @expires_in = nil
+        @expires_at = nil
       end
 
 
@@ -1017,7 +1008,6 @@ module Signet
           # An authorization code is a one-time use token and is immediately
           # revoked after usage.
           self.code = nil
-          self.issued_at = Time.now
           self.update_token!(token_hash)
         end
         return token_hash
