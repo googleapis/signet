@@ -31,7 +31,7 @@ Signet is an OAuth 1.0 / OAuth 2.0 implementation.
 require 'signet/oauth_2/client'
 client = Signet::OAuth2::Client.new(
   :authorization_uri => 'https://accounts.google.com/o/oauth2/auth',
-  :token_credential_uri =>  'https://www.googleapis.com/oauth2/v3/token',
+  :token_credential_uri =>  'https://oauth2.googleapis.com/token',
   :client_id => '44410190108-74nkm6jc5e3vvjqis803frkvmu88cu3a.apps.googleusercontent.com',
   :client_secret => 'X1NUhvO-rQr9sm8uUSMY8i7v',
   :scope => 'email profile',
