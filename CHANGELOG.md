@@ -1,3 +1,8 @@
+## 0.8.2 (2017-10-13)
+
+* Add RemoteServerError class for 5xx level errors.
+* Allow to_json to be called with arguments
+
 ## 0.8.1 (2017-10-13)
 
 * Restore support for Ruby 1.9.3
