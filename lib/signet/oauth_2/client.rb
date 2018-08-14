@@ -104,6 +104,7 @@ module Signet
         @scope                = nil
         @state                = nil
         @username             = nil
+        @access_type          = nil
         self.update!(options)
       end
 
@@ -152,6 +153,8 @@ module Signet
       #     to be refreshed.
       #   - <code>:access_token</code> -
       #     The current access token for this client.
+      #   - <code>:access_type</code> -
+      #     The current access type parameter for #authorization_uri.
       #   - <code>:id_token</code> -
       #     The current ID token for this client.
       #   - <code>:extension_parameters</code> -
@@ -189,6 +192,7 @@ module Signet
         self.signing_key = options[:signing_key] if options.has_key?(:signing_key)
         self.extension_parameters = options[:extension_parameters] || {}
         self.additional_parameters = options[:additional_parameters] || {}
+        self.access_type = options.fetch(:access_type) { :offline }
         self.update_token!(options)
         return self
       end
@@ -254,8 +258,8 @@ module Signet
         unless options[:response_type]
           options[:response_type] = :code
         end
-        unless options[:access_type]
-          options[:access_type] = :offline
+        if !options[:access_type] && access_type
+          options[:access_type] = access_type
         end
         options[:client_id] ||= self.client_id
         options[:redirect_uri] ||= self.redirect_uri
@@ -323,6 +327,23 @@ module Signet
         elsif incoming_uri
           Addressable::URI.parse(incoming_uri)
         end
+      end
+
+      ##
+      # Returns the current access type parameter for #authorization_uri.
+      #
+      # @return [String, Symbol] The current access type.
+      def access_type
+        return @access_type
+      end
+
+      ##
+      # Sets the current access type parameter for #authorization_uri.
+      #
+      # @param [String, Symbol] new_access_type
+      #   The current access type.
+      def access_type=(new_access_type)
+        @access_type = new_access_type
       end
 
       ##
