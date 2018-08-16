@@ -1,3 +1,6 @@
+## 0.9.1 (2018-08-18)
+* Warn on EOL ruby versions.
+
 ## 0.8.1 (2017-10-13)
 
 * Restore support for Ruby 1.9.3
