@@ -128,7 +128,7 @@ module Signet
       #   new_temporary_credential_uri
       #   The temporary credentials URI.
       def temporary_credential_uri=(new_temporary_credential_uri)
-        if new_temporary_credential_uri != nil
+        if !new_temporary_credential_uri.nil?
           new_temporary_credential_uri =
             Addressable::URI.parse(new_temporary_credential_uri)
           @temporary_credential_uri = new_temporary_credential_uri
@@ -163,7 +163,7 @@ module Signet
       # @param [Addressable::URI, String, #to_str] new_authorization_uri
       #   The authorization URI.
       def authorization_uri=(new_authorization_uri)
-        if new_authorization_uri != nil
+        if !new_authorization_uri.nil?
           new_authorization_uri = Addressable::URI.send(
             new_authorization_uri.kind_of?(Hash) ? :new : :parse,
             new_authorization_uri
@@ -189,7 +189,7 @@ module Signet
       # @param [Addressable::URI, Hash, String, #to_str] new_token_credential_uri
       #   The token credential URI.
       def token_credential_uri=(new_token_credential_uri)
-        if new_token_credential_uri != nil
+        if !new_token_credential_uri.nil?
           new_token_credential_uri = Addressable::URI.send(
             new_token_credential_uri.kind_of?(Hash) ? :new : :parse,
             new_token_credential_uri
@@ -229,7 +229,7 @@ module Signet
       # @param [Signet::OAuth1::Credential] new_client_credential
       #   The client credentials.
       def client_credential=(new_client_credential)
-        if new_client_credential != nil
+        if !new_client_credential.nil?
           if !new_client_credential.kind_of?(::Signet::OAuth1::Credential)
             raise TypeError,
               "Expected Signet::OAuth1::Credential, " +
@@ -259,7 +259,7 @@ module Signet
       # @param [String, #to_str] new_client_credential_key
       #   The client credential key.
       def client_credential_key=(new_client_credential_key)
-        if new_client_credential_key != nil
+        if !new_client_credential_key.nil?
           if !new_client_credential_key.respond_to?(:to_str)
             raise TypeError,
               "Can't convert #{new_client_credential_key.class} into String."
@@ -287,7 +287,7 @@ module Signet
       # @param [String, #to_str] new_client_credential_secret
       #   The client credential secret.
       def client_credential_secret=(new_client_credential_secret)
-        if new_client_credential_secret != nil
+        if !new_client_credential_secret.nil?
           if !new_client_credential_secret.respond_to?(:to_str)
             raise TypeError,
               "Can't convert #{new_client_credential_secret.class} " +
@@ -327,7 +327,7 @@ module Signet
       # @param [Signet::OAuth1::Credential] new_temporary_credential
       #   The temporary credentials.
       def temporary_credential=(new_temporary_credential)
-        if new_temporary_credential != nil
+        if !new_temporary_credential.nil?
           if !new_temporary_credential.kind_of?(::Signet::OAuth1::Credential)
             raise TypeError,
               "Expected Signet::OAuth1::Credential, " +
@@ -357,7 +357,7 @@ module Signet
       # @param [String, #to_str] new_temporary_credential_key
       #   The temporary credential key.
       def temporary_credential_key=(new_temporary_credential_key)
-        if new_temporary_credential_key != nil
+        if !new_temporary_credential_key.nil?
           if !new_temporary_credential_key.respond_to?(:to_str)
             raise TypeError,
               "Can't convert #{new_temporary_credential_key.class} " +
@@ -386,7 +386,7 @@ module Signet
       # @param [String, #to_str] new_temporary_credential_secret
       #   The temporary credential secret.
       def temporary_credential_secret=(new_temporary_credential_secret)
-        if new_temporary_credential_secret != nil
+        if !new_temporary_credential_secret.nil?
           if !new_temporary_credential_secret.respond_to?(:to_str)
             raise TypeError,
               "Can't convert #{new_temporary_credential_secret.class} " +
@@ -427,7 +427,7 @@ module Signet
       # @param [Signet::OAuth1::Credential] new_token_credential
       #   The token credentials.
       def token_credential=(new_token_credential)
-        if new_token_credential != nil
+        if !new_token_credential.nil?
           if !new_token_credential.kind_of?(::Signet::OAuth1::Credential)
             raise TypeError,
               "Expected Signet::OAuth1::Credential, " +
@@ -457,7 +457,7 @@ module Signet
       # @param [String, #to_str] new_token_credential_key
       #   The token credential key.
       def token_credential_key=(new_token_credential_key)
-        if new_token_credential_key != nil
+        if !new_token_credential_key.nil?
           if !new_token_credential_key.respond_to?(:to_str)
             raise TypeError,
               "Can't convert #{new_token_credential_key.class} " +
@@ -486,7 +486,7 @@ module Signet
       # @param [String, #to_str] new_token_credential_secret
       #   The token credential secret.
       def token_credential_secret=(new_token_credential_secret)
-        if new_token_credential_secret != nil
+        if !new_token_credential_secret.nil?
           if !new_token_credential_secret.respond_to?(:to_str)
             raise TypeError,
               "Can't convert #{new_token_credential_secret.class} " +
@@ -515,7 +515,7 @@ module Signet
       # @param [String, #to_str] new_callback
       #   The OAuth callback.
       def callback=(new_callback)
-        if new_callback != nil
+        if !new_callback.nil?
           if !new_callback.respond_to?(:to_str)
             raise TypeError,
               "Can't convert #{new_callback.class} into String."
