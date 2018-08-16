@@ -187,10 +187,10 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       @key = OpenSSL::PKey::RSA.new 2048
       @client = Signet::OAuth2::Client.new(
         :token_credential_uri =>
-          'https://accounts.google.com/o/oauth2/token',
+          'https://oauth2.googleapis.com/token',
         :scope => 'https://www.googleapis.com/auth/userinfo.profile',
         :issuer => 'app@example.com',
-        :audience => 'https://accounts.google.com/o/oauth2/token',
+        :audience => 'https://oauth2.googleapis.com/token',
         :signing_key => @key
       )
     end
@@ -202,7 +202,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       claim, header = JWT.decode(jwt, @key.public_key, true, algorithm: 'RS256')
       expect(claim["iss"]).to eq 'app@example.com'
       expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
-      expect(claim["aud"]).to eq 'https://accounts.google.com/o/oauth2/token'
+      expect(claim["aud"]).to eq 'https://oauth2.googleapis.com/token'
     end
 
     it 'should generate valid JWTs for impersonation' do
@@ -214,7 +214,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       expect(claim["iss"]).to eq 'app@example.com'
       expect(claim["prn"]).to eq 'user@example.com'
       expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
-      expect(claim["aud"]).to eq 'https://accounts.google.com/o/oauth2/token'
+      expect(claim["aud"]).to eq 'https://oauth2.googleapis.com/token'
     end
 
     it 'should generate valid JWTs for impersonation using deprecated person attribute' do
@@ -226,7 +226,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       expect(claim["iss"]).to eq 'app@example.com'
       expect(claim["prn"]).to eq 'user@example.com'
       expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
-      expect(claim["aud"]).to eq 'https://accounts.google.com/o/oauth2/token'
+      expect(claim["aud"]).to eq 'https://oauth2.googleapis.com/token'
     end
 
     it 'should generate valid JWTs for impersonation using the sub attribute' do
@@ -238,7 +238,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       expect(claim["iss"]).to eq 'app@example.com'
       expect(claim["sub"]).to eq 'user@example.com'
       expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
-      expect(claim["aud"]).to eq 'https://accounts.google.com/o/oauth2/token'
+      expect(claim["aud"]).to eq 'https://oauth2.googleapis.com/token'
     end
 
     it 'should generate a JSON representation of the client' do
@@ -247,16 +247,16 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       expect(json).not_to be_nil
 
       deserialized = MultiJson.load(json)
-      expect(deserialized["token_credential_uri"]).to eq 'https://accounts.google.com/o/oauth2/token'
+      expect(deserialized["token_credential_uri"]).to eq 'https://oauth2.googleapis.com/token'
       expect(deserialized["scope"]).to eq ['https://www.googleapis.com/auth/userinfo.profile']
       expect(deserialized["issuer"]).to eq 'app@example.com'
-      expect(deserialized["audience"]).to eq 'https://accounts.google.com/o/oauth2/token'
+      expect(deserialized["audience"]).to eq 'https://oauth2.googleapis.com/token'
       expect(deserialized["signing_key"]).to eq @key.to_s
     end
 
     it 'should send valid access token request' do
       stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-        stub.post('/o/oauth2/token') do |env|
+        stub.post('/token') do |env|
           params = Addressable::URI.form_unencode(env[:body])
           claim, header = JWT.decode(params.assoc("assertion").last, @key.public_key, true, algorithm: 'RS256')
           expect(params.assoc("grant_type")).to eq ['grant_type','urn:ietf:params:oauth:grant-type:jwt-bearer']
@@ -282,10 +282,10 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       @key = 'my secret key'
       @client = Signet::OAuth2::Client.new(
         :token_credential_uri =>
-          'https://accounts.google.com/o/oauth2/token',
+          'https://oauth2.googleapis.com/token',
         :scope => 'https://www.googleapis.com/auth/userinfo.profile',
         :issuer => 'app@example.com',
-        :audience => 'https://accounts.google.com/o/oauth2/token',
+        :audience => 'https://oauth2.googleapis.com/token',
         :signing_key => @key
       )
     end
@@ -297,7 +297,7 @@ describe Signet::OAuth2::Client, 'configured for assertions profile' do
       claim, header = JWT.decode(jwt, @key, true, algorithm: 'HS256')
       expect(claim["iss"]).to eq 'app@example.com'
       expect(claim["scope"]).to eq 'https://www.googleapis.com/auth/userinfo.profile'
-      expect(claim["aud"]).to eq 'https://accounts.google.com/o/oauth2/token'
+      expect(claim["aud"]).to eq 'https://oauth2.googleapis.com/token'
     end
   end
 end
@@ -308,7 +308,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
       :authorization_uri =>
         'https://accounts.google.com/o/oauth2/auth',
       :token_credential_uri =>
-        'https://accounts.google.com/o/oauth2/token',
+        'https://oauth2.googleapis.com/token',
       :scope => 'https://www.googleapis.com/auth/userinfo.profile'
     )
   end
@@ -478,7 +478,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         [401, {}, 'User authorization failed or something.']
       end
     end
@@ -497,7 +497,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         [509, {}, 'Rate limit hit or something.']
       end
     end
@@ -516,7 +516,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         [309, {}, 'Rate limit hit or something.']
       end
     end
@@ -537,7 +537,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.code = '00000'
     @client.redirect_uri = 'https://www.example.com/'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
@@ -563,7 +563,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.username = 'johndoe'
     @client.password = 'incognito'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
@@ -588,7 +588,7 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.client_secret = 'secret-12345'
     @client.refresh_token = '54321'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
@@ -774,7 +774,7 @@ JSON
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
@@ -815,7 +815,7 @@ JSON
     @client.client_id = 'client-54321'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
@@ -850,7 +850,7 @@ JSON
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
@@ -884,7 +884,7 @@ JSON
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post('/o/oauth2/token') do
+      stub.post('/token') do
         build_json_response({
           'access_token' => '12345',
           'refresh_token' => '54321',
