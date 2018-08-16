@@ -9,7 +9,6 @@
 
 [![Gem Version](https://badge.fury.io/rb/signet.svg)](https://badge.fury.io/rb/signet)
 [![Build Status](https://secure.travis-ci.org/google/signet.png)](http://travis-ci.org/google/signet)
-[![Dependency Status](https://gemnasium.com/google/signet.png)](https://gemnasium.com/google/signet)
 
 ## Description
 
