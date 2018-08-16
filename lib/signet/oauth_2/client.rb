@@ -734,7 +734,7 @@ module Signet
 
       ##
       # Sets the lifetime of the access token in seconds.  Resets the issued
-      # timestamp. Nil values will be treated as thought the token does
+      # timestamp. Nil values will be treated as though the token does
       # not expire.
       #
       # @param [String, Integer, nil] new_expires_in
@@ -775,7 +775,7 @@ module Signet
 
       ##
       # Limits the lifetime of the access token as number of seconds since
-      # the Epoch. Nil values will be treated as thought the token does
+      # the Epoch. Nil values will be treated as though the token does
       # not expire.
       # @param [String,Integer,Time, nil] new_expires_at
       #    The access token issuance time.
