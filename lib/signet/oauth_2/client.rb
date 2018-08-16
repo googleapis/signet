@@ -800,7 +800,7 @@ module Signet
       # @return [TrueClass, FalseClass]
       #   The expiration state of the access token.
       def expires_within?(sec)
-        return self.expires_at.nil? || Time.now >= (self.expires_at - sec)
+        return self.expires_at != nil && Time.now >= (self.expires_at - sec)
       end
 
       ##
