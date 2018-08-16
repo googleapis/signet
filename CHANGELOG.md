@@ -1,3 +1,8 @@
+## 0.9.0 (2018-08-16)
+* Add RemoteServerError class for 5xx level errors.
+* Allow to_json to be called with arguments
+* Expires_in now sets and reflects current expires_at value
+
 ## 0.8.1 (2017-10-13)
 
 * Restore support for Ruby 1.9.3
