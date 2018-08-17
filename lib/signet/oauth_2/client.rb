@@ -722,6 +722,7 @@ module Signet
 
       ##
       # Returns the lifetime of the access token in seconds.
+      # Returns nil if the token does not expires.
       #
       # @return [Integer, nil] The access token lifetime.
       def expires_in
@@ -751,7 +752,7 @@ module Signet
       ##
       # Returns the timestamp the access token was issued at.
       #
-      # @return [Time] The access token issuance time.
+      # @return [Time, nil] The access token issuance time.
       def issued_at
         return @issued_at
       end
@@ -767,8 +768,9 @@ module Signet
 
       ##
       # Returns the timestamp the access token will expire at.
+      # Returns nil if the token does not expire. 
       #
-      # @return [Time] The access token lifetime.
+      # @return [Time, nil] The access token lifetime.
       def expires_at
         @expires_at
       end
@@ -797,7 +799,7 @@ module Signet
       # Returns true if the access token has expired or expires within
       # the next n seconds. Returns false for tokens with a nil @expires_at.
       #
-      # @param [Integer, nil] sec
+      # @param [Integer] sec
       #  Max number of seconds from now where a token is still considered
       #  expired.
       # @return [TrueClass, FalseClass]
