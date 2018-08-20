@@ -442,9 +442,38 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     expect(@client).to_not be_expired
   end
 
+  it 'should set expires_in when expires_at is set' do
+    issued_at = Time.now
+    expires_at = Time.now+100
+    @client.expires_at = expires_at.to_i
+    @client.issued_at = issued_at
+    expect(@client.expires_in).to be_within(1).of (expires_at - issued_at).to_i
+    @client.expires_at = nil
+    expect(@client.expires_in).to be_nil
+  end
+
+  it 'should set expires_in to nil when expires_at is set to nil' do
+    @client.expires_at = nil
+    expect(@client.expires_in).to be_nil
+  end
+
+  it 'should set expires_at when expires_in is set' do
+    expires_in = 100
+    @client.expires_in = expires_in
+    expect(@client.expires_at).to eq (@client.issued_at + expires_in)
+    @client.expires_in = nil
+    expect(@client.expires_at).to be_nil
+  end
+
+  it 'should set expires_at to nil when expires_in is set to nil' do
+    @client.expires_in = nil
+    expect(@client.expires_at).to be_nil
+  end
+
   it 'should indicate the token is not expired if expired_at nil' do
     @client.expires_at = nil
     expect(@client.expires_within?(60)).to be false
+    expect(@client.expired?).to be false
   end
 
   it 'should indicate the token is not expiring when expiry beyond window' do
@@ -880,7 +909,7 @@ JSON
   end
 
   it 'should raise an error if the id token cannot be verified' do
-    pending "Need to update test data"
+    pending "Need to set test data"
     @client.client_id = 'client-12345'
     @client.client_secret = 'secret-12345'
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|

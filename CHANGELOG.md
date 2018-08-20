@@ -1,5 +1,11 @@
-## 0.9.1 (2018-08-18)
+## 0.9.1 (2018-08-21)
 * Warn on EOL ruby versions.
+
+## 0.9.0 (2018-08-20)
+* Add RemoteServerError class for 5xx level errors.
+* Allow to_json to be called with arguments
+* Expires_in now sets and reflects current expires_at value
+* Expires_within(0) now returns false when expires_at is nil.
 
 ## 0.8.1 (2017-10-13)
 
