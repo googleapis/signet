@@ -52,7 +52,7 @@ module Signet #:nodoc:
   def self.warn_unsupported_ruby cur_version, recommended_version
     warn "WARNING: You are running Ruby #{cur_version}, which has reached" \
       ' end-of-life and is no longer supported by Ruby Core.'
-    warn 'The Google Cloud API clients work best on supported versions of' \
+    warn 'The Signet client works best on supported versions of' \
       ' Ruby. It is strongly recommended that you upgrade to Ruby' \
       " #{recommended_version} or later."
     warn 'See https://www.ruby-lang.org/en/downloads/branches/ for more' \
@@ -68,7 +68,7 @@ module Signet #:nodoc:
   def self.warn_nonrecommended_ruby cur_version, recommended_version
     warn "WARNING: You are running Ruby #{cur_version}, which is nearing" \
       ' end-of-life.'
-    warn 'The Google Cloud API clients work best on supported versions of' \
+    warn 'The Signet client works best on supported versions of' \
       " Ruby. Consider upgrading to Ruby #{recommended_version} or later."
     warn 'See https://www.ruby-lang.org/en/downloads/branches/ for more' \
       ' info on the Ruby maintenance schedule.'
