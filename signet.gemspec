@@ -35,4 +35,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'launchy', '~> 2.4'
   s.add_development_dependency 'kramdown', '~> 1.5'
   s.add_development_dependency 'simplecov', '~> 0.9'
+
+  s.post_install_message = Signet::VERSION::warn_on_old_ruby_version
 end
