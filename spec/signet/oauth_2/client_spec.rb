@@ -435,6 +435,25 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     expect(@client).to be_expired
   end
 
+  it 'should calculate the expires_at from issued_at when issued_at is set' do
+    expires_in = 3600
+    issued_at = Time.now - expires_in
+    @client.update_token!(
+      :issued_at => issued_at,
+      :expires_in => expires_in
+    )
+    expect(@client.expires_at).to eq issued_at + expires_in
+    expect(@client).to be_expired
+  end
+
+  it 'should calculate expires_at from Time.now when issed_at is NOT set' do
+    expires_in = 3600
+    expires_at = Time.now + expires_in
+    @client.update_token! :expires_in => expires_in
+    expect(@client.expires_at).to be_within(1).of(expires_at)
+    expect(@client).to_not be_expired
+  end
+
   it 'should allow setting expires_at manually' do
     expires_at = Time.now+100
     @client.expires_at = expires_at.to_i
