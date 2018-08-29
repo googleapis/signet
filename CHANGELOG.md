@@ -1,5 +1,6 @@
 ## 0.9.1 (2018-08-29)
 * Warn on EOL ruby versions.
+* Fix DateTime normalization.
 
 ## 0.9.0 (2018-08-20)
 * Add RemoteServerError class for 5xx level errors.
