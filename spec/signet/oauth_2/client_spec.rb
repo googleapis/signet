@@ -15,6 +15,7 @@ require 'spec_helper'
 require 'signet/oauth_2/client'
 require 'openssl'
 require 'jwt'
+require 'date'
 
 conn = Faraday.default_connection
 
@@ -440,6 +441,18 @@ describe Signet::OAuth2::Client, 'configured for Google userinfo API' do
     @client.expires_at = expires_at.to_i
     expect(@client.expires_at).to be_within(1).of(expires_at)
     expect(@client).to_not be_expired
+  end
+
+  it 'should normalize values of expires_at to instances of time' do
+    time_formats = [DateTime.new, "12:00", 100, Time.new]
+    normalized_time_formats = []
+    time_formats.each do |time|
+      @client.expires_at = time
+      normalized_time_formats << @client.expires_at
+    end
+    normalized_time_formats.each do |time|
+      expect(time).to be_an_instance_of(Time)
+    end
   end
 
   it 'should set expires_in when expires_at is set' do
