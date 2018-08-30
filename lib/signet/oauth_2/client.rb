@@ -19,6 +19,7 @@ require 'signet'
 require 'signet/errors'
 require 'signet/oauth_2'
 require 'jwt'
+require 'date'
 
 module Signet
   module OAuth2

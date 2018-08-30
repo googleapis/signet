@@ -57,3 +57,12 @@ client.fetch_access_token!
 `gem install signet`
 
 Be sure `https://rubygems.org` is in your gem sources.
+
+## Supported Ruby Versions
+This library is currently supported on Ruby 1.9+.  
+However, Ruby 2.4 or later is strongly recommended, as earlier releases have
+reached or are nearing end-of-life. After March 31, 2019, Google will provide
+official support only for Ruby versions that are considered current and
+supported by Ruby Core (that is, Ruby versions that are either in normal
+maintenance or in security maintenance).
+See https://www.ruby-lang.org/en/downloads/branches/ for further details.
