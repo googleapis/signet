@@ -19,6 +19,7 @@ require 'signet'
 require 'signet/errors'
 require 'signet/oauth_2'
 require 'jwt'
+require 'date'
 
 module Signet
   module OAuth2
@@ -95,7 +96,6 @@ module Signet
         @client_secret        = nil
         @code                 = nil
         @expires_at           = nil
-        @expires_in           = nil
         @issued_at            = nil
         @issuer               = nil
         @password             = nil
@@ -744,32 +744,37 @@ module Signet
 
       ##
       # Returns the lifetime of the access token in seconds.
+      # Returns nil if the token does not expire.
       #
-      # @return [Integer] The access token lifetime.
+      # @return [Integer, nil] The access token lifetime.
       def expires_in
-        return @expires_in
+        if @expires_at.nil? || @issued_at.nil?
+          nil
+        else
+          (@expires_at - @issued_at).to_i
+        end
       end
 
       ##
-      # Sets the lifetime of the access token in seconds.  Resets the issued
-      # timestamp.
+      # Sets the lifetime of the access token in seconds.  Resets the issued_at
+      # timestamp. Nil values will be treated as though the token does
+      # not expire.
       #
-      # @param [String, Integer] new_expires_in
+      # @param [String, Integer, nil] new_expires_in
       #   The access token lifetime.
       def expires_in=(new_expires_in)
         if new_expires_in != nil
-          @expires_in = new_expires_in.to_i
           @issued_at = Time.now
+          @expires_at = @issued_at + new_expires_in.to_i
         else
-          @expires_in, @issued_at = nil, nil
+          @expires_at, @issued_at = nil, nil
         end
-        @expires_at = nil
       end
 
       ##
       # Returns the timestamp the access token was issued at.
       #
-      # @return [Time] The access token issuance time.
+      # @return [Time, nil] The access token issuance time.
       def issued_at
         return @issued_at
       end
@@ -785,29 +790,26 @@ module Signet
 
       ##
       # Returns the timestamp the access token will expire at.
+      # Returns nil if the token does not expire. 
       #
-      # @return [Time] The access token lifetime.
+      # @return [Time, nil] The access token lifetime.
       def expires_at
-        if @expires_at
-          @expires_at
-        elsif @issued_at && @expires_in
-          return @issued_at + @expires_in
-        else
-          return nil
-        end
+        @expires_at
       end
 
       ##
       # Limits the lifetime of the access token as number of seconds since
-      # the Epoch
-      # @param [String,Integer,Time] new_expires_at
-      #    The access token issuance time.
+      # the Epoch. Nil values will be treated as though the token does
+      # not expire.
+      # @param [String,Integer,Time, nil] new_expires_at
+      #    The access token expiration time.
       def expires_at=(new_expires_at)
-        @expires_at = normalize_timestamp(new_expires_at)
+        @expires_at = normalize_timestamp new_expires_at
       end
 
       ##
       # Returns true if the access token has expired.
+      # Returns false if the token has not expired or has an nil @expires_at.
       #
       # @return [TrueClass, FalseClass]
       #   The expiration state of the access token.
@@ -817,7 +819,7 @@ module Signet
 
       ##
       # Returns true if the access token has expired or expires within
-      # the next n seconds
+      # the next n seconds. Returns false for tokens with a nil @expires_at.
       #
       # @param [Integer] sec
       #  Max number of seconds from now where a token is still considered
@@ -825,7 +827,7 @@ module Signet
       # @return [TrueClass, FalseClass]
       #   The expiration state of the access token.
       def expires_within?(sec)
-        return self.expires_at.nil? || Time.now >= (self.expires_at - sec)
+        return self.expires_at != nil && Time.now >= (self.expires_at - sec)
       end
 
       ##
@@ -838,7 +840,7 @@ module Signet
         @password = nil
         @code = nil
         @issued_at = nil
-        @expires_in = nil
+        @expires_at = nil
       end
 
 
@@ -1027,8 +1029,6 @@ module Signet
       end
 
       def fetch_access_token!(options={})
-        options = deep_hash_normalize(options)
-
         token_hash = self.fetch_access_token(options)
         if token_hash
           # No-op for grant types other than `authorization_code`.
@@ -1044,8 +1044,6 @@ module Signet
       ##
       # Refresh the access token, if possible
       def refresh!(options={})
-        options = deep_hash_normalize(options)
-
         self.fetch_access_token!(options)
       end
 

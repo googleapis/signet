@@ -1,3 +1,13 @@
+## 0.9.1 (2018-08-29)
+* Warn on EOL ruby versions.
+* Fix DateTime normalization.
+
+## 0.9.0 (2018-08-20)
+* Add RemoteServerError class for 5xx level errors.
+* Allow to_json to be called with arguments
+* Expires_in now sets and reflects current expires_at value
+* Expires_within(0) now returns false when expires_at is nil.
+
 ## 0.8.1 (2017-10-13)
 
 * Restore support for Ruby 1.9.3
