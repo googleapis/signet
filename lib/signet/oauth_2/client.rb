@@ -233,7 +233,7 @@ module Signet
         # set, but this can be used to supply a more precise time.
         self.issued_at = options[:issued_at] if options.has_key?(:issued_at)
 
-        # Special case where we want expires_in to be relative to issued_at
+        # Special case where we want expires_at to be relative to issued_at
         if options.has_key?(:issued_at) && options.has_key?(:expires_in)
           set_relative_expires_at options[:issued_at], options[:expires_in]
         end
