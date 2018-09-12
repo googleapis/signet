@@ -225,13 +225,18 @@ module Signet
         # Normalize all keys to symbols to allow indifferent access internally
         options = deep_hash_normalize(options)
 
+        self.expires_in = options[:expires] if options.has_key?(:expires)
+        self.expires_in = options[:expires_in] if options.has_key?(:expires_in)
+        self.expires_at = options[:expires_at] if options.has_key?(:expires_at)
+
         # By default, the token is issued at `Time.now` when `expires_in` is
         # set, but this can be used to supply a more precise time.
         self.issued_at = options[:issued_at] if options.has_key?(:issued_at)
 
-        self.expires_in = options[:expires] if options.has_key?(:expires)
-        self.expires_in = options[:expires_in] if options.has_key?(:expires_in)
-        self.expires_at = options[:expires_at] if options.has_key?(:expires_at)
+        # Special case where we want expires_in to be relative to issued_at
+        if options.has_key?(:issued_at) && options.has_key?(:expires_in)
+          set_relative_expires_at options[:issued_at], options[:expires_in]
+        end
 
         self.access_token = options[:access_token] if options.has_key?(:access_token)
         self.refresh_token = options[:refresh_token] if options.has_key?(:refresh_token)
@@ -743,7 +748,7 @@ module Signet
       #   The access token lifetime.
       def expires_in=(new_expires_in)
         if new_expires_in != nil
-          @issued_at ||= Time.now
+          @issued_at = normalize_timestamp(Time.now)
           @expires_at = @issued_at + new_expires_in.to_i
         else
           @expires_at, @issued_at = nil, nil
@@ -1195,6 +1200,14 @@ module Signet
         else
           fail "Invalid time value #{time}"
         end
+      end
+
+      def set_relative_expires_at(issued_at, expires_in)
+        self.expires_in = expires_in.to_i
+        self.issued_at = issued_at
+        # Using local expires_in because if self.expires_in is used, it returns
+        # the time left before the token expires
+        self.expires_at = self.issued_at + expires_in.to_i
       end
     end
   end
