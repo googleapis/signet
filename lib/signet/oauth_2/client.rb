@@ -1203,7 +1203,6 @@ module Signet
       end
 
       def set_relative_expires_at(issued_at, expires_in)
-        self.expires_in = expires_in.to_i
         self.issued_at = issued_at
         # Using local expires_in because if self.expires_in is used, it returns
         # the time left before the token expires
