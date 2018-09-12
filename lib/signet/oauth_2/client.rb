@@ -748,7 +748,7 @@ module Signet
       #   The access token lifetime.
       def expires_in=(new_expires_in)
         if new_expires_in != nil
-          @issued_at = normalize_timestamp(Time.now)
+          @issued_at = Time.now
           @expires_at = @issued_at + new_expires_in.to_i
         else
           @expires_at, @issued_at = nil, nil
