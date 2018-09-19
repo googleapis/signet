@@ -1,3 +1,6 @@
+## 0.9.2 (2018-09-12)
+* Update issued_at correctly when it is set simultaneously with expires_in.
+
 ## 0.9.1 (2018-08-29)
 * Warn on EOL ruby versions.
 * Fix DateTime normalization.

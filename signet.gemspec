@@ -37,4 +37,10 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'simplecov', '~> 0.9'
 
   s.post_install_message = Signet::VERSION::warn_on_old_ruby_version
+
+  if s.respond_to?(:metadata)
+    s.metadata['changelog_uri'] = 'https://github.com/google/signet/blob/master/CHANGELOG.md'
+    s.metadata['source_code_uri'] = 'https://github.com/google/signet'
+    s.metadata['bug_tracker_uri'] = 'https://github.com/google/signet/issues'
+  end
 end
