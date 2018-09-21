@@ -1,3 +1,6 @@
+## 0.10.0 (2018-09-21)
+* Add UnexpectedStatusError class for http status errors that are not handled.
+
 ## 0.9.2 (2018-09-12)
 * Update issued_at correctly when it is set simultaneously with expires_in.
 
