@@ -142,7 +142,7 @@ module Signet #:nodoc:
     # @return [String] The authorization URI to redirect the user to.
     def self.generate_authorization_uri(authorization_uri, parameters={})
       for key, value in parameters
-        parameters.delete(key) if value == nil
+        parameters.delete(key) if value.nil?
       end
       parsed_uri = Addressable::URI.parse(authorization_uri).dup
       query_values = parsed_uri.query_values || {}

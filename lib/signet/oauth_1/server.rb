@@ -13,7 +13,7 @@
 #    limitations under the License.
 #
 require 'faraday'
-
+require "digest/sha2"
 require 'stringio'
 require 'addressable/uri'
 require 'signet'
@@ -56,6 +56,17 @@ module Signet
          :temporary_credential, :verifier].each do |attr|
            instance_variable_set("@#{attr}", options[attr])
         end
+      end
+ 
+      # Constant time string comparison.
+      def equal_signatures?(a, b)
+        a_digest = Digest::SHA256.hexdigest(a)
+        b_digest = Digest::SHA256.hexdigest(b)
+        return false unless a_digest.bytesize == b_digest.bytesize
+        l = a_digest.unpack "C#{a_digest.bytesize}"
+        res = 0
+        b_digest.each_byte { |byte| res |= byte ^ l.shift }
+        res == 0 && a == b
       end
 
       ##
@@ -285,7 +296,8 @@ module Signet
           client_credential_secret,
           nil
         )
-        if(computed_signature == auth_hash['oauth_signature'])
+        if equal_signatures?(computed_signature, 
+            auth_hash['oauth_signature'])
           if(auth_hash.fetch('oauth_callback', 'oob').empty?)
             'oob'
           else
@@ -363,7 +375,8 @@ module Signet
           temporary_credential.secret
         )
 
-        if(computed_signature == auth_hash['oauth_signature'])
+        if equal_signatures?(computed_signature, 
+            auth_hash['oauth_signature'])
           {:client_credential=>client_credential,
             :temporary_credential=>temporary_credential,
             :realm=>auth_hash['realm']
@@ -490,7 +503,8 @@ module Signet
           token_credential_secret
         )
 
-        if(computed_signature == auth_hash['oauth_signature'])
+        if equal_signatures?(computed_signature, 
+            auth_hash['oauth_signature'])
           {:client_credential=>client_credential,
            :token_credential=>token_credential,
            :realm=>auth_hash['realm']

@@ -89,7 +89,7 @@ module Signet
       #   )
       #
       # @see Signet::OAuth2::Client#update!
-      def initialize(options={})
+      def initialize options={}
         @authorization_uri    = nil
         @token_credential_uri = nil
         @client_id            = nil
@@ -713,7 +713,7 @@ module Signet
       #   omitted.
       #
       # @return [String] The decoded ID token.
-      def decoded_id_token(public_key=nil, options = {}, &keyfinder)
+      def decoded_id_token public_key=nil, options = {}, &keyfinder
         options[:algorithm] ||= signing_algorithm
         verify = !!(public_key || keyfinder)
         payload, _header = JWT.decode(self.id_token, public_key, verify, options, &keyfinder)
@@ -746,12 +746,13 @@ module Signet
       #
       # @param [String, Integer, nil] new_expires_in
       #   The access token lifetime.
-      def expires_in=(new_expires_in)
-        if new_expires_in != nil
+      def expires_in= new_expires_in
+        if !new_expires_in.nil?
           @issued_at = Time.now
           @expires_at = @issued_at + new_expires_in.to_i
         else
-          @expires_at, @issued_at = nil, nil
+          @expires_at = nil
+          @issued_at = nil
         end
       end
 
@@ -760,7 +761,7 @@ module Signet
       #
       # @return [Time, nil] The access token issuance time.
       def issued_at
-        return @issued_at
+        @issued_at
       end
 
       ##
@@ -961,7 +962,7 @@ module Signet
       end
 
       def fetch_access_token(options={})
-        if self.token_credential_uri == nil
+        if self.token_credential_uri.nil?
           raise ArgumentError, 'Missing token endpoint URI.'
         end
 
