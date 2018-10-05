@@ -237,6 +237,11 @@ module Signet
         # set, but this can be used to supply a more precise time.
         self.issued_at = options[:issued_at] if options.has_key?(:issued_at)
 
+        # Special case where we want expires_at to be relative to issued_at
+        if options.has_key?(:issued_at) && options.has_key?(:expires_in)
+          set_relative_expires_at options[:issued_at], options[:expires_in]
+        end
+
         self.access_token = options[:access_token] if options.has_key?(:access_token)
         self.refresh_token = options[:refresh_token] if options.has_key?(:refresh_token)
         self.id_token = options[:id_token] if options.has_key?(:id_token)
@@ -790,7 +795,7 @@ module Signet
 
       ##
       # Returns the timestamp the access token will expire at.
-      # Returns nil if the token does not expire. 
+      # Returns nil if the token does not expire.
       #
       # @return [Time, nil] The access token lifetime.
       def expires_at
@@ -1022,9 +1027,7 @@ module Signet
           if body.to_s.strip.length > 0
             message += "  Server message:\n#{response.body.to_s.strip}"
           end
-          raise ::Signet::AuthorizationError.new(
-            message, :response => response
-          )
+          raise ::Signet::UnexpectedStatusError.new(message)
         end
       end
 
@@ -1216,6 +1219,13 @@ module Signet
         else
           fail "Invalid time value #{time}"
         end
+      end
+
+      def set_relative_expires_at(issued_at, expires_in)
+        self.issued_at = issued_at
+        # Using local expires_in because if self.expires_in is used, it returns
+        # the time left before the token expires
+        self.expires_at = self.issued_at + expires_in.to_i
       end
     end
   end
