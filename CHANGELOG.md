@@ -1,3 +1,6 @@
+## 0.11.0 (2018-10-08)
+* Add constant time comparison for oauth signatures.
+
 ## 0.10.0 (2018-09-21)
 * Add UnexpectedStatusError class for http status errors that are not handled.
 
