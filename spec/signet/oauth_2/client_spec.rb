@@ -1110,6 +1110,16 @@ describe Signet::OAuth2::Client, 'configured with custom parameters' do
     expect(@client.authorization_uri(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'}).query_values).to eq ({"access_type"=>"offline", "client_id"=>"s6BhdRkqt3", "new_param"=>"new_val",  "response_type"=>"code","redirect_uri"=>"https://example.client.com/callback", "type"=>"new_type"})
   end
 
+  it 'should not have access_type parameter in authorization_uri when we set it to nil in client' do
+    @client.update!(:access_type=>nil)
+    expect(@client.authorization_uri().query_values).to eq ({"client_id"=>"s6BhdRkqt3", "response_type"=>"code", "redirect_uri"=>"https://example.client.com/callback"})
+  end
+
+  it 'should use new access_type parameter as default for authorization_uri' do
+    @client.update!(:access_type=>:online)
+    expect(@client.authorization_uri().query_values).to eq ({"access_type"=>"online", "client_id"=>"s6BhdRkqt3", "response_type"=>"code", "redirect_uri"=>"https://example.client.com/callback"})
+  end
+
   it 'should merge new generate_access_token_request custom parameters' do
     @client.update!(:code=>'12345')
     params = @client.generate_access_token_request(:additional_parameters => {'type' => 'new_type', 'new_param' => 'new_val'})
