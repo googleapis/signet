@@ -17,7 +17,7 @@ unless defined? Signet::VERSION
   module Signet
     module VERSION
       MAJOR = 0
-      MINOR = 10
+      MINOR = 11
       TINY  = 0
       PRE   = nil
 
@@ -58,15 +58,15 @@ unless defined? Signet::VERSION
       # @private
       #
       def self.warn_unsupported_ruby cur_version, recommended_version
-        "WARNING: You are running Ruby #{cur_version}, which has reached" + 
-        " end-of-life and is no longer supported by Ruby Core.\n" + 
-        'Signet works best on supported versions of' + 
-        ' Ruby. It is strongly recommended that you upgrade to Ruby' + 
-        " #{recommended_version} or later. \n" +
-        'See https://www.ruby-lang.org/en/downloads/branches/ for more' +
-        " info on the Ruby maintenance schedule.\n" + 
-        'To suppress this message, set the' + 
-        ' GOOGLE_CLOUD_SUPPRESS_RUBY_WARNINGS environment variable.'
+        "WARNING: You are running Ruby #{cur_version}, which has reached" \
+          " end-of-life and is no longer supported by Ruby Core.\n" \
+          'Signet works best on supported versions of' \
+          ' Ruby. It is strongly recommended that you upgrade to Ruby' \
+          " #{recommended_version} or later. \n" \
+          'See https://www.ruby-lang.org/en/downloads/branches/ for more' \
+          " info on the Ruby maintenance schedule.\n" \
+          'To suppress this message, set the' \
+          ' GOOGLE_CLOUD_SUPPRESS_RUBY_WARNINGS environment variable.'
       end
 
       ##
@@ -74,14 +74,14 @@ unless defined? Signet::VERSION
       # @private
       #
       def self.warn_nonrecommended_ruby cur_version, recommended_version
-        "WARNING: You are running Ruby #{cur_version}, which is nearing" + 
-        " end-of-life.\n" + 
-        'Signet works best on supported versions of' +
-        " Ruby. Consider upgrading to Ruby #{recommended_version} or later.\n" +
-        'See https://www.ruby-lang.org/en/downloads/branches/ for more' +
-        " info on the Ruby maintenance schedule.\n" +
-        'To suppress this message, set the' + 
-        ' GOOGLE_CLOUD_SUPPRESS_RUBY_WARNINGS environment variable.'
+        "WARNING: You are running Ruby #{cur_version}, which is nearing" \
+          " end-of-life.\n" \
+          'Signet works best on supported versions of' \
+          " Ruby. Consider upgrading to Ruby #{recommended_version} or later.\n" \
+          'See https://www.ruby-lang.org/en/downloads/branches/ for more' \
+          " info on the Ruby maintenance schedule.\n" \
+          'To suppress this message, set the' \
+          ' GOOGLE_CLOUD_SUPPRESS_RUBY_WARNINGS environment variable.'
       end
     end
   end
