@@ -13,7 +13,6 @@
 #    limitations under the License.
 #
 require 'faraday'
-require "digest/sha2"
 require 'stringio'
 require 'addressable/uri'
 require 'signet'
@@ -60,13 +59,9 @@ module Signet
  
       # Constant time string comparison.
       def equal_signatures?(a, b)
-        a_digest = Digest::SHA256.hexdigest(a)
-        b_digest = Digest::SHA256.hexdigest(b)
-        return false unless a_digest.bytesize == b_digest.bytesize
-        l = a_digest.unpack "C#{a_digest.bytesize}"
-        res = 0
-        b_digest.each_byte { |byte| res |= byte ^ l.shift }
-        res == 0 && a == b
+        check = a.bytesize ^ b.bytesize
+        a.bytes.zip(b.bytes) { |x, y| check |= x ^ y.to_i }
+        check == 0
       end
 
       ##
