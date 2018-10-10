@@ -296,8 +296,7 @@ module Signet
           client_credential_secret,
           nil
         )
-        if equal_signatures?(computed_signature, 
-            auth_hash['oauth_signature'])
+        if equal_signatures?(computed_signature, auth_hash['oauth_signature'])
           if(auth_hash.fetch('oauth_callback', 'oob').empty?)
             'oob'
           else
@@ -375,8 +374,7 @@ module Signet
           temporary_credential.secret
         )
 
-        if equal_signatures?(computed_signature, 
-            auth_hash['oauth_signature'])
+        if equal_signatures?(computed_signature, auth_hash['oauth_signature'])
           {:client_credential=>client_credential,
             :temporary_credential=>temporary_credential,
             :realm=>auth_hash['realm']
@@ -503,8 +501,7 @@ module Signet
           token_credential_secret
         )
 
-        if equal_signatures?(computed_signature, 
-            auth_hash['oauth_signature'])
+        if equal_signatures?(computed_signature, auth_hash['oauth_signature'])
           {:client_credential=>client_credential,
            :token_credential=>token_credential,
            :realm=>auth_hash['realm']
