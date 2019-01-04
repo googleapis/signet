@@ -27,7 +27,7 @@ function set_failed_status {
     EXIT_STATUS=1
 }
 
-gem install bundle
+gem install bundler --version 1.17.3
 
 
 (bundle update && bundle exec rake spec:all) || set_failed_status
