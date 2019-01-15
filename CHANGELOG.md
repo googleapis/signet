@@ -177,3 +177,19 @@
 ## 0.1.0
 
 * Initial release
+### 0.12.0 / 2019-01-15
+
+- Loosen bundler dependency to fix travis
+- Fix bundler gem name and pin to 1.17.3
+- Pin bundler to 1.17.3 for now when running travis
+- Update github issue templates (#122)
+- use newest ruby versions for kokoro (#121)
+
+### 0.12.0 / 2019-01-15
+
+- Loosen bundler dependency to fix travis
+- Fix bundler gem name and pin to 1.17.3
+- Pin bundler to 1.17.3 for now when running travis
+- Update github issue templates (#122)
+- use newest ruby versions for kokoro (#121)
+
