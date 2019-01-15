@@ -105,6 +105,7 @@ module Signet
         @state                = nil
         @username             = nil
         @access_type          = nil
+        @proxy                = nil
         self.update!(options)
       end
 
@@ -193,9 +194,12 @@ module Signet
         self.extension_parameters = options[:extension_parameters] || {}
         self.additional_parameters = options[:additional_parameters] || {}
         self.access_type = options.fetch(:access_type) { :offline }
+        self.proxy = options[:proxy] if options.has_key? :proxy
         self.update_token!(options)
         return self
       end
+
+# comment
 
       ##
       # Updates an OAuth 2.0 client.
