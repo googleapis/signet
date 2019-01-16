@@ -1,11 +1,4 @@
 #!/bin/bash
-
-# This file runs tests for merges, PRs, and nightlies.
-# There are a few rules for what tests are run:
-#  * PRs run all non-acceptance tests for every library.
-#  * Merges run all non-acceptance tests for every library, and acceptance tests for all altered libraries.
-#  * Nightlies run all acceptance tests for every library.
-
 set -eo pipefail
 
 # Debug: show build environment
@@ -28,9 +21,16 @@ function set_failed_status {
     EXIT_STATUS=1
 }
 
-for version in "${RUBY_VERSIONS[@]}"; do
-    rbenv global "$version"
-    (bundle update && bundle exec rake spec:all) || set_failed_status
-done
+if [ "$JOB_TYPE" = "release" ]; then
+    rbenv global ${RUBY_VERSIONS[-1]}
+    python3 -m pip install gcp-releasetool
+    python3 -m releasetool publish-reporter-script > /tmp/publisher-script; source /tmp/publisher-script
+    (bundle update && bundle exec rake release) || set_failed_status
+else
+    for version in "${RUBY_VERSIONS[@]}"; do
+        rbenv global "$version"
+        (bundle update && bundle exec rake spec:all) || set_failed_status
+    done
+fi
 
 exit $EXIT_STATUS

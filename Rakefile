@@ -40,3 +40,41 @@ WINDOWS = (RUBY_PLATFORM =~ /mswin|win32|mingw|bccwin|cygwin/) rescue false
 SUDO = WINDOWS ? '' : ('sudo' unless ENV['SUDOLESS'])
 
 Dir['tasks/**/*.rake'].each { |rake| load rake }
+
+
+task :load_env_vars do
+  require "json"
+  service_account = "#{ENV["KOKORO_GFILE_DIR"]}/service-account.json"
+  ENV["GOOGLE_APPLICATION_CREDENTIALS"] = service_account
+  filename = "#{ENV["KOKORO_GFILE_DIR"]}/env_vars.json"
+  env_vars = JSON.parse(File.read(filename))
+  env_vars.each { |k, v| ENV[k] = v }
+end
+
+task :release do
+  require "fileutils"
+  header_2 ENV["JOB_TYPE"]
+  Rake::Task["load_env_vars"].invoke
+  header "Using Ruby - #{RUBY_VERSION}"
+  sh "bundle exec rake build"
+  gem = Dir.entries("pkg").select { |entry| File.file? "pkg/#{entry}" }.first
+  path = FileUtils.mkdir_p(File.expand_path("~") + "/.gem")
+  File.open("#{path}/credentials", "w") do |f|
+    f.puts "---"
+    f.puts ":rubygems_api_key: #{ENV["RUBYGEMS_API_TOKEN"]}"
+  end
+  sh "gem push pkg/#{gem}"
+end
+
+def header str, token = "#"
+  line_length = str.length + 8
+  puts ""
+  puts token * line_length
+  puts "#{token * 3} #{str} #{token * 3}"
+  puts token * line_length
+  puts ""
+end
+
+def header_2 str, token = "#"
+  puts "\n#{token * 3} #{str} #{token * 3}\n"
+end
