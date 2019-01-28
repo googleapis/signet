@@ -3,12 +3,11 @@
 <dl>
   <dt>Homepage</dt><dd><a href="http://code.google.com/p/oauth-signet/">http://code.google.com/p/oauth-signet/</a></dd>
   <dt>Author</dt><dd><a href="mailto:bobaman@google.com">Bob Aman</a></dd>
-  <dt>Copyright</dt><dd>Copyright © 2010 Google, Inc.</dd>
+  <dt>Copyright</dt><dd>Copyright © 2019 Google, Inc.</dd>
   <dt>License</dt><dd>Apache 2.0</dd>
 </dl>
 
 [![Gem Version](https://badge.fury.io/rb/signet.svg)](https://badge.fury.io/rb/signet)
-[![Build Status](https://secure.travis-ci.org/google/signet.png)](http://travis-ci.org/google/signet)
 
 ## Description
 
