@@ -12,13 +12,15 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'signet/version'
+require "signet/version"
 
 module Signet #:nodoc:
-  def self.parse_auth_param_list(auth_param_string)
+  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/MethodLength
+  def self.parse_auth_param_list auth_param_string
     # Production rules from:
     # http://tools.ietf.org/html/draft-ietf-httpbis-p1-messaging-12
-    token = /[-!#$\%&'*+.^_`|~0-9a-zA-Z]+/
+    token = /[-!#{$OUTPUT_RECORD_SEPARATOR}%&'*+.^_`|~0-9a-zA-Z]+/
     d_qdtext = /[\s\x21\x23-\x5B\x5D-\x7E\x80-\xFF]/n
     d_quoted_pair = /\\[\s\x21-\x7E\x80-\xFF]/n
     d_qs = /"(?:#{d_qdtext}|#{d_quoted_pair})*"/
@@ -36,10 +38,10 @@ module Signet #:nodoc:
     #
     # This would be way easier in Ruby 1.9, but we want backwards
     # compatibility.
-    while (match = remainder.match(auth_param))
+    while (match = remainder.match auth_param)
       if match.pre_match && match.pre_match !~ /^[\s,]*$/
         raise ParseError,
-          "Unexpected auth param format: '#{auth_param_string}'."
+              "Unexpected auth param format: '#{auth_param_string}'."
       end
       auth_param_pairs << match.captures[0] # Appending pair
       remainder = match.post_match
@@ -47,24 +49,25 @@ module Signet #:nodoc:
     end
     if last_match.post_match && last_match.post_match !~ /^[\s,]*$/
       raise ParseError,
-        "Unexpected auth param format: '#{auth_param_string}'."
+            "Unexpected auth param format: '#{auth_param_string}'."
     end
     # Now parse the auth-param pair strings & turn them into key-value pairs.
-    return (auth_param_pairs.inject([]) do |accu, pair|
-      name, value = pair.split('=', 2)
+    (auth_param_pairs.each_with_object [] do |pair, accu|
+      name, value = pair.split "=", 2
       if value =~ /^".*"$/
         value = value.gsub(/^"(.*)"$/, '\1').gsub(/\\(.)/, '\1')
       elsif value =~ /^'.*'$/
         value = value.gsub(/^'(.*)'$/, '\1').gsub(/\\(.)/, '\1')
-      elsif value =~ /[\(\)<>@,;:\\\"\/\[\]?={}]/
+      elsif value =~ %r{[\(\)<>@,;:\\\"/\[\]?={}]}
         # Certain special characters are not allowed
-        raise ParseError, (
-          "Unexpected characters in auth param " +
-          "list: '#{auth_param_string}'."
-        )
+        raise ParseError,
+              "Unexpected characters in auth param " \
+              "list: '#{auth_param_string}'."
+
       end
       accu << [name, value]
-      accu
     end)
   end
+  # rubocop:enable Metrics/AbcSize
+  # rubocop:enable Metrics/MethodLength
 end

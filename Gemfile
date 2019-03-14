@@ -1,7 +1,7 @@
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
 gemspec
 
-gem 'jruby-openssl', :platforms => :jruby
-gem 'hurley'
-gem 'bundler', '>= 1.15'
+gem "bundler", ">= 1.15"
+gem "hurley"
+gem "jruby-openssl", platforms: :jruby

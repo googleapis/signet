@@ -1,6 +1,5 @@
-# -*- encoding: utf-8 -*-
 # stub: signet 0.5.1 ruby lib
-require File.join(File.dirname(__FILE__), 'lib/signet', 'version')
+require File.join(File.dirname(__FILE__), "lib/signet", "version")
 
 Gem::Specification.new do |gem|
   gem.name = "signet"
@@ -13,34 +12,35 @@ Gem::Specification.new do |gem|
   gem.description = "Signet is an OAuth 1.0 / OAuth 2.0 implementation.\n"
   gem.email = "sbazyl@google.com"
   gem.extra_rdoc_files = ["README.md"]
-  gem.files = %w(signet.gemspec Rakefile LICENSE CHANGELOG.md README.md Gemfile)
-  gem.files += Dir.glob("lib/**/*.rb")
-  gem.files += Dir.glob("spec/**/*.{rb,opts}")
-  gem.files += Dir.glob("vendor/**/*.rb")
-  gem.files += Dir.glob("tasks/**/*")
-  gem.files += Dir.glob("website/**/*")
+  gem.files = %w[signet.gemspec Rakefile LICENSE CHANGELOG.md README.md Gemfile]
+  gem.files += Dir.glob "lib/**/*.rb"
+  gem.files += Dir.glob "spec/**/*.{rb,opts}"
+  gem.files += Dir.glob "vendor/**/*.rb"
+  gem.files += Dir.glob "tasks/**/*"
+  gem.files += Dir.glob "website/**/*"
   gem.homepage = "https://github.com/google/signet/"
   gem.rdoc_options = ["--main", "README.md"]
   gem.summary = "Signet is an OAuth 1.0 / OAuth 2.0 implementation."
   gem.required_ruby_version = ">= 1.9.3"
 
-  gem.add_runtime_dependency 'addressable', '~> 2.3'
-  gem.add_runtime_dependency 'faraday', '~> 0.9'
-  gem.add_runtime_dependency 'multi_json', '~> 1.10'
-  gem.add_runtime_dependency 'jwt', '>= 1.5', '< 3.0'
+  gem.add_runtime_dependency "addressable", "~> 2.3"
+  gem.add_runtime_dependency "faraday", "~> 0.9"
+  gem.add_runtime_dependency "jwt", ">= 1.5", "< 3.0"
+  gem.add_runtime_dependency "multi_json", "~> 1.10"
 
-  gem.add_development_dependency 'rake', '~> 12.0'
-  gem.add_development_dependency 'yard', '~> 0.9', '>= 0.9.12'
-  gem.add_development_dependency 'rspec', '~> 3.1'
-  gem.add_development_dependency 'launchy', '~> 2.4'
-  gem.add_development_dependency 'kramdown', '~> 1.5'
-  gem.add_development_dependency 'simplecov', '~> 0.9'
+  gem.add_development_dependency "google-style", "~> 0.2"
+  gem.add_development_dependency "kramdown", "~> 1.5"
+  gem.add_development_dependency "launchy", "~> 2.4"
+  gem.add_development_dependency "rake", "~> 12.0"
+  gem.add_development_dependency "rspec", "~> 3.1"
+  gem.add_development_dependency "simplecov", "~> 0.9"
+  gem.add_development_dependency "yard", "~> 0.9", ">= 0.9.12"
 
-  gem.post_install_message = Signet::VERSION::warn_on_old_ruby_version
+  gem.post_install_message = Signet::VERSION.warn_on_old_ruby_version
 
-  if gem.respond_to?(:metadata)
-    gem.metadata['changelog_uri'] = 'https://github.com/google/signet/blob/master/CHANGELOG.md'
-    gem.metadata['source_code_uri'] = 'https://github.com/google/signet'
-    gem.metadata['bug_tracker_uri'] = 'https://github.com/google/signet/issues'
+  if gem.respond_to? :metadata
+    gem.metadata["changelog_uri"] = "https://github.com/google/signet/blob/master/CHANGELOG.md"
+    gem.metadata["source_code_uri"] = "https://github.com/google/signet"
+    gem.metadata["bug_tracker_uri"] = "https://github.com/google/signet/issues"
   end
 end

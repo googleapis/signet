@@ -29,7 +29,8 @@ if [ "$JOB_TYPE" = "release" ]; then
 else
     for version in "${RUBY_VERSIONS[@]}"; do
         rbenv global "$version"
-        (bundle update && bundle exec rake spec:all) || set_failed_status
+        bundle update
+        (bundle exec rake ci) || set_failed_status
     done
 fi
 

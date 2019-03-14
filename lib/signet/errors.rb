@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'addressable/uri'
+require "addressable/uri"
 
 module Signet
   ##
@@ -66,14 +66,14 @@ module Signet
     #   - <code>:uri</code> -
     #     A URI identifying a human-readable web page with additional
     #     information about the error, indended for the resource owner.
-    def initialize(message, options={})
-      super(message)
+    def initialize message, options = {}
+      super message
       @options = options
       @request = options[:request]
       @response = options[:response]
       @code = options[:code]
       @description = options[:description]
-      @uri = Addressable::URI.parse(options[:uri])
+      @uri = Addressable::URI.parse options[:uri]
     end
 
     ##
