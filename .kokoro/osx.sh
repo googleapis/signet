@@ -30,6 +30,6 @@ function set_failed_status {
 gem install bundler --version 1.17.3
 
 
-(bundle update && bundle exec rake spec:all) || set_failed_status
+(bundle update && bundle exec rake ci) || set_failed_status
 
 exit $EXIT_STATUS

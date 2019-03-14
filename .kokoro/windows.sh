@@ -27,6 +27,6 @@ function set_failed_status {
     EXIT_STATUS=1
 }
 
-(bundle update && bundle exec rake spec:all) || set_failed_status
+(bundle update && bundle exec rake ci) || set_failed_status
 
 exit $EXIT_STATUS

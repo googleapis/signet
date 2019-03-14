@@ -30,7 +30,7 @@ else
     for version in "${RUBY_VERSIONS[@]}"; do
         rbenv global "$version"
         bundle update
-        (bundle exec rubocop && bundle exec rake spec:all) || set_failed_status
+        (bundle exec rake ci) || set_failed_status
     done
 fi
 

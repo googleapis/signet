@@ -51,6 +51,11 @@ task :load_env_vars do
   env_vars.each { |k, v| ENV[k] = v }
 end
 
+task :ci do
+  sh "bundle exec rubocop"
+  sh "bundle exec rake spec:all"
+end
+
 task :release do
   require "fileutils"
   header_2 ENV["JOB_TYPE"]
