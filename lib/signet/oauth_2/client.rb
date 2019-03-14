@@ -12,20 +12,19 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'faraday'
-require 'stringio'
-require 'addressable/uri'
-require 'signet'
-require 'signet/errors'
-require 'signet/oauth_2'
-require 'jwt'
-require 'date'
+require "faraday"
+require "stringio"
+require "addressable/uri"
+require "signet"
+require "signet/errors"
+require "signet/oauth_2"
+require "jwt"
+require "date"
 
 module Signet
   module OAuth2
     class Client
-
-      OOB_MODES = %w(urn:ietf:wg:oauth:2.0:oob:auto urn:ietf:wg:oauth:2.0:oob oob)
+      OOB_MODES = %w[urn:ietf:wg:oauth:2.0:oob:auto urn:ietf:wg:oauth:2.0:oob oob].freeze
 
       ##
       # Creates an OAuth 2.0 client.
@@ -89,7 +88,7 @@ module Signet
       #   )
       #
       # @see Signet::OAuth2::Client#update!
-      def initialize options={}
+      def initialize options = {}
         @authorization_uri    = nil
         @token_credential_uri = nil
         @client_id            = nil
@@ -105,8 +104,11 @@ module Signet
         @state                = nil
         @username             = nil
         @access_type          = nil
-        self.update!(options)
+        update! options
       end
+      # rubocop:disable Metrics/AbcSize
+      # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/PerceivedComplexity
 
       ##
       # Updates an OAuth 2.0 client.
@@ -170,32 +172,35 @@ module Signet
       #
       # @see Signet::OAuth2::Client#initialize
       # @see Signet::OAuth2::Client#update_token!
-      def update!(options={})
+      def update! options = {}
         # Normalize all keys to symbols to allow indifferent access.
-        options = deep_hash_normalize(options)
+        options = deep_hash_normalize options
 
-        self.authorization_uri = options[:authorization_uri] if options.has_key?(:authorization_uri)
-        self.token_credential_uri = options[:token_credential_uri] if options.has_key?(:token_credential_uri)
-        self.client_id = options[:client_id] if options.has_key?(:client_id)
-        self.client_secret = options[:client_secret] if options.has_key?(:client_secret)
-        self.scope = options[:scope] if options.has_key?(:scope)
-        self.state = options[:state] if options.has_key?(:state)
-        self.code = options[:code] if options.has_key?(:code)
-        self.redirect_uri = options[:redirect_uri] if options.has_key?(:redirect_uri)
-        self.username = options[:username] if options.has_key?(:username)
-        self.password = options[:password] if options.has_key?(:password)
-        self.issuer = options[:issuer] if options.has_key?(:issuer)
-        self.person = options[:person] if options.has_key?(:person)
-        self.sub = options[:sub] if options.has_key?(:sub)
+        self.authorization_uri = options[:authorization_uri] if options.key? :authorization_uri
+        self.token_credential_uri = options[:token_credential_uri] if options.key? :token_credential_uri
+        self.client_id = options[:client_id] if options.key? :client_id
+        self.client_secret = options[:client_secret] if options.key? :client_secret
+        self.scope = options[:scope] if options.key? :scope
+        self.state = options[:state] if options.key? :state
+        self.code = options[:code] if options.key? :code
+        self.redirect_uri = options[:redirect_uri] if options.key? :redirect_uri
+        self.username = options[:username] if options.key? :username
+        self.password = options[:password] if options.key? :password
+        self.issuer = options[:issuer] if options.key? :issuer
+        self.person = options[:person] if options.key? :person
+        self.sub = options[:sub] if options.key? :sub
         self.expiry = options[:expiry] || 60
-        self.audience = options[:audience] if options.has_key?(:audience)
-        self.signing_key = options[:signing_key] if options.has_key?(:signing_key)
+        self.audience = options[:audience] if options.key? :audience
+        self.signing_key = options[:signing_key] if options.key? :signing_key
         self.extension_parameters = options[:extension_parameters] || {}
         self.additional_parameters = options[:additional_parameters] || {}
         self.access_type = options.fetch(:access_type) { :offline }
-        self.update_token!(options)
-        return self
+        update_token! options
+        self
       end
+      # rubocop:enable Metrics/AbcSize
+      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/PerceivedComplexity
 
       ##
       # Updates an OAuth 2.0 client.
@@ -225,29 +230,33 @@ module Signet
       #
       # @see Signet::OAuth2::Client#initialize
       # @see Signet::OAuth2::Client#update!
-      def update_token!(options={})
+      def update_token! options = {}
         # Normalize all keys to symbols to allow indifferent access internally
-        options = deep_hash_normalize(options)
+        options = deep_hash_normalize options
 
-        self.expires_in = options[:expires] if options.has_key?(:expires)
-        self.expires_in = options[:expires_in] if options.has_key?(:expires_in)
-        self.expires_at = options[:expires_at] if options.has_key?(:expires_at)
+        self.expires_in = options[:expires] if options.key? :expires
+        self.expires_in = options[:expires_in] if options.key? :expires_in
+        self.expires_at = options[:expires_at] if options.key? :expires_at
 
         # By default, the token is issued at `Time.now` when `expires_in` is
         # set, but this can be used to supply a more precise time.
-        self.issued_at = options[:issued_at] if options.has_key?(:issued_at)
+        self.issued_at = options[:issued_at] if options.key? :issued_at
 
         # Special case where we want expires_at to be relative to issued_at
-        if options.has_key?(:issued_at) && options.has_key?(:expires_in)
+        if options.key?(:issued_at) && options.key?(:expires_in)
           set_relative_expires_at options[:issued_at], options[:expires_in]
         end
 
-        self.access_token = options[:access_token] if options.has_key?(:access_token)
-        self.refresh_token = options[:refresh_token] if options.has_key?(:refresh_token)
-        self.id_token = options[:id_token] if options.has_key?(:id_token)
+        self.access_token = options[:access_token] if options.key? :access_token
+        self.refresh_token = options[:refresh_token] if options.key? :refresh_token
+        self.id_token = options[:id_token] if options.key? :id_token
 
-        return self
+        self
       end
+      # rubocop:disable Metrics/AbcSize
+      # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/MethodLength
+      # rubocop:disable Metrics/PerceivedComplexity
 
       ##
       # Returns the authorization URI that the user should be redirected to.
@@ -255,34 +264,24 @@ module Signet
       # @return [Addressable::URI] The authorization URI.
       #
       # @see Signet::OAuth2.generate_authorization_uri
-      def authorization_uri(options={})
+      def authorization_uri options = {}
         # Normalize external input
-        options = deep_hash_normalize(options)
+        options = deep_hash_normalize options
 
-        return nil if @authorization_uri == nil
-        unless options[:response_type]
-          options[:response_type] = :code
-        end
-        if !options[:access_type] && access_type
-          options[:access_type] = access_type
-        end
-        options[:client_id] ||= self.client_id
-        options[:redirect_uri] ||= self.redirect_uri
+        return nil if @authorization_uri.nil?
+        options[:response_type] = :code unless options[:response_type]
+        options[:access_type] = access_type if !options[:access_type] && access_type
+        options[:client_id] ||= client_id
+        options[:redirect_uri] ||= redirect_uri
         if options[:prompt] && options[:approval_prompt]
           raise ArgumentError, "prompt and approval_prompt are mutually exclusive parameters"
         end
-        if !options[:client_id]
-          raise ArgumentError, "Missing required client identifier."
-        end
-        unless options[:redirect_uri]
-          raise ArgumentError, "Missing required redirect URI."
-        end
-        if !options[:scope] && self.scope
-          options[:scope] = self.scope.join(' ')
-        end
-        options[:state] = self.state unless options[:state]
-        options.merge!(self.additional_parameters.merge(options[:additional_parameters] || {}))
-        options.delete(:additional_parameters)
+        raise ArgumentError, "Missing required client identifier." unless options[:client_id]
+        raise ArgumentError, "Missing required redirect URI." unless options[:redirect_uri]
+        options[:scope] = scope.join " " if !options[:scope] && scope
+        options[:state] = state unless options[:state]
+        options.merge!(additional_parameters.merge(options[:additional_parameters] || {}))
+        options.delete :additional_parameters
         options = Hash[options.map do |key, option|
           [key.to_s, option]
         end]
@@ -291,20 +290,24 @@ module Signet
             @authorization_uri, options
           )
         )
-        if uri.normalized_scheme != 'https'
+        if uri.normalized_scheme != "https"
           raise Signet::UnsafeOperationError,
-            'Authorization endpoint must be protected by TLS.'
+                "Authorization endpoint must be protected by TLS."
         end
-        return uri
+        uri
       end
+      # rubocop:enable Metrics/AbcSize
+      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/MethodLength
+      # rubocop:enable Metrics/PerceivedComplexity
 
       ##
       # Sets the authorization URI for this client.
       #
       # @param [Addressable::URI, Hash, String, #to_str] new_authorization_uri
       #   The authorization URI.
-      def authorization_uri=(new_authorization_uri)
-        @authorization_uri = coerce_uri(new_authorization_uri)
+      def authorization_uri= new_authorization_uri
+        @authorization_uri = coerce_uri new_authorization_uri
       end
 
       ##
@@ -312,7 +315,7 @@ module Signet
       #
       # @return [Addressable::URI] The token credential URI.
       def token_credential_uri
-        return @token_credential_uri
+        @token_credential_uri
       end
 
       ##
@@ -320,17 +323,17 @@ module Signet
       #
       # @param [Addressable::URI, Hash, String, #to_str] new_token_credential_uri
       #   The token credential URI.
-      def token_credential_uri=(new_token_credential_uri)
-        @token_credential_uri = coerce_uri(new_token_credential_uri)
+      def token_credential_uri= new_token_credential_uri
+        @token_credential_uri = coerce_uri new_token_credential_uri
       end
 
       # Addressable expects URIs formatted as hashes to come in with symbols as keys.
       # Returns nil implicitly for the nil case.
-      def coerce_uri(incoming_uri)
+      def coerce_uri incoming_uri
         if incoming_uri.is_a? Hash
-          Addressable::URI.new(deep_hash_normalize(incoming_uri))
+          Addressable::URI.new deep_hash_normalize(incoming_uri)
         elsif incoming_uri
-          Addressable::URI.parse(incoming_uri)
+          Addressable::URI.parse incoming_uri
         end
       end
 
@@ -339,7 +342,7 @@ module Signet
       #
       # @return [String, Symbol] The current access type.
       def access_type
-        return @access_type
+        @access_type
       end
 
       ##
@@ -347,7 +350,7 @@ module Signet
       #
       # @param [String, Symbol] new_access_type
       #   The current access type.
-      def access_type=(new_access_type)
+      def access_type= new_access_type
         @access_type = new_access_type
       end
 
@@ -356,7 +359,7 @@ module Signet
       #
       # @return [String] The client identifier.
       def client_id
-        return @client_id
+        @client_id
       end
 
       ##
@@ -364,7 +367,7 @@ module Signet
       #
       # @param [String] new_client_id
       #   The client identifier.
-      def client_id=(new_client_id)
+      def client_id= new_client_id
         @client_id = new_client_id
       end
 
@@ -373,7 +376,7 @@ module Signet
       #
       # @return [String] The client secret.
       def client_secret
-        return @client_secret
+        @client_secret
       end
 
       ##
@@ -381,7 +384,7 @@ module Signet
       #
       # @param [String] new_client_secret
       #   The client secret.
-      def client_secret=(new_client_secret)
+      def client_secret= new_client_secret
         @client_secret = new_client_secret
       end
 
@@ -391,7 +394,7 @@ module Signet
       #
       # @return [Array] The scope of access the client is requesting.
       def scope
-        return @scope
+        @scope
       end
 
       ##
@@ -401,18 +404,18 @@ module Signet
       #   The scope of access the client is requesting.  This may be
       #   expressed as either an Array of String objects or as a
       #   space-delimited String.
-      def scope=(new_scope)
+      def scope= new_scope
         case new_scope
         when Array
           new_scope.each do |scope|
-            if scope.include?(' ')
+            if scope.include? " "
               raise ArgumentError,
-                "Individual scopes cannot contain the space character."
+                    "Individual scopes cannot contain the space character."
             end
           end
           @scope = new_scope
         when String
-          @scope = new_scope.split(' ')
+          @scope = new_scope.split " "
         when nil
           @scope = nil
         else
@@ -425,7 +428,7 @@ module Signet
       #
       # @return [String] The state value.
       def state
-        return @state
+        @state
       end
 
       ##
@@ -433,7 +436,7 @@ module Signet
       #
       # @param [String] new_state
       #   The state value.
-      def state=(new_state)
+      def state= new_state
         @state = new_state
       end
 
@@ -443,7 +446,7 @@ module Signet
       #
       # @return [String] The authorization code.
       def code
-        return @code
+        @code
       end
 
       ##
@@ -452,7 +455,7 @@ module Signet
       #
       # @param [String] new_code
       #   The authorization code.
-      def code=(new_code)
+      def code= new_code
         @code = new_code
       end
 
@@ -461,7 +464,7 @@ module Signet
       #
       # @return [String] The redirect URI.
       def redirect_uri
-        return @redirect_uri
+        @redirect_uri
       end
 
       ##
@@ -469,14 +472,14 @@ module Signet
       #
       # @param [String] new_redirect_uri
       #   The redirect URI.
-      def redirect_uri=(new_redirect_uri)
-        new_redirect_uri = Addressable::URI.parse(new_redirect_uri)
-        #TODO - Better solution to allow google postmessage flow. For now, make an exception to the spec.
-        if new_redirect_uri == nil|| new_redirect_uri.absolute? || uri_is_postmessage?(new_redirect_uri) || uri_is_oob?(new_redirect_uri)
-          @redirect_uri = new_redirect_uri
-        else
+      def redirect_uri= new_redirect_uri
+        new_redirect_uri = Addressable::URI.parse new_redirect_uri
+        # TODO: - Better solution to allow google postmessage flow. For now, make an exception to the spec.
+        unless new_redirect_uri.nil? || new_redirect_uri.absolute? || uri_is_postmessage?(new_redirect_uri) ||
+               uri_is_oob?(new_redirect_uri)
           raise ArgumentError, "Redirect URI must be an absolute URI."
         end
+        @redirect_uri = new_redirect_uri
       end
 
       ##
@@ -485,7 +488,7 @@ module Signet
       #
       # @return [String] The username.
       def username
-        return @username
+        @username
       end
 
       ##
@@ -494,7 +497,7 @@ module Signet
       #
       # @param [String] new_username
       #   The username.
-      def username=(new_username)
+      def username= new_username
         @username = new_username
       end
 
@@ -504,7 +507,7 @@ module Signet
       #
       # @return [String] The password.
       def password
-        return @password
+        @password
       end
 
       ##
@@ -513,7 +516,7 @@ module Signet
       #
       # @param [String] new_password
       #   The password.
-      def password=(new_password)
+      def password= new_password
         @password = new_password
       end
 
@@ -523,7 +526,7 @@ module Signet
       #
       # @return [String] Issuer id.
       def issuer
-        return @issuer
+        @issuer
       end
 
       ##
@@ -532,7 +535,7 @@ module Signet
       #
       # @param [String] new_issuer
       #   Issuer ID (typical in email adddress form).
-      def issuer=(new_issuer)
+      def issuer= new_issuer
         @issuer = new_issuer
       end
 
@@ -542,7 +545,7 @@ module Signet
       #
       # @return [String] Target audience ID.
       def audience
-        return @audience
+        @audience
       end
 
       ##
@@ -551,7 +554,7 @@ module Signet
       #
       # @param [String] new_audience
       #   Target audience ID
-      def audience=(new_audience)
+      def audience= new_audience
         @audience = new_audience
       end
 
@@ -561,7 +564,7 @@ module Signet
       #
       # @return [String] Target user for impersonation.
       def principal
-        return @principal
+        @principal
       end
 
       ##
@@ -570,12 +573,12 @@ module Signet
       #
       # @param [String] new_person
       #   Target user for impersonation
-      def principal=(new_person)
+      def principal= new_person
         @principal = new_person
       end
 
-      alias_method :person, :principal
-      alias_method :person=, :principal=
+      alias person principal
+      alias person= principal=
 
       ##
       # The target "sub" when issuing assertions.
@@ -589,7 +592,7 @@ module Signet
       #
       # @return [Integer] Assertion expiry, in seconds
       def expiry
-        return @expiry
+        @expiry
       end
 
       ##
@@ -598,10 +601,9 @@ module Signet
       #
       # @param [Integer, String] new_expiry
       #   Assertion expiry, in seconds
-      def expiry=(new_expiry)
+      def expiry= new_expiry
         @expiry = new_expiry ? new_expiry.to_i : nil
       end
-
 
       ##
       # Returns the signing key associated with this client.
@@ -609,7 +611,7 @@ module Signet
       #
       # @return [String,OpenSSL::PKey] Signing key
       def signing_key
-        return @signing_key
+        @signing_key
       end
 
       ##
@@ -618,7 +620,7 @@ module Signet
       #
       # @param [String, OpenSSL::Pkey] new_key
       #   Signing key. Either private key for RSA or string for HMAC algorithm
-      def signing_key=(new_key)
+      def signing_key= new_key
         @signing_key = new_key
       end
 
@@ -626,7 +628,7 @@ module Signet
       # Algorithm used for signing JWTs
       # @return [String] Signing algorithm
       def signing_algorithm
-        self.signing_key.is_a?(String) ? "HS256" : "RS256"
+        signing_key.is_a?(String) ? "HS256" : "RS256"
       end
 
       ##
@@ -635,7 +637,7 @@ module Signet
       #
       # @return [Hash] The extension parameters.
       def extension_parameters
-        return @extension_parameters ||= {}
+        @extension_parameters ||= {}
       end
 
       ##
@@ -644,12 +646,12 @@ module Signet
       #
       # @param [Hash] new_extension_parameters
       #   The parameters.
-      def extension_parameters=(new_extension_parameters)
-        if new_extension_parameters.respond_to?(:to_hash)
+      def extension_parameters= new_extension_parameters
+        if new_extension_parameters.respond_to? :to_hash
           @extension_parameters = new_extension_parameters.to_hash
         else
           raise TypeError,
-            "Expected Hash, got #{new_extension_parameters.class}."
+                "Expected Hash, got #{new_extension_parameters.class}."
         end
       end
 
@@ -658,7 +660,7 @@ module Signet
       #
       # @return [Hash] The pass through parameters.
       def additional_parameters
-        return @additional_parameters ||= {}
+        @additional_parameters ||= {}
       end
 
       ##
@@ -666,8 +668,8 @@ module Signet
       #
       # @param [Hash] new_additional_parameters
       #   The parameters.
-      def additional_parameters=(new_additional_parameters)
-        if new_additional_parameters.respond_to?(:to_hash)
+      def additional_parameters= new_additional_parameters
+        if new_additional_parameters.respond_to? :to_hash
           @additional_parameters = new_additional_parameters.to_hash
         else
           raise TypeError,
@@ -680,7 +682,7 @@ module Signet
       #
       # @return [String] The refresh token.
       def refresh_token
-        return @refresh_token ||= nil
+        @refresh_token ||= nil
       end
 
       ##
@@ -688,7 +690,7 @@ module Signet
       #
       # @param [String] new_refresh_token
       #   The refresh token.
-      def refresh_token=(new_refresh_token)
+      def refresh_token= new_refresh_token
         @refresh_token = new_refresh_token
       end
 
@@ -697,7 +699,7 @@ module Signet
       #
       # @return [String] The access token.
       def access_token
-        return @access_token ||= nil
+        @access_token ||= nil
       end
 
       ##
@@ -705,7 +707,7 @@ module Signet
       #
       # @param [String] new_access_token
       #   The access token.
-      def access_token=(new_access_token)
+      def access_token= new_access_token
         @access_token = new_access_token
       end
 
@@ -714,7 +716,7 @@ module Signet
       #
       # @return [String] The ID token.
       def id_token
-        return @id_token ||= nil
+        @id_token ||= nil
       end
 
       ##
@@ -722,7 +724,7 @@ module Signet
       #
       # @param [String] new_id_token
       #   The ID token.
-      def id_token=(new_id_token)
+      def id_token= new_id_token
         @id_token = new_id_token
       end
 
@@ -734,17 +736,16 @@ module Signet
       #   omitted.
       #
       # @return [String] The decoded ID token.
-      def decoded_id_token public_key=nil, options = {}, &keyfinder
+      def decoded_id_token public_key = nil, options = {}, &keyfinder
         options[:algorithm] ||= signing_algorithm
-        verify = !!(public_key || keyfinder)
-        payload, _header = JWT.decode(self.id_token, public_key, verify, options, &keyfinder)
-        if !payload.has_key?('aud')
-          raise Signet::UnsafeOperationError, 'No ID token audience declared.'
-        elsif payload['aud'] != self.client_id
+        verify = !public_key.nil? || block_given?
+        payload, _header = JWT.decode(id_token, public_key, verify, options, &keyfinder)
+        raise Signet::UnsafeOperationError, "No ID token audience declared." unless payload.key? "aud"
+        if payload["aud"] != client_id
           raise Signet::UnsafeOperationError,
-            'ID token audience did not match Client ID.'
+                "ID token audience did not match Client ID."
         end
-        return payload
+        payload
       end
 
       ##
@@ -790,8 +791,8 @@ module Signet
       #
       # @param [String,Integer,Time] new_issued_at
       #    The access token issuance time.
-      def issued_at=(new_issued_at)
-        @issued_at = normalize_timestamp(new_issued_at)
+      def issued_at= new_issued_at
+        @issued_at = normalize_timestamp new_issued_at
       end
 
       ##
@@ -809,7 +810,7 @@ module Signet
       # not expire.
       # @param [String,Integer,Time, nil] new_expires_at
       #    The access token expiration time.
-      def expires_at=(new_expires_at)
+      def expires_at= new_expires_at
         @expires_at = normalize_timestamp new_expires_at
       end
 
@@ -820,7 +821,7 @@ module Signet
       # @return [TrueClass, FalseClass]
       #   The expiration state of the access token.
       def expired?
-        return self.expires_at != nil && Time.now >= self.expires_at
+        !expires_at.nil? && Time.now >= expires_at
       end
 
       ##
@@ -832,8 +833,8 @@ module Signet
       #  expired.
       # @return [TrueClass, FalseClass]
       #   The expiration state of the access token.
-      def expires_within?(sec)
-        return self.expires_at != nil && Time.now >= (self.expires_at - sec)
+      def expires_within? sec
+        !expires_at.nil? && Time.now >= (expires_at - sec)
       end
 
       ##
@@ -849,7 +850,6 @@ module Signet
         @expires_at = nil
       end
 
-
       ##
       # Returns the inferred grant type, based on the current state of the
       # client object.  Returns `"none"` if the client has insufficient
@@ -859,52 +859,45 @@ module Signet
       #   The inferred grant type.
       def grant_type
         @grant_type ||= nil
-        if @grant_type
-          return @grant_type
-        else
-          if self.code && self.redirect_uri
-            'authorization_code'
-          elsif self.refresh_token
-            'refresh_token'
-          elsif self.username && self.password
-            'password'
-          elsif self.issuer && self.signing_key
-            'urn:ietf:params:oauth:grant-type:jwt-bearer'
-          else
-            # We don't have sufficient auth information, assume an out-of-band
-            # authorization arrangement between the client and server, or an
-            # extension grant type.
-            nil
-          end
+        return @grant_type if @grant_type
+        if code && redirect_uri
+          "authorization_code"
+        elsif refresh_token
+          "refresh_token"
+        elsif username && password
+          "password"
+        elsif issuer && signing_key
+          "urn:ietf:params:oauth:grant-type:jwt-bearer"
         end
       end
 
-      def grant_type=(new_grant_type)
+      def grant_type= new_grant_type
         case new_grant_type
-        when 'authorization_code', 'refresh_token',
-            'password', 'client_credentials'
+        when "authorization_code", "refresh_token",
+            "password", "client_credentials"
           @grant_type = new_grant_type
         else
-          @grant_type = Addressable::URI.parse(new_grant_type)
+          @grant_type = Addressable::URI.parse new_grant_type
         end
       end
 
-      def to_jwt(options={})
-        options = deep_hash_normalize(options)
+      def to_jwt options = {}
+        options = deep_hash_normalize options
 
         now = Time.new
         skew = options[:skew] || 60
         assertion = {
-          "iss" => self.issuer,
-          "aud" => self.audience,
-          "exp" => (now + self.expiry).to_i,
+          "iss" => issuer,
+          "aud" => audience,
+          "exp" => (now + expiry).to_i,
           "iat" => (now - skew).to_i
         }
-        assertion['scope'] = self.scope.join(' ') unless self.scope.nil?
-        assertion['prn'] = self.person unless self.person.nil?
-        assertion['sub'] = self.sub unless self.sub.nil?
-        JWT.encode(assertion, self.signing_key, self.signing_algorithm)
+        assertion["scope"] = scope.join " " unless scope.nil?
+        assertion["prn"] = person unless person.nil?
+        assertion["sub"] = sub unless sub.nil?
+        JWT.encode assertion, signing_key, signing_algorithm
       end
+      # rubocop:disable Style/MethodDefParentheses
 
       ##
       # Serialize the client object to JSON.
@@ -913,29 +906,34 @@ module Signet
       #
       # @return [String] A serialized JSON representation of the client.
       def to_json(*)
-        return MultiJson.dump({
-          'authorization_uri' => self.authorization_uri ? self.authorization_uri.to_s : nil,
-          'token_credential_uri' => self.token_credential_uri ? self.token_credential_uri.to_s : nil,
-          'client_id' => self.client_id,
-          'client_secret' => self.client_secret,
-          'scope' => self.scope,
-          'state' => self.state,
-          'code' => self.code,
-          'redirect_uri' => self.redirect_uri ? self.redirect_uri.to_s : nil,
-          'username' => self.username,
-          'password' => self.password,
-          'issuer' => self.issuer,
-          'audience' => self.audience,
-          'person' => self.person,
-          'expiry' => self.expiry,
-          'expires_at' => self.expires_at ? self.expires_at.to_i : nil,
-          'signing_key' => self.signing_key,
-          'refresh_token' => self.refresh_token,
-          'access_token' => self.access_token,
-          'id_token' => self.id_token,
-          'extension_parameters' => self.extension_parameters
-        })
+        MultiJson.dump(
+          "authorization_uri"    => authorization_uri ? authorization_uri.to_s : nil,
+          "token_credential_uri" => token_credential_uri ? token_credential_uri.to_s : nil,
+          "client_id"            => client_id,
+          "client_secret"        => client_secret,
+          "scope"                => scope,
+          "state"                => state,
+          "code"                 => code,
+          "redirect_uri"         => redirect_uri ? redirect_uri.to_s : nil,
+          "username"             => username,
+          "password"             => password,
+          "issuer"               => issuer,
+          "audience"             => audience,
+          "person"               => person,
+          "expiry"               => expiry,
+          "expires_at"           => expires_at ? expires_at.to_i : nil,
+          "signing_key"          => signing_key,
+          "refresh_token"        => refresh_token,
+          "access_token"         => access_token,
+          "id_token"             => id_token,
+          "extension_parameters" => extension_parameters
+        )
       end
+      # rubocop:enable Style/MethodDefParentheses
+      # rubocop:disable Metrics/AbcSize
+      # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/MethodLength
+      # rubocop:disable Metrics/PerceivedComplexity
 
       ##
       # Generates a request for token credentials.
@@ -947,58 +945,58 @@ module Signet
       #
       # @private
       # @return [Array] The request object.
-      def generate_access_token_request(options={})
-        options = deep_hash_normalize(options)
+      def generate_access_token_request options = {}
+        options = deep_hash_normalize options
 
-        parameters = {"grant_type" => self.grant_type}
-        case self.grant_type
-        when 'authorization_code'
-          parameters['code'] = self.code
-          parameters['redirect_uri'] = self.redirect_uri
-        when 'password'
-          parameters['username'] = self.username
-          parameters['password'] = self.password
-        when 'refresh_token'
-          parameters['refresh_token'] = self.refresh_token
-        when 'urn:ietf:params:oauth:grant-type:jwt-bearer'
-          parameters['assertion'] = self.to_jwt(options)
+        parameters = { "grant_type" => grant_type }
+        case grant_type
+        when "authorization_code"
+          parameters["code"] = code
+          parameters["redirect_uri"] = redirect_uri
+        when "password"
+          parameters["username"] = username
+          parameters["password"] = password
+        when "refresh_token"
+          parameters["refresh_token"] = refresh_token
+        when "urn:ietf:params:oauth:grant-type:jwt-bearer"
+          parameters["assertion"] = to_jwt options
         else
-          if self.redirect_uri
+          if redirect_uri
             # Grant type was intended to be `authorization_code` because of
             # the presence of the redirect URI.
-            raise ArgumentError, 'Missing authorization code.'
+            raise ArgumentError, "Missing authorization code."
           end
-          parameters.merge!(self.extension_parameters)
+          parameters.merge! extension_parameters
         end
-        parameters['client_id'] = self.client_id unless self.client_id.nil?
-        parameters['client_secret'] = self.client_secret unless self.client_secret.nil?
+        parameters["client_id"] = client_id unless client_id.nil?
+        parameters["client_secret"] = client_secret unless client_secret.nil?
         if options[:scope]
-          parameters['scope'] = options[:scope]
-        elsif options[:use_configured_scope] && !self.scope.nil?
-          parameters['scope'] = self.scope
+          parameters["scope"] = options[:scope]
+        elsif options[:use_configured_scope] && !scope.nil?
+          parameters["scope"] = scope
         end
-        additional = self.additional_parameters.merge(options[:additional_parameters] || {})
+        additional = additional_parameters.merge(options[:additional_parameters] || {})
         additional.each { |k, v| parameters[k.to_s] = v }
         parameters
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/PerceivedComplexity
 
-      def fetch_access_token(options={})
-        if self.token_credential_uri.nil?
-          raise ArgumentError, 'Missing token endpoint URI.'
-        end
+      def fetch_access_token options = {}
+        raise ArgumentError, "Missing token endpoint URI." if token_credential_uri.nil?
 
-        options = deep_hash_normalize(options)
+        options = deep_hash_normalize options
 
         client = options[:connection] ||= Faraday.default_connection
-        url = Addressable::URI.parse(self.token_credential_uri).normalize.to_s
-        parameters = self.generate_access_token_request(options)
-        if client.is_a?(Faraday::Connection)
+        url = Addressable::URI.parse(token_credential_uri).normalize.to_s
+        parameters = generate_access_token_request options
+        if client.is_a? Faraday::Connection
           response = client.post url,
-            Addressable::URI.form_encode(parameters),
-            { 'Content-Type' => 'application/x-www-form-urlencoded' }
+                                 Addressable::URI.form_encode(parameters),
+                                 "Content-Type" => "application/x-www-form-urlencoded"
           status = response.status.to_i
           body = response.body
-          content_type = response.headers['Content-type']
+          content_type = response.headers["Content-type"]
         else
           # Hurley
           response = client.post url, parameters
@@ -1007,49 +1005,46 @@ module Signet
           content_type = response.header[:content_type]
         end
 
-        if status == 200
-          return ::Signet::OAuth2.parse_credentials(body, content_type)
-        elsif [400, 401, 403].include?(status)
-          message = 'Authorization failed.'
-          if body.to_s.strip.length > 0
-            message += "  Server message:\n#{response.body.to_s.strip}"
-          end
+        return ::Signet::OAuth2.parse_credentials body, content_type if status == 200
+
+        message = "  Server message:\n#{response.body.to_s.strip}" unless body.to_s.strip.empty?
+        if [400, 401, 403].include? status
+          message = "Authorization failed." + message
           raise ::Signet::AuthorizationError.new(
-            message, :response => response
+            message, response: response
           )
         elsif status.to_s[0] == "5"
-          message = 'Remote server error.'
-          if body.to_s.strip.length > 0
-            message += "  Server message:\n#{response.body.to_s.strip}"
-          end
-          raise ::Signet::RemoteServerError.new(message)
+          message = "Remote server error." + message
+          raise ::Signet::RemoteServerError, message
         else
-          message = "Unexpected status code: #{response.status}."
-          if body.to_s.strip.length > 0
-            message += "  Server message:\n#{response.body.to_s.strip}"
-          end
-          raise ::Signet::UnexpectedStatusError.new(message)
+          message = "Unexpected status code: #{response.status}." + message
+          raise ::Signet::UnexpectedStatusError, message
         end
       end
+      # rubocop:enable Metrics/AbcSize
+      # rubocop:enable Metrics/MethodLength
 
-      def fetch_access_token!(options={})
-        token_hash = self.fetch_access_token(options)
+      def fetch_access_token! options = {}
+        token_hash = fetch_access_token options
         if token_hash
           # No-op for grant types other than `authorization_code`.
           # An authorization code is a one-time use token and is immediately
           # revoked after usage.
           self.code = nil
           self.issued_at = Time.now
-          self.update_token!(token_hash)
+          update_token! token_hash
         end
-        return token_hash
+        token_hash
       end
 
       ##
       # Refresh the access token, if possible
-      def refresh!(options={})
-        self.fetch_access_token!(options)
+      def refresh! options = {}
+        fetch_access_token! options
       end
+      # rubocop:disable Metrics/AbcSize
+      # rubocop:disable Metrics/MethodLength
+      # rubocop:disable Metrics/PerceivedComplexity
 
       ##
       # Generates an authenticated request for protected resources.
@@ -1071,55 +1066,54 @@ module Signet
       #   - <code>:realm</code> -
       #     The Authorization realm.  See RFC 2617.
       # @return [Faraday::Request] The request object.
-      def generate_authenticated_request(options={})
-        options = deep_hash_normalize(options)
+      def generate_authenticated_request options = {}
+        options = deep_hash_normalize options
 
-        if self.access_token == nil
-          raise ArgumentError, 'Missing access token.'
-        end
+        raise ArgumentError, "Missing access token." if access_token.nil?
         options = {
-          :realm => nil
+          realm: nil
         }.merge(options)
 
-        if options[:request].kind_of?(Faraday::Request)
+        if options[:request].is_a? Faraday::Request
           request = options[:request]
         else
-          if options[:request].kind_of?(Array)
+          if options[:request].is_a? Array
             method, uri, headers, body = options[:request]
           else
             method = options[:method] || :get
             uri = options[:uri]
             headers = options[:headers] || []
-            body = options[:body] || ''
+            body = options[:body] || ""
           end
-          headers = headers.to_a if headers.kind_of?(Hash)
+          headers = headers.to_a if headers.is_a? Hash
           request_components = {
-            :method => method,
-            :uri => uri,
-            :headers => headers,
-            :body => body
+            method:  method,
+            uri:     uri,
+            headers: headers,
+            body:    body
           }
           # Verify that we have all pieces required to return an HTTP request
           request_components.each do |(key, value)|
-            unless value
-              raise ArgumentError, "Missing :#{key} parameter."
-            end
+            raise ArgumentError, "Missing :#{key} parameter." unless value
           end
           method = method.to_s.downcase.to_sym
-          request = options[:connection].build_request(method.to_s.downcase.to_sym) do |req|
-            req.url(Addressable::URI.parse(uri).normalize.to_s)
-            req.headers = Faraday::Utils::Headers.new(headers)
+          request = options[:connection].build_request method.to_s.downcase.to_sym do |req|
+            req.url Addressable::URI.parse(uri).normalize.to_s
+            req.headers = Faraday::Utils::Headers.new headers
             req.body = body
           end
         end
 
-        request['Authorization'] = ::Signet::OAuth2.generate_bearer_authorization_header(
-          self.access_token,
-          options[:realm] ? [['realm', options[:realm]]] : nil
+        request["Authorization"] = ::Signet::OAuth2.generate_bearer_authorization_header(
+          access_token,
+          options[:realm] ? [["realm", options[:realm]]] : nil
         )
-        request['Cache-Control'] = 'no-store'
-        return request
+        request["Cache-Control"] = "no-store"
+        request
       end
+      # rubocop:enable Metrics/AbcSize
+      # rubocop:enable Metrics/MethodLength
+      # rubocop:enable Metrics/PerceivedComplexity
 
       ##
       # Transmits a request for a protected resource.
@@ -1151,27 +1145,22 @@ module Signet
       #   )
       #
       # @return [Array] The response object.
-      def fetch_protected_resource(options={})
-        options = deep_hash_normalize(options)
+      def fetch_protected_resource options = {}
+        options = deep_hash_normalize options
 
         options[:connection] ||= Faraday.default_connection
-        request = self.generate_authenticated_request(options)
-        request_env = request.to_env(options[:connection])
+        request = generate_authenticated_request options
+        request_env = request.to_env options[:connection]
         request_env[:request] ||= request
-        response = options[:connection].app.call(request_env)
-        if response.status.to_i == 401
-          # When accessing a protected resource, we only want to raise an
-          # error for 401 responses.
-          message = 'Authorization failed.'
-          if response.body.to_s.strip.length > 0
-            message += "  Server message:\n#{response.body.to_s.strip}"
-          end
-          raise ::Signet::AuthorizationError.new(
-            message, :request => request, :response => response
-          )
-        else
-          return response
-        end
+        response = options[:connection].app.call request_env
+        return response unless response.status.to_i == 401
+        # When accessing a protected resource, we only want to raise an
+        # error for 401 responses.
+        message = "Authorization failed."
+        message += "  Server message:\n#{response.body.to_s.strip}" unless response.body.to_s.strip.empty?
+        raise ::Signet::AuthorizationError.new(
+          message, request: request, response: response
+        )
       end
 
       private
@@ -1179,33 +1168,33 @@ module Signet
       ##
       # Check if URI is Google's postmessage flow (not a valid redirect_uri by spec, but allowed)
       # @private
-      def uri_is_postmessage?(uri)
-        return uri.to_s.casecmp('postmessage') == 0
+      def uri_is_postmessage? uri
+        uri.to_s.casecmp("postmessage").zero?
       end
 
       ##
       # Check if the URI is a out-of-band
       # @private
-      def uri_is_oob?(uri)
-        return OOB_MODES.include?(uri.to_s)
+      def uri_is_oob? uri
+        OOB_MODES.include? uri.to_s
       end
 
       # Convert all keys in this hash (nested) to symbols for uniform retrieval
-      def recursive_hash_normalize_keys(val)
+      def recursive_hash_normalize_keys val
         if val.is_a? Hash
-          deep_hash_normalize(val)
+          deep_hash_normalize val
         else
           val
         end
       end
 
-      def deep_hash_normalize(old_hash)
+      def deep_hash_normalize old_hash
         sym_hash = {}
-        old_hash and old_hash.each {|k,v| sym_hash[k.to_sym] = recursive_hash_normalize_keys(v)}
+        old_hash&.each { |k, v| sym_hash[k.to_sym] = recursive_hash_normalize_keys v }
         sym_hash
       end
 
-      def normalize_timestamp(time)
+      def normalize_timestamp time
         case time
         when NilClass
           nil
@@ -1214,15 +1203,15 @@ module Signet
         when DateTime
           time.to_time
         when String
-          Time.parse(time)
+          Time.parse time
         when Integer
-          Time.at(time)
+          Time.at time
         else
-          fail "Invalid time value #{time}"
+          raise "Invalid time value #{time}"
         end
       end
 
-      def set_relative_expires_at(issued_at, expires_in)
+      def set_relative_expires_at issued_at, expires_in
         self.issued_at = issued_at
         # Using local expires_in because if self.expires_in is used, it returns
         # the time left before the token expires

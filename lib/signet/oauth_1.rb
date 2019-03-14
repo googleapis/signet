@@ -1,11 +1,11 @@
-require 'addressable/uri'
-require 'signet'
+require "addressable/uri"
+require "signet"
 
-require 'securerandom'
+require "securerandom"
 
 module Signet #:nodoc:
   module OAuth1
-    OUT_OF_BAND = 'oob'
+    OUT_OF_BAND = "oob".freeze
 
     ##
     # Converts a value to a percent-encoded <code>String</code> according to
@@ -15,9 +15,9 @@ module Signet #:nodoc:
     # @param [Symbol, #to_str] value The value to be encoded.
     #
     # @return [String] The percent-encoded value.
-    def self.encode(value)
-      value = value.to_s if value.kind_of?(Symbol)
-      return Addressable::URI.encode_component(
+    def self.encode value
+      value = value.to_s if value.is_a? Symbol
+      Addressable::URI.encode_component(
         value,
         Addressable::URI::CharacterClasses::UNRESERVED
       )
@@ -30,8 +30,8 @@ module Signet #:nodoc:
     #   The percent-encoded <code>String</code> to be unencoded.
     #
     # @return [String] The unencoded value.
-    def self.unencode(value)
-      return Addressable::URI.unencode_component(value)
+    def self.unencode value
+      Addressable::URI.unencode_component value
     end
 
     ##
@@ -39,8 +39,8 @@ module Signet #:nodoc:
     # value.
     #
     # @return [String] The current timestamp.
-    def self.generate_timestamp()
-      return Time.now.to_i.to_s
+    def self.generate_timestamp
+      Time.now.to_i.to_s
     end
 
     ##
@@ -48,9 +48,10 @@ module Signet #:nodoc:
     # value.
     #
     # @return [String] A random nonce.
-    def self.generate_nonce()
-      return SecureRandom.random_bytes(16).unpack('H*').join('')
+    def self.generate_nonce
+      SecureRandom.random_bytes(16).unpack("H*").join ""
     end
+    # rubocop:disable Metrics/MethodLength
 
     ##
     # Processes an options <code>Hash</code> to find a credential key value.
@@ -62,36 +63,36 @@ module Signet #:nodoc:
     #   or <code>:access</code>.
     #
     # @return [String] The credential key value.
-    def self.extract_credential_key_option(credential_type, options)
+    def self.extract_credential_key_option credential_type, options
       # Normalize key to String to allow indifferent access.
-      options = options.inject({}) { |accu, (k, v)| accu[k.to_s] = v; accu }
+      options = options.each_with_object({}) { |(k, v), accu| accu[k.to_s] = v; }
       credential_key = "#{credential_type}_credential_key"
       credential = "#{credential_type}_credential"
       if options[credential_key]
         credential_key = options[credential_key]
       elsif options[credential]
-        require 'signet/oauth_1/credential'
-        if !options[credential].respond_to?(:key)
+        require "signet/oauth_1/credential"
+        unless options[credential].respond_to? :key
           raise TypeError,
-            "Expected Signet::OAuth1::Credential, " +
-            "got #{options[credential].class}."
+                "Expected Signet::OAuth1::Credential, " \
+                "got #{options[credential].class}."
         end
         credential_key = options[credential].key
       elsif options["client"]
-        require 'signet/oauth_1/client'
-        if !options["client"].kind_of?(::Signet::OAuth1::Client)
+        require "signet/oauth_1/client"
+        unless options["client"].is_a? ::Signet::OAuth1::Client
           raise TypeError,
-            "Expected Signet::OAuth1::Client, got #{options["client"].class}."
+                "Expected Signet::OAuth1::Client, got #{options['client'].class}."
         end
-        credential_key = options["client"].send(credential_key)
+        credential_key = options["client"].send credential_key
       else
         credential_key = nil
       end
-      if credential_key != nil && !credential_key.kind_of?(String)
+      if !credential_key.nil? && !credential_key.is_a?(String)
         raise TypeError,
-          "Expected String, got #{credential_key.class}."
+              "Expected String, got #{credential_key.class}."
       end
-      return credential_key
+      credential_key
     end
 
     ##
@@ -104,37 +105,38 @@ module Signet #:nodoc:
     #   or <code>:access</code>.
     #
     # @return [String] The credential secret value.
-    def self.extract_credential_secret_option(credential_type, options)
+    def self.extract_credential_secret_option credential_type, options
       # Normalize key to String to allow indifferent access.
-      options = options.inject({}) { |accu, (k, v)| accu[k.to_s] = v; accu }
+      options = options.each_with_object({}) { |(k, v), accu| accu[k.to_s] = v; }
       credential_secret = "#{credential_type}_credential_secret"
       credential = "#{credential_type}_credential"
       if options[credential_secret]
         credential_secret = options[credential_secret]
       elsif options[credential]
-        require 'signet/oauth_1/credential'
-        if !options[credential].respond_to?(:secret)
+        require "signet/oauth_1/credential"
+        unless options[credential].respond_to? :secret
           raise TypeError,
-            "Expected Signet::OAuth1::Credential, " +
-            "got #{options[credential].class}."
+                "Expected Signet::OAuth1::Credential, " \
+                "got #{options[credential].class}."
         end
         credential_secret = options[credential].secret
       elsif options["client"]
-        require 'signet/oauth_1/client'
-        if !options["client"].kind_of?(::Signet::OAuth1::Client)
+        require "signet/oauth_1/client"
+        unless options["client"].is_a? ::Signet::OAuth1::Client
           raise TypeError,
-            "Expected Signet::OAuth1::Client, got #{options["client"].class}."
+                "Expected Signet::OAuth1::Client, got #{options['client'].class}."
         end
-        credential_secret = options["client"].send(credential_secret)
+        credential_secret = options["client"].send credential_secret
       else
         credential_secret = nil
       end
-      if credential_secret != nil && !credential_secret.kind_of?(String)
+      if !credential_secret.nil? && !credential_secret.is_a?(String)
         raise TypeError,
-          "Expected String, got #{credential_secret.class}."
+              "Expected String, got #{credential_secret.class}."
       end
-      return credential_secret
+      credential_secret
     end
+    # rubocop:enable Metrics/MethodLength
 
     ##
     # Normalizes a set of OAuth parameters according to the algorithm given
@@ -145,16 +147,14 @@ module Signet #:nodoc:
     # @param [Enumerable] parameters The OAuth parameter list.
     #
     # @return [String] The normalized parameter list.
-    def self.normalize_parameters(parameters)
-      if !parameters.kind_of?(Enumerable)
-        raise TypeError, "Expected Enumerable, got #{parameters.class}."
-      end
+    def self.normalize_parameters parameters
+      raise TypeError, "Expected Enumerable, got #{parameters.class}." unless parameters.is_a? Enumerable
       parameter_list = parameters.map do |k, v|
         next if k == "oauth_signature"
         # This is probably the wrong place to try to exclude the realm
-        "#{self.encode(k)}=#{self.encode(v)}"
+        "#{encode k}=#{encode v}"
       end
-      return parameter_list.compact.sort.join("&")
+      parameter_list.compact.sort.join "&"
     end
 
     ##
@@ -167,29 +167,27 @@ module Signet #:nodoc:
     # @param [Enumerable] parameters The OAuth parameter list.
     #
     # @return [String] The signature base string.
-    def self.generate_base_string(method, uri, parameters)
-      if !parameters.kind_of?(Enumerable)
-        raise TypeError, "Expected Enumerable, got #{parameters.class}."
-      end
+    def self.generate_base_string method, uri, parameters
+      raise TypeError, "Expected Enumerable, got #{parameters.class}." unless parameters.is_a? Enumerable
       method = method.to_s.upcase
-      parsed_uri = Addressable::URI.parse(uri)
+      parsed_uri = Addressable::URI.parse uri
       uri = Addressable::URI.new(
-        :scheme => parsed_uri.normalized_scheme,
-        :authority => parsed_uri.normalized_authority,
-        :path => parsed_uri.path,
-        :query => parsed_uri.query,
-        :fragment => parsed_uri.fragment
+        scheme:    parsed_uri.normalized_scheme,
+        authority: parsed_uri.normalized_authority,
+        path:      parsed_uri.path,
+        query:     parsed_uri.query,
+        fragment:  parsed_uri.fragment
       )
       uri_parameters = uri.query_values.to_a
       uri = uri.omit(:query, :fragment).to_s
       merged_parameters =
         uri_parameters.concat(parameters.map { |k, v| [k, v] })
-      parameter_string = self.normalize_parameters(merged_parameters)
-      return [
-        self.encode(method),
-        self.encode(uri),
-        self.encode(parameter_string)
-      ].join('&')
+      parameter_string = normalize_parameters merged_parameters
+      [
+        encode(method),
+        encode(uri),
+        encode(parameter_string)
+      ].join("&")
     end
 
     ##
@@ -201,48 +199,45 @@ module Signet #:nodoc:
     #   The <code>Authorization</code> realm.  See RFC 2617.
     #
     # @return [String] The <code>Authorization</code> header.
-    def self.generate_authorization_header(parameters, realm=nil)
-      if !parameters.kind_of?(Enumerable) || parameters.kind_of?(String)
+    def self.generate_authorization_header parameters, realm = nil
+      if !parameters.is_a?(Enumerable) || parameters.is_a?(String)
         raise TypeError, "Expected Enumerable, got #{parameters.class}."
       end
       parameter_list = parameters.map do |k, v|
-        if k == 'realm'
+        if k == "realm"
           raise ArgumentError,
-            'The "realm" parameter must be specified as a separate argument.'
+                'The "realm" parameter must be specified as a separate argument.'
         end
-        "#{self.encode(k)}=\"#{self.encode(v)}\""
+        "#{encode k}=\"#{encode v}\""
       end
       if realm
-        realm = realm.gsub('"', '\"')
-        parameter_list.unshift("realm=\"#{realm}\"")
+        realm = realm.gsub '"', '\"'
+        parameter_list.unshift "realm=\"#{realm}\""
       end
-      return 'OAuth ' + parameter_list.join(", ")
+      "OAuth " + parameter_list.join(", ")
     end
 
     ##
     # Parses an <code>Authorization</code> header into its component
     # parameters.  Parameter keys and values are decoded according to the
     # rules given in RFC 5849.
-    def self.parse_authorization_header(field_value)
-      if !field_value.kind_of?(String)
-        raise TypeError, "Expected String, got #{field_value.class}."
-      end
+    def self.parse_authorization_header field_value
+      raise TypeError, "Expected String, got #{field_value.class}." unless field_value.is_a? String
       auth_scheme = field_value[/^([-._0-9a-zA-Z]+)/, 1]
       case auth_scheme
       when /^OAuth$/i
         # Other token types may be supported eventually
         pairs = Signet.parse_auth_param_list(field_value[/^OAuth\s+(.*)$/i, 1])
-        return (pairs.inject([]) do |accu, (k, v)|
-          if k != 'realm'
-            k = self.unencode(k)
-            v = self.unencode(v)
+        return (pairs.each_with_object [] do |(k, v), accu|
+          if k != "realm"
+            k = unencode k
+            v = unencode v
           end
           accu << [k, v]
-          accu
         end)
       else
         raise ParseError,
-          'Parsing non-OAuth Authorization headers is out of scope.'
+              "Parsing non-OAuth Authorization headers is out of scope."
       end
     end
 
@@ -253,11 +248,9 @@ module Signet #:nodoc:
     # @param [String] body The response body.
     #
     # @return [Signet::OAuth1::Credential] The OAuth credentials.
-    def self.parse_form_encoded_credentials(body)
-      if !body.kind_of?(String)
-        raise TypeError, "Expected String, got #{body.class}."
-      end
-      return Signet::OAuth1::Credential.new(
+    def self.parse_form_encoded_credentials body
+      raise TypeError, "Expected String, got #{body.class}." unless body.is_a? String
+      Signet::OAuth1::Credential.new(
         Addressable::URI.form_unencode(body)
       )
     end
@@ -275,33 +268,33 @@ module Signet #:nodoc:
     #   The token credential secret.  Omitted when unavailable.
     #
     # @return [String] The signature.
-    def self.sign_parameters(method, uri, parameters,
-        client_credential_secret, token_credential_secret=nil)
+    def self.sign_parameters method, uri, parameters,
+                             client_credential_secret, token_credential_secret = nil
       # Technically, the token_credential_secret parameter here may actually
       # be a temporary credential secret when obtaining a token credential
       # for the first time
-      base_string = self.generate_base_string(method, uri, parameters)
-      parameters = parameters.inject({}) { |h,(k,v)| h[k.to_s]=v; h }
-      signature_method = parameters['oauth_signature_method']
+      base_string = generate_base_string method, uri, parameters
+      parameters = parameters.each_with_object({}) { |(k, v), h| h[k.to_s] = v; }
+      signature_method = parameters["oauth_signature_method"]
       case signature_method
-      when 'HMAC-SHA1'
-        require 'signet/oauth_1/signature_methods/hmac_sha1'
+      when "HMAC-SHA1"
+        require "signet/oauth_1/signature_methods/hmac_sha1"
         return Signet::OAuth1::HMACSHA1.generate_signature(
           base_string, client_credential_secret, token_credential_secret
         )
-      when 'RSA-SHA1'
-        require 'signet/oauth_1/signature_methods/rsa_sha1'
+      when "RSA-SHA1"
+        require "signet/oauth_1/signature_methods/rsa_sha1"
         return Signet::OAuth1::RSASHA1.generate_signature(
           base_string, client_credential_secret, token_credential_secret
         )
-      when 'PLAINTEXT'
-        require 'signet/oauth_1/signature_methods/plaintext'
+      when "PLAINTEXT"
+        require "signet/oauth_1/signature_methods/plaintext"
         return Signet::OAuth1::PLAINTEXT.generate_signature(
           base_string, client_credential_secret, token_credential_secret
         )
       else
         raise NotImplementedError,
-          "Unsupported signature method: #{signature_method}"
+              "Unsupported signature method: #{signature_method}"
       end
     end
 
@@ -322,22 +315,20 @@ module Signet #:nodoc:
     #
     # @return [Array]
     #   The parameter list as an <code>Array</code> of key/value pairs.
-    def self.unsigned_temporary_credential_parameters(options={})
+    def self.unsigned_temporary_credential_parameters options = {}
       options = {
-        :callback => ::Signet::OAuth1::OUT_OF_BAND,
-        :signature_method => 'HMAC-SHA1',
-        :additional_parameters => []
+        callback:              ::Signet::OAuth1::OUT_OF_BAND,
+        signature_method:      "HMAC-SHA1",
+        additional_parameters: []
       }.merge(options)
       client_credential_key =
-        self.extract_credential_key_option(:client, options)
-      if client_credential_key == nil
-        raise ArgumentError, "Missing :client_credential_key parameter."
-      end
+        extract_credential_key_option :client, options
+      raise ArgumentError, "Missing :client_credential_key parameter." if client_credential_key.nil?
       parameters = [
         ["oauth_consumer_key", client_credential_key],
         ["oauth_signature_method", options[:signature_method]],
-        ["oauth_timestamp", self.generate_timestamp()],
-        ["oauth_nonce", self.generate_nonce()],
+        ["oauth_timestamp", generate_timestamp],
+        ["oauth_nonce", generate_nonce],
         ["oauth_version", "1.0"],
         ["oauth_callback", options[:callback]]
       ]
@@ -345,7 +336,7 @@ module Signet #:nodoc:
       options[:additional_parameters].each do |key, value|
         parameters << [key, value]
       end
-      return parameters
+      parameters
     end
 
     ##
@@ -356,28 +347,24 @@ module Signet #:nodoc:
     #   The base authorization URI.
     #
     # @return [String] The authorization URI to redirect the user to.
-    def self.generate_authorization_uri(authorization_uri, options={})
+    def self.generate_authorization_uri authorization_uri, options = {}
       options = {
-        :callback => nil,
-        :additional_parameters => {}
+        callback:              nil,
+        additional_parameters: {}
       }.merge(options)
       temporary_credential_key =
-        self.extract_credential_key_option(:temporary, options)
+        extract_credential_key_option :temporary, options
       parsed_uri = Addressable::URI.parse(authorization_uri).dup
       query_values = parsed_uri.query_values || {}
       if options[:additional_parameters]
         query_values = query_values.merge(
-          options[:additional_parameters].inject({}) { |h,(k,v)| h[k]=v; h }
+          options[:additional_parameters].each_with_object({}) { |(k, v), h| h[k] = v; }
         )
       end
-      if temporary_credential_key
-        query_values['oauth_token'] = temporary_credential_key
-      end
-      if options[:callback]
-        query_values['oauth_callback'] = options[:callback]
-      end
+      query_values["oauth_token"] = temporary_credential_key if temporary_credential_key
+      query_values["oauth_callback"] = options[:callback] if options[:callback]
       parsed_uri.query_values = query_values
-      return parsed_uri.normalize.to_s
+      parsed_uri.normalize.to_s
     end
 
     ##
@@ -397,35 +384,29 @@ module Signet #:nodoc:
     #
     # @return [Array]
     #   The parameter list as an <code>Array</code> of key/value pairs.
-    def self.unsigned_token_credential_parameters(options={})
+    def self.unsigned_token_credential_parameters options = {}
       options = {
-        :signature_method => 'HMAC-SHA1',
-        :verifier => nil
+        signature_method: "HMAC-SHA1",
+        verifier:         nil
       }.merge(options)
       client_credential_key =
-        self.extract_credential_key_option(:client, options)
+        extract_credential_key_option :client, options
       temporary_credential_key =
-        self.extract_credential_key_option(:temporary, options)
-      if client_credential_key == nil
-        raise ArgumentError, "Missing :client_credential_key parameter."
-      end
-      if temporary_credential_key == nil
-        raise ArgumentError, "Missing :temporary_credential_key parameter."
-      end
-      if options[:verifier] == nil
-        raise ArgumentError, "Missing :verifier parameter."
-      end
+        extract_credential_key_option :temporary, options
+      raise ArgumentError, "Missing :client_credential_key parameter." if client_credential_key.nil?
+      raise ArgumentError, "Missing :temporary_credential_key parameter." if temporary_credential_key.nil?
+      raise ArgumentError, "Missing :verifier parameter." if options[:verifier].nil?
       parameters = [
         ["oauth_consumer_key", client_credential_key],
         ["oauth_token", temporary_credential_key],
         ["oauth_signature_method", options[:signature_method]],
-        ["oauth_timestamp", self.generate_timestamp()],
-        ["oauth_nonce", self.generate_nonce()],
+        ["oauth_timestamp", generate_timestamp],
+        ["oauth_nonce", generate_nonce],
         ["oauth_verifier", options[:verifier]],
         ["oauth_version", "1.0"]
       ]
       # No additional parameters allowed here
-      return parameters
+      parameters
     end
 
     ##
@@ -445,35 +426,29 @@ module Signet #:nodoc:
     #
     # @return [Array]
     #   The parameter list as an <code>Array</code> of key/value pairs.
-    def self.unsigned_resource_parameters(options={})
+    def self.unsigned_resource_parameters options = {}
       options = {
-        :signature_method => 'HMAC-SHA1',
-        :two_legged => false
+        signature_method: "HMAC-SHA1",
+        two_legged:       false
       }.merge(options)
       client_credential_key =
-        self.extract_credential_key_option(:client, options)
-      if client_credential_key == nil
-        raise ArgumentError, "Missing :client_credential_key parameter."
-      end
+        extract_credential_key_option :client, options
+      raise ArgumentError, "Missing :client_credential_key parameter." if client_credential_key.nil?
       unless options[:two_legged]
         token_credential_key =
-          self.extract_credential_key_option(:token, options)
-        if token_credential_key == nil
-          raise ArgumentError, "Missing :token_credential_key parameter."
-        end
+          extract_credential_key_option :token, options
+        raise ArgumentError, "Missing :token_credential_key parameter." if token_credential_key.nil?
       end
       parameters = [
         ["oauth_consumer_key", client_credential_key],
         ["oauth_signature_method", options[:signature_method]],
-        ["oauth_timestamp", self.generate_timestamp()],
-        ["oauth_nonce", self.generate_nonce()],
+        ["oauth_timestamp", generate_timestamp],
+        ["oauth_nonce", generate_nonce],
         ["oauth_version", "1.0"]
       ]
-      unless options[:two_legged]
-        parameters << ["oauth_token", token_credential_key]
-      end
+      parameters << ["oauth_token", token_credential_key] unless options[:two_legged]
       # No additional parameters allowed here
-      return parameters
+      parameters
     end
   end
 end

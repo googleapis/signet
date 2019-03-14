@@ -1,0 +1,22 @@
+inherit_gem:
+  google-style: google-style.yml
+
+AllCops:
+  Exclude:
+    - "*.gemspec"
+    - "spec/**/*"
+    - "Rakefile"
+    - "script/**/*"
+    - "yard/**/*"
+    - "tasks/**/*"
+    - "website/**/*"
+Metrics/ClassLength:
+  Exclude:
+    - "lib/signet/oauth_1/client.rb"
+    - "lib/signet/oauth_1/server.rb"
+    - "lib/signet/oauth_2/client.rb"
+Metrics/ModuleLength:
+  Exclude:
+    - "lib/signet/oauth_1.rb"
+Style/Documentation:
+  Enabled: false

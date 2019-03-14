@@ -11,21 +11,21 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-require 'spec_helper'
-require 'signet'
-require 'signet/oauth_1'
-require 'signet/oauth_1/signature_methods/rsa_sha1'
+require "spec_helper"
+require "signet"
+require "signet/oauth_1"
+require "signet/oauth_1/signature_methods/rsa_sha1"
 
 describe Signet::OAuth1::RSASHA1 do
-  it 'should correctly generate a signature' do
+  it "should correctly generate a signature" do
     method = "GET"
     uri = "http://term.ie/oauth/example/request_token.php"
     parameters = {
-        "oauth_consumer_key" => "key",
-        "oauth_signature_method" => "RSA-SHA1",
-        "oauth_timestamp" => "1377815426",
-        "oauth_nonce" => "c3839c47cb204a20e042b11a5cc9f971",
-        "oauth_version" => "1.0"
+      "oauth_consumer_key"     => "key",
+      "oauth_signature_method" => "RSA-SHA1",
+      "oauth_timestamp"        => "1377815426",
+      "oauth_nonce"            => "c3839c47cb204a20e042b11a5cc9f971",
+      "oauth_version"          => "1.0"
     }
     client_credential_secret = "-----BEGIN PRIVATE KEY-----
 MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V
@@ -44,26 +44,26 @@ AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54
 Lw03eHTNQghS0A==
 -----END PRIVATE KEY-----"
     token_credential_secret = "pfkkdhi9sl3r4s00"
-    base_string = Signet::OAuth1.generate_base_string(method, uri, parameters)
+    base_string = Signet::OAuth1.generate_base_string method, uri, parameters
 
     expect(Signet::OAuth1::RSASHA1.generate_signature(
-        base_string, client_credential_secret, token_credential_secret
-    )).to eq "P72T4RS8dVBneQPJSY71D3iLEjge2tiivxEasPVoaoDldDgPdwpQfhS1q0th19jB3B3+9P6tBWjpWaVPxrNZe3ssBCiwS/EmXZ/6VCJGU3YoDHMtz+0jCd36NjHj5I6TpLVQ8/rtfy6+EzpdUMz7ydnhKXYqJFPOWnNv8HM1W7I="
+             base_string, client_credential_secret, token_credential_secret
+           )).to eq "P72T4RS8dVBneQPJSY71D3iLEjge2tiivxEasPVoaoDldDgPdwpQfhS1q0th19jB3B3+9P6tBWjpWaVPxrNZe3ssBCiwS/EmXZ/6VCJGU3YoDHMtz+0jCd36NjHj5I6TpLVQ8/rtfy6+EzpdUMz7ydnhKXYqJFPOWnNv8HM1W7I="
   end
 end
 
 describe Signet::OAuth1::RSASHA1 do
-  it 'should correctly generate a signature' do
+  it "should correctly generate a signature" do
     method = "GET"
     uri = "http://photos.example.net/photos"
     parameters = {
-        "oauth_consumer_key" => "dpf43f3p2l4k3l03",
-        "oauth_signature_method" => "RSA-SHA1",
-        "oauth_timestamp" => "1196666512",
-        "oauth_nonce" => "13917289812797014437",
-        "oauth_version" => "1.0",
-        "file" => "vacaction.jpg",
-        "size" => "original"
+      "oauth_consumer_key"     => "dpf43f3p2l4k3l03",
+      "oauth_signature_method" => "RSA-SHA1",
+      "oauth_timestamp"        => "1196666512",
+      "oauth_nonce"            => "13917289812797014437",
+      "oauth_version"          => "1.0",
+      "file"                   => "vacaction.jpg",
+      "size"                   => "original"
     }
     client_credential_secret = "-----BEGIN PRIVATE KEY-----
 MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V
@@ -82,24 +82,24 @@ AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54
 Lw03eHTNQghS0A==
 -----END PRIVATE KEY-----"
     token_credential_secret = "pfkkdhi9sl3r4s00"
-    base_string = Signet::OAuth1.generate_base_string(method, uri, parameters)
+    base_string = Signet::OAuth1.generate_base_string method, uri, parameters
 
     expect(Signet::OAuth1::RSASHA1.generate_signature(
-        base_string, client_credential_secret, token_credential_secret
-    )).to eq "jvTp/wX1TYtByB1m+Pbyo0lnCOLIsyGCH7wke8AUs3BpnwZJtAuEJkvQL2/9n4s5wUmUl4aCI4BwpraNx4RtEXMe5qg5T1LVTGliMRpKasKsW//e+RinhejgCuzoH26dyF8iY2ZZ/5D1ilgeijhV/vBka5twt399mXwaYdCwFYE="
+             base_string, client_credential_secret, token_credential_secret
+           )).to eq "jvTp/wX1TYtByB1m+Pbyo0lnCOLIsyGCH7wke8AUs3BpnwZJtAuEJkvQL2/9n4s5wUmUl4aCI4BwpraNx4RtEXMe5qg5T1LVTGliMRpKasKsW//e+RinhejgCuzoH26dyF8iY2ZZ/5D1ilgeijhV/vBka5twt399mXwaYdCwFYE="
   end
 
 
-  it 'should correctly generate a signature' do
+  it "should correctly generate a signature" do
     method = "GET"
     uri = "http://term.ie/oauth/example/access_token.php"
     parameters = {
-        "oauth_consumer_key" => "key",
-        "oauth_token" => "requestkey",
-        "oauth_signature_method" => "RSA-SHA1",
-        "oauth_timestamp" => "1377815426",
-        "oauth_nonce" => "8ae9ac8192dd3cd7372e0324bf879602",
-        "oauth_version" => "1.0",
+      "oauth_consumer_key"     => "key",
+      "oauth_token"            => "requestkey",
+      "oauth_signature_method" => "RSA-SHA1",
+      "oauth_timestamp"        => "1377815426",
+      "oauth_nonce"            => "8ae9ac8192dd3cd7372e0324bf879602",
+      "oauth_version"          => "1.0"
     }
     client_credential_secret = "-----BEGIN PRIVATE KEY-----
 MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V
@@ -118,10 +118,9 @@ AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54
 Lw03eHTNQghS0A==
 -----END PRIVATE KEY-----"
     token_credential_secret = "QllSuL9eQ5FXFO1Z/HcgL4ON"
-    base_string = Signet::OAuth1.generate_base_string(method, uri, parameters)
+    base_string = Signet::OAuth1.generate_base_string method, uri, parameters
     expect(Signet::OAuth1::RSASHA1.generate_signature(
-        base_string, client_credential_secret, token_credential_secret
-    )).to eq "Q1O7Ovi0jdacl/OTJoH3MAyOO/9H/tTXmoJzP/YqiKEJ+/wfShXo1RXX0xmlcjDR1XYxB1RMgHkFWQYYwz1qGCUhkXlH1c/to2qxPksptfPHRe7PJTxRClrdqLFOlhN7w2kO7tHVCeEp8IJIKON9q7cdXroTP7ctPPS+Q883SS0="
+             base_string, client_credential_secret, token_credential_secret
+           )).to eq "Q1O7Ovi0jdacl/OTJoH3MAyOO/9H/tTXmoJzP/YqiKEJ+/wfShXo1RXX0xmlcjDR1XYxB1RMgHkFWQYYwz1qGCUhkXlH1c/to2qxPksptfPHRe7PJTxRClrdqLFOlhN7w2kO7tHVCeEp8IJIKON9q7cdXroTP7ctPPS+Q883SS0="
   end
-
 end

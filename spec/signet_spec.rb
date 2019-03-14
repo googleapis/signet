@@ -11,68 +11,68 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-require 'spec_helper'
-require 'signet/oauth_2'
+require "spec_helper"
+require "signet/oauth_2"
 
 describe Signet do
-  describe 'when parsing an auth param list' do
-    it 'should correctly handle commas' do
+  describe "when parsing an auth param list" do
+    it "should correctly handle commas" do
       parameters = Signet.parse_auth_param_list(
         'a="1, 2" , b="3,4",c="5 , 6" ,d="7 ,8"'
-      ).inject({}) { |h,(k,v)| h[k]=v; h }
-      expect(parameters['a']).to eq '1, 2'
-      expect(parameters['b']).to eq '3,4'
-      expect(parameters['c']).to eq '5 , 6'
-      expect(parameters['d']).to eq '7 ,8'
+      ).each_with_object({}) { |(k, v), h| h[k] = v; }
+      expect(parameters["a"]).to eq "1, 2"
+      expect(parameters["b"]).to eq "3,4"
+      expect(parameters["c"]).to eq "5 , 6"
+      expect(parameters["d"]).to eq "7 ,8"
     end
 
-    it 'should correctly handle backslash-escaped pairs' do
+    it "should correctly handle backslash-escaped pairs" do
       parameters = Signet.parse_auth_param_list(
         'token="\t\o\k\e\n" sigalg="\s\i\g\a\l\g" data="\d\a\t\a"'
-      ).inject({}) { |h,(k,v)| h[k]=v; h }
-      expect(parameters['token']).to eq 'token'
-      expect(parameters['sigalg']).to eq 'sigalg'
-      expect(parameters['data']).to eq 'data'
+      ).each_with_object({}) { |(k, v), h| h[k] = v; }
+      expect(parameters["token"]).to eq "token"
+      expect(parameters["sigalg"]).to eq "sigalg"
+      expect(parameters["data"]).to eq "data"
     end
 
-    it 'should liberally handle space-separated auth-param lists' do
+    it "should liberally handle space-separated auth-param lists" do
       parameters = Signet.parse_auth_param_list(
         'token="token" sigalg="sigalg" data="data" sig="sig"'
-      ).inject({}) { |h,(k,v)| h[k]=v; h }
-      expect(parameters['token']).to eq 'token'
-      expect(parameters['sigalg']).to eq 'sigalg'
-      expect(parameters['data']).to eq 'data'
-      expect(parameters['sig']).to eq 'sig'
+      ).each_with_object({}) { |(k, v), h| h[k] = v; }
+      expect(parameters["token"]).to eq "token"
+      expect(parameters["sigalg"]).to eq "sigalg"
+      expect(parameters["data"]).to eq "data"
+      expect(parameters["sig"]).to eq "sig"
     end
 
-    it 'should liberally handle single-quoted auth-param lists' do
+    it "should liberally handle single-quoted auth-param lists" do
       parameters = Signet.parse_auth_param_list(
-        'token=\'token\' sigalg=\'sigalg\' data=\'data\' sig=\'sig\''
-      ).inject({}) { |h,(k,v)| h[k]=v; h }
-      expect(parameters['token']).to eq 'token'
-      expect(parameters['sigalg']).to eq 'sigalg'
-      expect(parameters['data']).to eq 'data'
-      expect(parameters['sig']).to eq 'sig'
+        "token='token' sigalg='sigalg' data='data' sig='sig'"
+      ).each_with_object({}) { |(k, v), h| h[k] = v; }
+      expect(parameters["token"]).to eq "token"
+      expect(parameters["sigalg"]).to eq "sigalg"
+      expect(parameters["data"]).to eq "data"
+      expect(parameters["sig"]).to eq "sig"
     end
 
-    it 'should liberally handle unquoted auth-param lists' do
+    it "should liberally handle unquoted auth-param lists" do
       parameters = Signet.parse_auth_param_list(
-        'token=token sigalg=sigalg data=data sig=sig'
-      ).inject({}) { |h,(k,v)| h[k]=v; h }
-      expect(parameters['token']).to eq 'token'
-      expect(parameters['sigalg']).to eq 'sigalg'
-      expect(parameters['data']).to eq 'data'
-      expect(parameters['sig']).to eq 'sig'
+        "token=token sigalg=sigalg data=data sig=sig"
+      ).each_with_object({}) { |(k, v), h| h[k] = v; }
+      expect(parameters["token"]).to eq "token"
+      expect(parameters["sigalg"]).to eq "sigalg"
+      expect(parameters["data"]).to eq "data"
+      expect(parameters["sig"]).to eq "sig"
     end
 
-    it 'should liberally handle auth-param lists with empty sections' do
+    it "should liberally handle auth-param lists with empty sections" do
       parameters = Signet.parse_auth_param_list(
-        'token=token, , sigalg=sigalg,, data=data, sig=sig'
-      ).inject({}) { |h,(k,v)| h[k]=v; h }
-      expect(parameters['token']).to eq 'token'
-      expect(parameters['sigalg']).to eq 'sigalg'
-      expect(parameters['data']).to eq 'data'
-      expect(parameters['sig']).to eq 'sig'
+        "token=token, , sigalg=sigalg,, data=data, sig=sig"
+      ).each_with_object({}) { |(k, v), h| h[k] = v; }
+      expect(parameters["token"]).to eq "token"
+      expect(parameters["sigalg"]).to eq "sigalg"
+      expect(parameters["data"]).to eq "data"
+      expect(parameters["sig"]).to eq "sig"
     end
   end
 end
