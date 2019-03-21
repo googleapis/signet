@@ -1,74 +1,83 @@
-lib_dir = File.expand_path File.join(File.dirname(__FILE__), "lib")
-$LOAD_PATH.unshift lib_dir
-$LOAD_PATH.uniq!
-
 require "rubygems"
 require "rake"
 require "bundler/gem_tasks"
 
-require File.join(File.dirname(__FILE__), "lib/signet", "version")
+task :release, :tag do |_t, args|
+  tag = args[:tag]
+  raise "You must provide a tag to release." if tag.nil?
 
-PKG_DISPLAY_NAME   = "Signet".freeze
-PKG_NAME           = PKG_DISPLAY_NAME.downcase
-PKG_VERSION        = Signet::VERSION::STRING
-PKG_FILE_NAME      = "#{PKG_NAME}-#{PKG_VERSION}".freeze
+  # Verify the tag format "vVERSION"
+  m = tag.match(/v(?<version>\S*)/)
+  raise "Tag #{tag} does not match the expected format." if m.nil?
 
-RELEASE_NAME       = "REL #{PKG_VERSION}".freeze
+  version = m[:version]
+  raise "You must provide a version." if version.nil?
 
-PKG_AUTHOR         = "Bob Aman".freeze
-PKG_AUTHOR_EMAIL   = "bobaman@google.com".freeze
-PKG_HOMEPAGE       = "http://code.google.com/p/oauth-signet/".freeze
-PKG_DESCRIPTION    = <<~TEXT.freeze
-  Signet is an OAuth 1.0 / OAuth 2.0 implementation.
-TEXT
-PKG_SUMMARY = PKG_DESCRIPTION
+  api_token = ENV["RUBYGEMS_API_TOKEN"]
 
-PKG_FILES = FileList[
-    "lib/**/*", "spec/**/*", "vendor/**/*",
-    "tasks/**/*", "website/**/*",
-    "[A-Z]*", "Rakefile"
-].exclude(/database\.yml/).exclude(/[_\.]git$/).exclude(/Gemfile\.lock/)
+  require "gems"
+  if api_token
+    ::Gems.configure do |config|
+      config.key = api_token
+    end
+  end
 
-RCOV_ENABLED = !!(RUBY_PLATFORM != "java" && RUBY_VERSION =~ /^1\.8/)
-if RCOV_ENABLED
-  task default: "spec:rcov"
-else
-  task default: "spec:normal"
-end
+  Bundler.with_clean_env do
+    sh "rm -rf pkg"
+    sh "bundle update"
+    sh "bundle exec rake build"
+  end
 
-WINDOWS = (RUBY_PLATFORM =~ /mswin|win32|mingw|bccwin|cygwin/) rescue false
-SUDO = WINDOWS ? "" : ("sudo" unless ENV["SUDOLESS"])
-
-Dir["tasks/**/*.rake"].each { |rake| load rake }
-
-
-task :load_env_vars do
-  require "json"
-  service_account = "#{ENV['KOKORO_GFILE_DIR']}/service-account.json"
-  ENV["GOOGLE_APPLICATION_CREDENTIALS"] = service_account
-  filename = "#{ENV['KOKORO_GFILE_DIR']}/env_vars.json"
-  env_vars = JSON.parse File.read(filename)
-  env_vars.each { |k, v| ENV[k] = v }
+  path_to_be_pushed = "pkg/#{version}.gem"
+  if File.file? path_to_be_pushed
+    begin
+      ::Gems.push File.new(path_to_be_pushed)
+      puts "Successfully built and pushed signet for version #{version}"
+    rescue StandardError => e
+      puts "Error while releasing signet version #{version}: #{e.message}"
+    end
+  else
+    raise "Cannot build signet for version #{version}"
+  end
 end
 
 task :ci do
+  header "Using Ruby - #{RUBY_VERSION}"
   sh "bundle exec rubocop"
   sh "bundle exec rake spec:all"
 end
 
-task :release do
-  require "fileutils"
-  header_2 ENV["JOB_TYPE"]
-  Rake::Task["load_env_vars"].invoke
-  header "Using Ruby - #{RUBY_VERSION}"
-  sh "bundle exec rake build"
-  gem = Dir.entries("pkg").select { |entry| File.file? "pkg/#{entry}" }.first
-  path = FileUtils.mkdir_p File.expand_path("~") + "/.gem"
-  File.open "#{path}/credentials", "w" do |f|
-    f.puts "---"
-    f.puts ":rubygems_api_key: #{ENV['RUBYGEMS_API_TOKEN']}"
+namespace :kokoro do
+  task :load_env_vars do
+    service_account = "#{ENV['KOKORO_GFILE_DIR']}/service-account.json"
+    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = service_account
+    filename = "#{ENV['KOKORO_GFILE_DIR']}/env_vars.json"
+    env_vars = JSON.parse File.read(filename)
+    env_vars.each { |k, v| ENV[k] = v }
   end
-  sh "gem push pkg/#{gem}"
+
+  task :presubmit do
+    Rake::Task["ci"].invoke
+  end
+
+  task :continuous do
+    Rake::Task["ci"].invoke
+  end
+
+  task :nightly do
+    Rake::Task["ci"].invoke
+  end
+
+  task :release do
+    version = "0.1.0"
+    Bundler.with_clean_env do
+      version = `bundle exec gem list`
+                .split("\n").select { |line| line.include? "signet" }
+                .first.split("(").last.split(")").first || "0.1.0"
+    end
+    Rake::Task["kokoro:load_env_vars"].invoke
+    Rake::Task["release"].invoke "v/#{version}"
+  end
 end
 
 def header str, token = "#"
@@ -78,8 +87,4 @@ def header str, token = "#"
   puts "#{token * 3} #{str} #{token * 3}"
   puts token * line_length
   puts ""
-end
-
-def header_2 str, token = "#"
-  puts "\n#{token * 3} #{str} #{token * 3}\n"
 end

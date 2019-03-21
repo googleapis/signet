@@ -6,9 +6,7 @@ AllCops:
     - "*.gemspec"
     - "spec/**/*"
     - "Rakefile"
-    - "script/**/*"
     - "yard/**/*"
-    - "tasks/**/*"
     - "website/**/*"
 Metrics/ClassLength:
   Exclude:
