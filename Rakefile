@@ -44,7 +44,7 @@ end
 task :ci do
   header "Using Ruby - #{RUBY_VERSION}"
   sh "bundle exec rubocop"
-  sh "bundle exec rake spec:all"
+  sh "bundle exec rspec"
 end
 
 namespace :kokoro do
