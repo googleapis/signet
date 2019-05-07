@@ -24,7 +24,7 @@ require "date"
 module Signet
   module OAuth2
     class Client
-      OOB_MODES = %w[urn:ietf:wg:oauth:2.0:oob:auto urn:ietf:wg:oauth:2.0:oob oob].freeze
+      OOB_MODES = ["urn:ietf:wg:oauth:2.0:oob:auto", "urn:ietf:wg:oauth:2.0:oob", "oob"].freeze
 
       ##
       # Creates an OAuth 2.0 client.
