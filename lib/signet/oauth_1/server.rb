@@ -50,8 +50,8 @@ module Signet
       #       lambda {|verifier| Verifier.find_by_verifier(verifier).active? }
       #   )
       def initialize options = {}
-        %i[nonce_timestamp client_credential token_credential
-           temporary_credential verifier].each do |attr|
+        [:nonce_timestamp, :client_credential, :token_credential,
+         :temporary_credential, :verifier].each do |attr|
           instance_variable_set "@#{attr}", options[attr]
         end
       end
