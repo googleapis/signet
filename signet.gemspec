@@ -28,7 +28,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "jwt", ">= 1.5", "< 3.0"
   gem.add_runtime_dependency "multi_json", "~> 1.10"
 
-  gem.add_development_dependency "google-style", "~> 0.3.0"
+  gem.add_development_dependency "google-style", "~> 0.3"
   gem.add_development_dependency "kramdown", "~> 1.5"
   gem.add_development_dependency "launchy", "~> 2.4"
   gem.add_development_dependency "rake", "~> 12.0"
