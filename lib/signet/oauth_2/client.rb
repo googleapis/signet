@@ -540,7 +540,7 @@ module Signet
       end
 
       ##
-      # Returns the issuer ID associated with this client.
+      # Returns the target audience ID when issuing assertions.
       # Used only by the assertion grant type.
       #
       # @return [String] Target audience ID.
