@@ -881,6 +881,46 @@ describe Signet::OAuth2::Client, "configured for Google userinfo API" do
     stubs.verify_stubbed_calls
   end
 
+  it "should correctly handle an ID token with `aud` array" do
+    @client.client_id = "client-12345"
+    @client.client_secret = "secret-12345"
+    stubs = Faraday::Adapter::Test::Stubs.new do |stub|
+      stub.post "/token" do
+        build_json_response(
+          "access_token"  => "12345",
+          "refresh_token" => "54321",
+          "expires_in"    => "3600",
+          "id_token"      => (
+            "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl9oYXNoIjoidGdoRD" \
+            "lKN244VjBOMnZjdzZlTWlqZyIsImF1ZCI6WyJjbGllbnQtMTIzNDUiXSwiaWQiO" \
+            "iIxMjM0NSIsImlhdCI6MTMyMDY3MDk3OCwiZXhwIjoxMzIwNjc0ODc4LCJjaWQi" \
+            "OiJjbGllbnQtMTIzNDUiLCJpc3MiOiJleGFtcGxlLmNvbSJ9.rSaY-M9YlB4pcU" \
+            "uNf21FeEtOM9pBGr_a7xe9fZrpWWU"
+          )
+        )
+      end
+    end
+    connection = Faraday.new url: "https://www.google.com" do |builder|
+      builder.adapter :test, stubs
+    end
+    @client.fetch_access_token!(
+      connection: connection
+    )
+    expect(@client.access_token).to eq "12345"
+    expect(@client.refresh_token).to eq "54321"
+    expect(@client.decoded_id_token(nil, verify_expiration: false)).to eq ({
+      "token_hash" => "tghD9J7n8V0N2vcw6eMijg",
+      "id"         => "12345",
+      "aud"        => ["client-12345"],
+      "iat"        => 1_320_670_978,
+      "exp"        => 1_320_674_878,
+      "cid"        => "client-12345",
+      "iss"        => "example.com"
+    })
+    expect(@client.expires_in).to eq 3600
+    stubs.verify_stubbed_calls
+  end
+
   it "should raise an error decoding an ID token if " \
      "audience does not match client ID" do
     @client.client_id = "client-54321"
