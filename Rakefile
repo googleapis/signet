@@ -2,6 +2,8 @@ require "rubygems"
 require "rake"
 require "bundler/gem_tasks"
 
+ENV['RUBYGEMS_HOST'] ? ENV['RUBYGEMS_HOST'] : 'https://private-gems.liveramp.net'
+
 task :release, :tag do |_t, args|
   tag = args[:tag]
   raise "You must provide a tag to release." if tag.nil?
