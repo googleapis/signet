@@ -1,0 +1,20 @@
+# These settings are synced to GitHub by https://probot.github.io/apps/settings/
+
+repository:
+  private: true
+  default_branch: master
+
+teams:
+  - name: dev
+    permission: push
+
+branches:
+  - name: master
+    protection:
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+        require_code_owner_reviews: true
+        dismissal_restrictions: {}
+      required_status_checks: null
+      enforce_admins: false
+      restrictions: null
