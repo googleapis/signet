@@ -35,6 +35,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "rspec", "~> 3.1"
   gem.add_development_dependency "simplecov", "~> 0.9"
   gem.add_development_dependency "yard", "~> 0.9", ">= 0.9.12"
+  gem.add_development_dependency 'rubygems-tasks', '~> 0.2'
 
   gem.post_install_message = Signet::VERSION.warn_on_old_ruby_version
 

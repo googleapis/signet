@@ -17,9 +17,9 @@ unless defined? Signet::VERSION
   module Signet
     module VERSION
       MAJOR = 0
-      MINOR = 12
+      MINOR = 11
       TINY  = 0
-      PRE   = nil
+      PRE   = 'liveramp-001'
 
       STRING = [MAJOR, MINOR, TINY, PRE].compact.join "."
 
