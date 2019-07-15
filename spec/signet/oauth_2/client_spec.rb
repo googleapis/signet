@@ -189,7 +189,8 @@ describe Signet::OAuth2::Client, "configured for assertions profile" do
         scope:                "https://www.googleapis.com/auth/userinfo.profile",
         issuer:               "app@example.com",
         audience:             "https://oauth2.googleapis.com/token",
-        signing_key:          @key
+        signing_key:          @key,
+        additional_claims:    { target_audience_id: 'foobar'}
       )
     end
 
@@ -239,6 +240,17 @@ describe Signet::OAuth2::Client, "configured for assertions profile" do
       expect(claim["aud"]).to eq "https://oauth2.googleapis.com/token"
     end
 
+    it "should generate valid JWTs with additional claims" do
+      jwt = @client.to_jwt
+      expect(jwt).not_to be_nil
+
+      claim, header = JWT.decode jwt, @key.public_key, true, algorithm: "RS256"
+      expect(claim["iss"]).to eq "app@example.com"
+      expect(claim["scope"]).to eq "https://www.googleapis.com/auth/userinfo.profile"
+      expect(claim["aud"]).to eq "https://oauth2.googleapis.com/token"
+      expect(claim["target_audience_id"]).to eq "foobar"
+    end
+
     it "should generate a JSON representation of the client" do
       @client.principal = "user@example.com"
       json = @client.to_json
@@ -250,6 +262,7 @@ describe Signet::OAuth2::Client, "configured for assertions profile" do
       expect(deserialized["issuer"]).to eq "app@example.com"
       expect(deserialized["audience"]).to eq "https://oauth2.googleapis.com/token"
       expect(deserialized["signing_key"]).to eq @key.to_s
+      expect(deserialized["additional_claims"]).to eq({ "target_audience_id" => "foobar" })
     end
 
     it "should send valid access token request" do

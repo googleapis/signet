@@ -60,6 +60,8 @@ module Signet
       #     Issuer ID when using assertion profile
       #   - <code>:person</code> -
       #     Target user for assertions
+      #   - <code>:additional_claims</code> -
+      #     A hash of additional claims to include in the assertions
       #   - <code>:expiry</code> -
       #     Number of seconds assertions are valid for
       #   - <code>:signing_key</code> -
@@ -104,6 +106,7 @@ module Signet
         @state                = nil
         @username             = nil
         @access_type          = nil
+        @additional_claims    = nil
         update! options
       end
       # rubocop:disable Metrics/AbcSize
@@ -146,6 +149,8 @@ module Signet
       #     Target audience for assertions
       #   - <code>:person</code> -
       #     Target user for assertions
+      #   - <code>:additional_claims</code> -
+      #     A hash of additional claims to include in the assertions
       #   - <code>:expiry</code> -
       #     Number of seconds assertions are valid for
       #   - <code>:signing_key</code> -
@@ -188,6 +193,7 @@ module Signet
         self.password = options[:password] if options.key? :password
         self.issuer = options[:issuer] if options.key? :issuer
         self.person = options[:person] if options.key? :person
+        self.additional_claims = options[:additional_claims] || {}
         self.sub = options[:sub] if options.key? :sub
         self.expiry = options[:expiry] || 60
         self.audience = options[:audience] if options.key? :audience
@@ -581,6 +587,25 @@ module Signet
       alias person= principal=
 
       ##
+      # Returns the additional claims to be encoded in the JWT.
+      # Used only by the assertion grant type.
+      #
+      # @return [Hash] Additional claims
+      def additional_claims
+        @additional_claims ||= {}
+      end
+
+      ##
+      # Sets the additional claims to be encoded in the JWT.
+      # Used only by the assertion grant type.
+      #
+      # @param [Hash] new_additional_claims
+      #   Additional claims
+      def additional_claims= new_additional_claims
+        @additional_claims = new_additional_claims
+      end
+
+      ##
       # The target "sub" when issuing assertions.
       # Used in some Admin SDK APIs.
       #
@@ -895,6 +920,7 @@ module Signet
         assertion["scope"] = scope.join " " unless scope.nil?
         assertion["prn"] = person unless person.nil?
         assertion["sub"] = sub unless sub.nil?
+        assertion.merge! additional_claims
         JWT.encode assertion, signing_key, signing_algorithm
       end
       # rubocop:disable Style/MethodDefParentheses
@@ -920,6 +946,7 @@ module Signet
           "issuer"               => issuer,
           "audience"             => audience,
           "person"               => person,
+          "additional_claims"    => additional_claims,
           "expiry"               => expiry,
           "expires_at"           => expires_at ? expires_at.to_i : nil,
           "signing_key"          => signing_key,
