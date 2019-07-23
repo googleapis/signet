@@ -11,7 +11,7 @@ task :ci_release => ['generate_rubygems_credentials', 'build', 'release:guard_cl
 
 task :generate_rubygems_credentials do
   require 'base64'
-  GEM_CREDENTIALS = File.join(ENV['HOME'], '/.gem/credentials')
+  GEM_CREDENTIALS = File.join(ENV['HOME'], '.gem/credentials')
   b64_authorization = Base64.encode64("#{ENV.fetch('ARTIFACTORY_USERNAME')}:#{ENV.fetch('ARTIFACTORY_PASSWORD')}")
   open(GEM_CREDENTIALS, 'w') do |f|
     f.puts "---\n:rubygems_api_key: Basic #{b64_authorization}\n"

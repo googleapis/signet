@@ -1,4 +1,4 @@
-source "https://private-gems.liveramp.net" do
+source "https://public-gems.liveramp.net" do
   gemspec
 
   gem "bundler", ">= 1.15"
