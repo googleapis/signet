@@ -52,6 +52,7 @@ module Signet #:nodoc:
       SecureRandom.random_bytes(16).unpack("H*").join ""
     end
     # rubocop:disable Metrics/MethodLength
+    # rubocop:disable Metrics/AbcSize
 
     ##
     # Processes an options <code>Hash</code> to find a credential key value.
@@ -137,6 +138,7 @@ module Signet #:nodoc:
       credential_secret
     end
     # rubocop:enable Metrics/MethodLength
+    # rubocop:enable Metrics/AbcSize
 
     ##
     # Normalizes a set of OAuth parameters according to the algorithm given

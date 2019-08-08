@@ -556,7 +556,7 @@ module Signet
       # @note A serialized client contains sensitive information. Persist or transmit with care.
       #
       # @return [String] A serialized JSON representation of the client.
-      def to_json
+      def to_json *_args
         MultiJson.dump(
           "temporary_credential_uri"    => temporary_credential_uri,
           "authorization_uri"           => authorization_uri,
