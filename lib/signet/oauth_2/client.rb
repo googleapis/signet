@@ -741,7 +741,7 @@ module Signet
         verify = !public_key.nil? || block_given?
         payload, _header = JWT.decode(id_token, public_key, verify, options, &keyfinder)
         raise Signet::UnsafeOperationError, "No ID token audience declared." unless payload.key? "aud"
-        if payload["aud"] != client_id
+        unless Array(payload["aud"]).include?(client_id)
           raise Signet::UnsafeOperationError,
                 "ID token audience did not match Client ID."
         end
