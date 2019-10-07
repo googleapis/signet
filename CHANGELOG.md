@@ -1,3 +1,7 @@
+## 0.12.0 (unreleased)
+* Requires Ruby 2.4
+* Support array values of the "aud" field
+
 ## 0.11.0 (2018-10-08)
 * Add constant time comparison for oauth signatures.
 
