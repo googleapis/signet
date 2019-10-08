@@ -21,7 +21,7 @@ Gem::Specification.new do |gem|
   gem.homepage = "https://github.com/google/signet/"
   gem.rdoc_options = ["--main", "README.md"]
   gem.summary = "Signet is an OAuth 1.0 / OAuth 2.0 implementation."
-  gem.required_ruby_version = ">= 1.9.3"
+  gem.required_ruby_version = ">= 2.4.0"
 
   gem.add_runtime_dependency "addressable", "~> 2.3"
   gem.add_runtime_dependency "faraday", "~> 0.9"
@@ -35,8 +35,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "rspec", "~> 3.1"
   gem.add_development_dependency "simplecov", "~> 0.9"
   gem.add_development_dependency "yard", "~> 0.9", ">= 0.9.12"
-
-  gem.post_install_message = Signet::VERSION.warn_on_old_ruby_version
 
   if gem.respond_to? :metadata
     gem.metadata["changelog_uri"] = "https://github.com/google/signet/blob/master/CHANGELOG.md"

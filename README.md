@@ -1,7 +1,7 @@
 # Signet
 
 <dl>
-  <dt>Homepage</dt><dd><a href="http://code.google.com/p/oauth-signet/">http://code.google.com/p/oauth-signet/</a></dd>
+  <dt>Homepage</dt><dd><a href="https://github.com/googleapis/signet/">https://github.com/googleapis/signet/</a></dd>
   <dt>Author</dt><dd><a href="mailto:bobaman@google.com">Bob Aman</a></dd>
   <dt>Copyright</dt><dd>Copyright © 2010 Google, Inc.</dd>
   <dt>License</dt><dd>Apache 2.0</dd>
@@ -59,10 +59,9 @@ client.fetch_access_token!
 Be sure `https://rubygems.org` is in your gem sources.
 
 ## Supported Ruby Versions
-This library is currently supported on Ruby 1.9+.  
-However, Ruby 2.4 or later is strongly recommended, as earlier releases have
-reached or are nearing end-of-life. After March 31, 2019, Google will provide
-official support only for Ruby versions that are considered current and
+
+This library requires Ruby 2.4 or later.
+In general, this library supports Ruby versions that are considered current and
 supported by Ruby Core (that is, Ruby versions that are either in normal
 maintenance or in security maintenance).
 See https://www.ruby-lang.org/en/downloads/branches/ for further details.
