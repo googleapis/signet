@@ -1,4 +1,5 @@
 require "rubygems"
+require "json"
 require "rake"
 require "bundler/gem_tasks"
 
