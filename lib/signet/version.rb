@@ -12,16 +12,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Used to prevent the class/module from being loaded more than once
-unless defined? Signet::VERSION
-  module Signet
-    module VERSION
-      MAJOR = 0
-      MINOR = 11
-      TINY  = 0
-      PRE   = nil
-
-      STRING = [MAJOR, MINOR, TINY, PRE].compact.join "."
-    end
-  end
+module Signet
+  VERSION = "0.11.0".freeze
 end

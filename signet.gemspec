@@ -1,9 +1,9 @@
-# stub: signet 0.5.1 ruby lib
-require File.join(File.dirname(__FILE__), "lib/signet", "version")
+$LOAD_PATH.push File.expand_path("lib", __dir__)
+require "signet/version"
 
 Gem::Specification.new do |gem|
   gem.name = "signet"
-  gem.version = Signet::VERSION::STRING
+  gem.version = Signet::VERSION
 
   gem.required_rubygems_version = ">= 1.3.5"
   gem.require_paths = ["lib"]
