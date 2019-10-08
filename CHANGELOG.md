@@ -1,4 +1,4 @@
-### 0.12.0 / 2019-10-07
+### 0.12.0 / 2019-10-08
 
 * This version now requires Ruby 2.4.
 * Support array values of the "aud" field.
