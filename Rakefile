@@ -3,12 +3,12 @@ require "json"
 require "rake"
 require "bundler/gem_tasks"
 
-task :release, :tag do |_t, args|
+task :release_gem, :tag do |_t, args|
   tag = args[:tag]
   raise "You must provide a tag to release." if tag.nil?
 
   # Verify the tag format "vVERSION"
-  m = tag.match(/v(?<version>\S*)/)
+  m = tag.match(/signet\/v(?<version>\S*)/)
   raise "Tag #{tag} does not match the expected format." if m.nil?
 
   version = m[:version]
@@ -29,7 +29,7 @@ task :release, :tag do |_t, args|
     sh "bundle exec rake build"
   end
 
-  path_to_be_pushed = "pkg/#{version}.gem"
+  path_to_be_pushed = "pkg/signet-#{version}.gem"
   if File.file? path_to_be_pushed
     begin
       ::Gems.push File.new(path_to_be_pushed)
@@ -77,7 +77,7 @@ namespace :kokoro do
                 .first.split("(").last.split(")").first || "0.1.0"
     end
     Rake::Task["kokoro:load_env_vars"].invoke
-    Rake::Task["release"].invoke "v/#{version}"
+    Rake::Task["release_gem"].invoke "signet/v#{version}"
   end
 end
 
