@@ -45,17 +45,17 @@ class LinkChecker
     link_hash.each do |location, links|
       puts "#{location} contains the following broken links:"
       links.each { |link| puts "  #{link}" }
-      puts ""
+      puts
     end
   end
 
   def job_info
     line_length = "Using Ruby - #{RUBY_VERSION}".length + 8
-    puts ""
+    puts
     puts "#" * line_length
     puts "### Using Ruby - #{RUBY_VERSION} ###"
     puts "#" * line_length
-    puts ""
+    puts
   end
 
   def exit_status
