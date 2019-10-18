@@ -87,6 +87,14 @@ namespace :kokoro do
     Rake::Task["release_gem"].invoke "v#{version}"
   end
 
+  task :post do
+    require_relative "rakelib/link_checker.rb"
+
+    link_checker = LinkChecker.new
+    link_checker.run
+    exit link_checker.exit_status
+  end
+
   task :publish_docs do
     require_relative "rakelib/devsite_builder.rb"
 
