@@ -26,7 +26,7 @@ class RepoMetadata
     require_relative "../lib/signet/version.rb"
 
     @data.delete_if { |k, _| !allowed_fields.include?(k) }
-    @data["version"] = Signet::VERSION
+    @data["version"] = "v#{Signet::VERSION}"
   end
 
   def [] key
