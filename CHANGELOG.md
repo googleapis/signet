@@ -1,3 +1,7 @@
+### 0.13.0 / 2020-02-24
+
+* Support Faraday 1.x
+
 ### 0.12.0 / 2019-10-08
 
 * This version now requires Ruby 2.4.
