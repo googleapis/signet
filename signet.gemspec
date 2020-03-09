@@ -18,7 +18,7 @@ Gem::Specification.new do |gem|
   gem.files += Dir.glob "vendor/**/*.rb"
   gem.files += Dir.glob "tasks/**/*"
   gem.files += Dir.glob "website/**/*"
-  gem.homepage = "https://github.com/google/signet/"
+  gem.homepage = "https://github.com/googleapis/signet"
   gem.rdoc_options = ["--main", "README.md"]
   gem.summary = "Signet is an OAuth 1.0 / OAuth 2.0 implementation."
   gem.required_ruby_version = ">= 2.4.0"
@@ -37,8 +37,8 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "yard", "~> 0.9", ">= 0.9.12"
 
   if gem.respond_to? :metadata
-    gem.metadata["changelog_uri"] = "https://github.com/google/signet/blob/master/CHANGELOG.md"
-    gem.metadata["source_code_uri"] = "https://github.com/google/signet"
-    gem.metadata["bug_tracker_uri"] = "https://github.com/google/signet/issues"
+    gem.metadata["changelog_uri"] = "https://github.com/googleapis/signet/blob/master/CHANGELOG.md"
+    gem.metadata["source_code_uri"] = "https://github.com/googleapis/signet"
+    gem.metadata["bug_tracker_uri"] = "https://github.com/googleapis/signet/issues"
   end
 end
