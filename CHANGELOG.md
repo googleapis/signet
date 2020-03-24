@@ -1,3 +1,7 @@
+### 0.13.1 / 2020-03-24
+
+* Update github url
+
 ### 0.13.0 / 2020-02-24
 
 * Support Faraday 1.x
