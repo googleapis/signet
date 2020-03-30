@@ -1212,3 +1212,43 @@ describe Signet::OAuth2::Client, "configured with custom parameters a la JSON.lo
     expect(params).to include("new_param" => "new_val")
   end
 end
+
+describe Signet::OAuth2::Client, "configured for id tokens" do
+  before do
+    @key = OpenSSL::PKey::RSA.new 2048
+    @client = Signet::OAuth2::Client.new(
+      token_credential_uri: "https://oauth2.googleapis.com/token",
+      target_audience:      "https://api.example.com",
+      issuer:               "app@example.com",
+      audience:             "https://hello.googleapis.com",
+      signing_key:          @key
+    )
+  end
+
+  it "should set target_audience" do
+    expect(@client.target_audience).to eq "https://api.example.com"
+  end
+
+  it "should send a valid id token request" do
+    stubs = Faraday::Adapter::Test::Stubs.new do |stub|
+      stub.post "/token" do |env|
+        params = Addressable::URI.form_unencode env[:body]
+        claim, header = JWT.decode params.assoc("assertion").last, @key.public_key, true, algorithm: "RS256"
+        expect(params.assoc("grant_type")).to eq ["grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer"]
+        expect(claim["target_audience"]).to eq "https://api.example.com"
+        expect(claim["iss"]).to eq "app@example.com"
+        expect(claim["aud"]).to eq "https://hello.googleapis.com"
+        build_json_response(
+          "id_token"  => "12345id",
+          "refresh_token" => "54321refresh",
+          "expires_in"    => "3600"
+        )
+      end
+    end
+    connection = Faraday.new url: "https://www.google.com" do |builder|
+      builder.adapter :test, stubs
+    end
+    @client.fetch_access_token! connection: connection
+    expect(@client.id_token).to eq "12345id"
+  end
+end
