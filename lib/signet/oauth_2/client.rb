@@ -46,6 +46,9 @@ module Signet
       #   - <code>:scope</code> -
       #     The scope of the access request, expressed either as an Array
       #     or as a space-delimited String.
+      #   - <code>:target_audience</code> -
+      #     The final target audience for ID tokens fetched by this client,
+      #     as a String.
       #   - <code>:state</code> -
       #     An arbitrary string designed to allow the client to maintain state.
       #   - <code>:code</code> -
@@ -101,6 +104,7 @@ module Signet
         @principal            = nil
         @redirect_uri         = nil
         @scope                = nil
+        @target_audience      = nil
         @state                = nil
         @username             = nil
         @access_type          = nil
@@ -130,6 +134,9 @@ module Signet
       #   - <code>:scope</code> -
       #     The scope of the access request, expressed either as an Array
       #     or as a space-delimited String.
+      #   - <code>:target_audience</code> -
+      #     The final target audience for ID tokens fetched by this client,
+      #     as a String.
       #   - <code>:state</code> -
       #     An arbitrary string designed to allow the client to maintain state.
       #   - <code>:code</code> -
@@ -181,6 +188,7 @@ module Signet
         self.client_id = options[:client_id] if options.key? :client_id
         self.client_secret = options[:client_secret] if options.key? :client_secret
         self.scope = options[:scope] if options.key? :scope
+        self.target_audience = options[:target_audience] if options.key? :target_audience
         self.state = options[:state] if options.key? :state
         self.code = options[:code] if options.key? :code
         self.redirect_uri = options[:redirect_uri] if options.key? :redirect_uri
@@ -421,6 +429,22 @@ module Signet
         else
           raise TypeError, "Expected Array or String, got #{new_scope.class}"
         end
+      end
+
+      ##
+      # Returns the final target audience for ID tokens fetched by this client.
+      #
+      # @return [String] The target audience.
+      def target_audience
+        @target_audience
+      end
+
+      ##
+      # Sets the final target audience for ID tokens fetched by this client.
+      #
+      # @param [String] new_target_audience The new target audience.
+      def target_audience= new_target_audience
+        @target_audience = new_target_audience
       end
 
       ##
@@ -893,11 +917,13 @@ module Signet
           "iat" => (now - skew).to_i
         }
         assertion["scope"] = scope.join " " unless scope.nil?
+        assertion["target_audience"] = target_audience unless target_audience.nil?
         assertion["prn"] = person unless person.nil?
         assertion["sub"] = sub unless sub.nil?
         JWT.encode assertion, signing_key, signing_algorithm
       end
       # rubocop:disable Style/MethodDefParentheses
+      # rubocop:disable Metrics/AbcSize
 
       ##
       # Serialize the client object to JSON.
@@ -912,6 +938,7 @@ module Signet
           "client_id"            => client_id,
           "client_secret"        => client_secret,
           "scope"                => scope,
+          "target_audience"      => target_audience,
           "state"                => state,
           "code"                 => code,
           "redirect_uri"         => redirect_uri ? redirect_uri.to_s : nil,
@@ -930,7 +957,6 @@ module Signet
         )
       end
       # rubocop:enable Style/MethodDefParentheses
-      # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/MethodLength
       # rubocop:disable Metrics/PerceivedComplexity
