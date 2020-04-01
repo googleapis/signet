@@ -1,3 +1,7 @@
+### 0.14.0 / 2020-03-31
+
+* Support for fetching ID tokens from google oauth2 endpoint.
+
 ### 0.13.2 / 2020-03-25
 
 Rerelease of 0.13.1.
