@@ -282,6 +282,32 @@ describe Signet::OAuth1 do
     )
   end
 
+  it "should correctly generate a base signature with duplicated query params" do
+    method = "GET"
+    uri = "http://photos.example.net/photos?foo=bar&foo=baz&foo=qux"
+    parameters = {
+      "oauth_consumer_key"     => "dpf43f3p2l4k3l03",
+      "oauth_token"            => "nnch734d00sl2jdk",
+      "oauth_signature_method" => "HMAC-SHA1",
+      "oauth_timestamp"        => "1191242096",
+      "oauth_nonce"            => "kllo9940pd9333jh",
+      "oauth_version"          => "1.0",
+      "file"                   => "vacation.jpg",
+      "size"                   => "original"
+    }
+    expect(Signet::OAuth1.generate_base_string(method, uri, parameters)).to eq(
+      "GET&http%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26" \
+      "foo%3Dbar%26" \
+      "foo%3Dbaz%26" \
+      "foo%3Dqux%26" \
+      "oauth_consumer_key%3Ddpf43f3p2l4k3l03%26" \
+      "oauth_nonce%3Dkllo9940pd9333jh%26" \
+      "oauth_signature_method%3DHMAC-SHA1%26" \
+      "oauth_timestamp%3D1191242096%26oauth_token%3Dnnch734d00sl2jdk%26" \
+      "oauth_version%3D1.0%26size%3Doriginal"
+                                                                            )
+  end
+
   it "should correctly generate an authorization header" do
     parameters = [
       %w[oauth_consumer_key 0685bd9184jfhq22],
