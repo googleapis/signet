@@ -178,7 +178,7 @@ module Signet #:nodoc:
         query:     parsed_uri.query,
         fragment:  parsed_uri.fragment
       )
-      uri_parameters = uri.query_values.to_a
+      uri_parameters = uri.query_values(Array) || []
       uri = uri.omit(:query, :fragment).to_s
       merged_parameters =
         uri_parameters.concat(parameters.map { |k, v| [k, v] })
