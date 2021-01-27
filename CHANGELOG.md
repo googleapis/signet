@@ -1,6 +1,6 @@
 # Release History
 
-### [0.14.1](https://www.github.com/googleapis/signet/compare/v0.14.0...v0.14.1) (2021-01-27)
+## [0.14.1](https://www.github.com/googleapis/signet/compare/v0.14.0...v0.14.1) (2021-01-27)
 
 
 ### Bug Fixes
