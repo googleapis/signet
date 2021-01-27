@@ -13,5 +13,5 @@
 #    limitations under the License.
 
 module Signet
-  VERSION = "0.14.0".freeze
+  VERSION = "0.14.1".freeze
 end
