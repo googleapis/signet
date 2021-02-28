@@ -1,11 +1,8 @@
 # Release History
 
-## [0.14.1](https://www.github.com/googleapis/signet/compare/v0.14.0...v0.14.1) (2021-01-27)
+## 0.14.1 / 2021-01-27
 
-
-### Bug Fixes
-
-* Fix OAuth1 signature with duplicate query param names ([9f5b81a](https://www.github.com/googleapis/signet/commit/9f5b81a60625a6e6f0e5bca24c67b90e73d7479b))
+* Fix OAuth1 signature with duplicate query param names
 
 ## 0.14.0 / 2020-03-31
 

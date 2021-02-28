@@ -23,7 +23,7 @@ class RepoMetadata
   end
 
   def normalize_data!
-    require_relative "../lib/signet/version.rb"
+    require_relative "../lib/signet/version"
 
     @data.delete_if { |k, _| !allowed_fields.include?(k) }
     @data["version"] = "v#{Signet::VERSION}"

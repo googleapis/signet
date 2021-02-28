@@ -15,8 +15,6 @@
 require "signet/version"
 
 module Signet #:nodoc:
-  # rubocop:disable Metrics/AbcSize
-  # rubocop:disable Metrics/MethodLength
   def self.parse_auth_param_list auth_param_string
     # Production rules from:
     # http://tools.ietf.org/html/draft-ietf-httpbis-p1-messaging-12
@@ -54,11 +52,12 @@ module Signet #:nodoc:
     # Now parse the auth-param pair strings & turn them into key-value pairs.
     (auth_param_pairs.each_with_object [] do |pair, accu|
       name, value = pair.split "=", 2
-      if value =~ /^".*"$/
+      case value
+      when /^".*"$/
         value = value.gsub(/^"(.*)"$/, '\1').gsub(/\\(.)/, '\1')
-      elsif value =~ /^'.*'$/
+      when /^'.*'$/
         value = value.gsub(/^'(.*)'$/, '\1').gsub(/\\(.)/, '\1')
-      elsif value =~ %r{[\(\)<>@,;:\\\"/\[\]?={}]}
+      when %r{[()<>@,;:\\"/\[\]?={}]}
         # Certain special characters are not allowed
         raise ParseError,
               "Unexpected characters in auth param " \
@@ -68,6 +67,4 @@ module Signet #:nodoc:
       accu << [name, value]
     end)
   end
-  # rubocop:enable Metrics/AbcSize
-  # rubocop:enable Metrics/MethodLength
 end

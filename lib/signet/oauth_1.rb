@@ -49,9 +49,8 @@ module Signet #:nodoc:
     #
     # @return [String] A random nonce.
     def self.generate_nonce
-      SecureRandom.random_bytes(16).unpack("H*").join ""
+      SecureRandom.random_bytes(16).unpack("H*").join
     end
-    # rubocop:disable Metrics/MethodLength
 
     ##
     # Processes an options <code>Hash</code> to find a credential key value.
@@ -65,7 +64,7 @@ module Signet #:nodoc:
     # @return [String] The credential key value.
     def self.extract_credential_key_option credential_type, options
       # Normalize key to String to allow indifferent access.
-      options = options.each_with_object({}) { |(k, v), accu| accu[k.to_s] = v; }
+      options = options.to_h.transform_keys(&:to_s)
       credential_key = "#{credential_type}_credential_key"
       credential = "#{credential_type}_credential"
       if options[credential_key]
@@ -107,7 +106,7 @@ module Signet #:nodoc:
     # @return [String] The credential secret value.
     def self.extract_credential_secret_option credential_type, options
       # Normalize key to String to allow indifferent access.
-      options = options.each_with_object({}) { |(k, v), accu| accu[k.to_s] = v; }
+      options = options.to_h.transform_keys(&:to_s)
       credential_secret = "#{credential_type}_credential_secret"
       credential = "#{credential_type}_credential"
       if options[credential_secret]
@@ -136,7 +135,6 @@ module Signet #:nodoc:
       end
       credential_secret
     end
-    # rubocop:enable Metrics/MethodLength
 
     ##
     # Normalizes a set of OAuth parameters according to the algorithm given
@@ -214,7 +212,7 @@ module Signet #:nodoc:
         realm = realm.gsub '"', '\"'
         parameter_list.unshift "realm=\"#{realm}\""
       end
-      "OAuth " + parameter_list.join(", ")
+      "OAuth #{parameter_list.join ', '}"
     end
 
     ##
@@ -228,7 +226,7 @@ module Signet #:nodoc:
       when /^OAuth$/i
         # Other token types may be supported eventually
         pairs = Signet.parse_auth_param_list(field_value[/^OAuth\s+(.*)$/i, 1])
-        return (pairs.each_with_object [] do |(k, v), accu|
+        (pairs.each_with_object [] do |(k, v), accu|
           if k != "realm"
             k = unencode k
             v = unencode v
@@ -274,24 +272,18 @@ module Signet #:nodoc:
       # be a temporary credential secret when obtaining a token credential
       # for the first time
       base_string = generate_base_string method, uri, parameters
-      parameters = parameters.each_with_object({}) { |(k, v), h| h[k.to_s] = v; }
+      parameters = parameters.to_h.transform_keys(&:to_s)
       signature_method = parameters["oauth_signature_method"]
       case signature_method
       when "HMAC-SHA1"
         require "signet/oauth_1/signature_methods/hmac_sha1"
-        return Signet::OAuth1::HMACSHA1.generate_signature(
-          base_string, client_credential_secret, token_credential_secret
-        )
+        Signet::OAuth1::HMACSHA1.generate_signature base_string, client_credential_secret, token_credential_secret
       when "RSA-SHA1"
         require "signet/oauth_1/signature_methods/rsa_sha1"
-        return Signet::OAuth1::RSASHA1.generate_signature(
-          base_string, client_credential_secret, token_credential_secret
-        )
+        Signet::OAuth1::RSASHA1.generate_signature base_string, client_credential_secret, token_credential_secret
       when "PLAINTEXT"
         require "signet/oauth_1/signature_methods/plaintext"
-        return Signet::OAuth1::PLAINTEXT.generate_signature(
-          base_string, client_credential_secret, token_credential_secret
-        )
+        Signet::OAuth1::PLAINTEXT.generate_signature base_string, client_credential_secret, token_credential_secret
       else
         raise NotImplementedError,
               "Unsupported signature method: #{signature_method}"
@@ -396,7 +388,7 @@ module Signet #:nodoc:
       raise ArgumentError, "Missing :client_credential_key parameter." if client_credential_key.nil?
       raise ArgumentError, "Missing :temporary_credential_key parameter." if temporary_credential_key.nil?
       raise ArgumentError, "Missing :verifier parameter." if options[:verifier].nil?
-      parameters = [
+      [
         ["oauth_consumer_key", client_credential_key],
         ["oauth_token", temporary_credential_key],
         ["oauth_signature_method", options[:signature_method]],
@@ -405,8 +397,6 @@ module Signet #:nodoc:
         ["oauth_verifier", options[:verifier]],
         ["oauth_version", "1.0"]
       ]
-      # No additional parameters allowed here
-      parameters
     end
 
     ##

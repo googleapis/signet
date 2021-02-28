@@ -8,13 +8,41 @@ AllCops:
     - "Rakefile"
     - "yard/**/*"
     - "website/**/*"
+Metrics/AbcSize:
+  Exclude:
+    - "lib/signet.rb"
+    - "lib/signet/oauth_1.rb"
+    - "lib/signet/oauth_1/client.rb"
+    - "lib/signet/oauth_1/credential.rb"
+    - "lib/signet/oauth_1/server.rb"
+    - "lib/signet/oauth_2/client.rb"
 Metrics/ClassLength:
   Exclude:
     - "lib/signet/oauth_1/client.rb"
     - "lib/signet/oauth_1/server.rb"
     - "lib/signet/oauth_2/client.rb"
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - "lib/signet/oauth_1/client.rb"
+    - "lib/signet/oauth_1/credential.rb"
+    - "lib/signet/oauth_1/server.rb"
+    - "lib/signet/oauth_2/client.rb"
+Metrics/MethodLength:
+  Exclude:
+    - "lib/signet.rb"
+    - "lib/signet/oauth_1.rb"
+    - "lib/signet/oauth_1/client.rb"
+    - "lib/signet/oauth_1/credential.rb"
+    - "lib/signet/oauth_1/server.rb"
+    - "lib/signet/oauth_2/client.rb"
 Metrics/ModuleLength:
   Exclude:
     - "lib/signet/oauth_1.rb"
+Metrics/PerceivedComplexity:
+  Exclude:
+    - "lib/signet/oauth_1/client.rb"
+    - "lib/signet/oauth_1/credential.rb"
+    - "lib/signet/oauth_1/server.rb"
+    - "lib/signet/oauth_2/client.rb"
 Style/Documentation:
   Enabled: false
