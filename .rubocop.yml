@@ -9,40 +9,16 @@ AllCops:
     - "yard/**/*"
     - "website/**/*"
 Metrics/AbcSize:
-  Exclude:
-    - "lib/signet.rb"
-    - "lib/signet/oauth_1.rb"
-    - "lib/signet/oauth_1/client.rb"
-    - "lib/signet/oauth_1/credential.rb"
-    - "lib/signet/oauth_1/server.rb"
-    - "lib/signet/oauth_2/client.rb"
+  Enabled: false
 Metrics/ClassLength:
-  Exclude:
-    - "lib/signet/oauth_1/client.rb"
-    - "lib/signet/oauth_1/server.rb"
-    - "lib/signet/oauth_2/client.rb"
+  Enabled: false
 Metrics/CyclomaticComplexity:
-  Exclude:
-    - "lib/signet/oauth_1/client.rb"
-    - "lib/signet/oauth_1/credential.rb"
-    - "lib/signet/oauth_1/server.rb"
-    - "lib/signet/oauth_2/client.rb"
+  Max: 30
 Metrics/MethodLength:
-  Exclude:
-    - "lib/signet.rb"
-    - "lib/signet/oauth_1.rb"
-    - "lib/signet/oauth_1/client.rb"
-    - "lib/signet/oauth_1/credential.rb"
-    - "lib/signet/oauth_1/server.rb"
-    - "lib/signet/oauth_2/client.rb"
+  Enabled: false
 Metrics/ModuleLength:
-  Exclude:
-    - "lib/signet/oauth_1.rb"
+  Enabled: false
 Metrics/PerceivedComplexity:
-  Exclude:
-    - "lib/signet/oauth_1/client.rb"
-    - "lib/signet/oauth_1/credential.rb"
-    - "lib/signet/oauth_1/server.rb"
-    - "lib/signet/oauth_2/client.rb"
+  Max: 30
 Style/Documentation:
   Enabled: false
