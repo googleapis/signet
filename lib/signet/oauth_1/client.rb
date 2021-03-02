@@ -89,7 +89,7 @@ module Signet
       # @see Signet::OAuth1::Client#initialize
       def update! options = {}
         # Normalize key to String to allow indifferent access.
-        options = options.each_with_object({}) { |(k, v), accu| accu[k.to_s] = v; }
+        options = options.to_h.transform_keys(&:to_s)
         self.temporary_credential_uri = options["temporary_credential_uri"]
         self.authorization_uri = options["authorization_uri"]
         self.token_credential_uri = options["token_credential_uri"]
@@ -128,12 +128,12 @@ module Signet
       #   new_temporary_credential_uri
       #   The temporary credentials URI.
       def temporary_credential_uri= new_temporary_credential_uri
-        if !new_temporary_credential_uri.nil?
+        if new_temporary_credential_uri.nil?
+          @temporary_credential_uri = nil
+        else
           new_temporary_credential_uri =
             Addressable::URI.parse new_temporary_credential_uri
           @temporary_credential_uri = new_temporary_credential_uri
-        else
-          @temporary_credential_uri = nil
         end
       end
       alias request_token_uri= temporary_credential_uri=
@@ -163,14 +163,14 @@ module Signet
       # @param [Addressable::URI, String, #to_str] new_authorization_uri
       #   The authorization URI.
       def authorization_uri= new_authorization_uri
-        if !new_authorization_uri.nil?
+        if new_authorization_uri.nil?
+          @authorization_uri = nil
+        else
           new_authorization_uri = Addressable::URI.send(
             new_authorization_uri.is_a?(Hash) ? :new : :parse,
             new_authorization_uri
           )
           @authorization_uri = new_authorization_uri
-        else
-          @authorization_uri = nil
         end
       end
 
@@ -189,14 +189,14 @@ module Signet
       # @param [Addressable::URI, Hash, String, #to_str] new_token_credential_uri
       #   The token credential URI.
       def token_credential_uri= new_token_credential_uri
-        if !new_token_credential_uri.nil?
+        if new_token_credential_uri.nil?
+          @token_credential_uri = nil
+        else
           new_token_credential_uri = Addressable::URI.send(
             new_token_credential_uri.is_a?(Hash) ? :new : :parse,
             new_token_credential_uri
           )
           @token_credential_uri = new_token_credential_uri
-        else
-          @token_credential_uri = nil
         end
       end
       alias access_token_uri= token_credential_uri=
@@ -217,8 +217,7 @@ module Signet
         elsif !client_credential_key && !client_credential_secret
           nil
         else
-          raise ArgumentError,
-                "The client credential key and secret must be set."
+          raise ArgumentError, "The client credential key and secret must be set."
         end
       end
       alias consumer_token client_credential
@@ -229,7 +228,10 @@ module Signet
       # @param [Signet::OAuth1::Credential] new_client_credential
       #   The client credentials.
       def client_credential= new_client_credential
-        if !new_client_credential.nil?
+        if new_client_credential.nil?
+          @client_credential_key = nil
+          @client_credential_secret = nil
+        else
           unless new_client_credential.is_a? ::Signet::OAuth1::Credential
             raise TypeError,
                   "Expected Signet::OAuth1::Credential, " \
@@ -237,9 +239,6 @@ module Signet
           end
           @client_credential_key = new_client_credential.key
           @client_credential_secret = new_client_credential.secret
-        else
-          @client_credential_key = nil
-          @client_credential_secret = nil
         end
       end
       alias consumer_token= client_credential=
@@ -259,15 +258,15 @@ module Signet
       # @param [String, #to_str] new_client_credential_key
       #   The client credential key.
       def client_credential_key= new_client_credential_key
-        if !new_client_credential_key.nil?
+        if new_client_credential_key.nil?
+          @client_credential_key = nil
+        else
           unless new_client_credential_key.respond_to? :to_str
             raise TypeError,
                   "Can't convert #{new_client_credential_key.class} into String."
           end
           new_client_credential_key = new_client_credential_key.to_str
           @client_credential_key = new_client_credential_key
-        else
-          @client_credential_key = nil
         end
       end
       alias consumer_key= client_credential_key=
@@ -287,7 +286,9 @@ module Signet
       # @param [String, #to_str] new_client_credential_secret
       #   The client credential secret.
       def client_credential_secret= new_client_credential_secret
-        if !new_client_credential_secret.nil?
+        if new_client_credential_secret.nil?
+          @client_credential_secret = nil
+        else
           unless new_client_credential_secret.respond_to? :to_str
             raise TypeError,
                   "Can't convert #{new_client_credential_secret.class} " \
@@ -295,8 +296,6 @@ module Signet
           end
           new_client_credential_secret = new_client_credential_secret.to_str
           @client_credential_secret = new_client_credential_secret
-        else
-          @client_credential_secret = nil
         end
       end
       alias consumer_secret= client_credential_secret=
@@ -311,12 +310,10 @@ module Signet
             temporary_credential_key,
             temporary_credential_secret
           )
-        elsif !temporary_credential_key &&
-              !temporary_credential_secret
+        elsif !temporary_credential_key && !temporary_credential_secret
           nil
         else
-          raise ArgumentError,
-                "The temporary credential key and secret must be set."
+          raise ArgumentError, "The temporary credential key and secret must be set."
         end
       end
       alias request_token temporary_credential
@@ -327,7 +324,10 @@ module Signet
       # @param [Signet::OAuth1::Credential] new_temporary_credential
       #   The temporary credentials.
       def temporary_credential= new_temporary_credential
-        if !new_temporary_credential.nil?
+        if new_temporary_credential.nil?
+          @temporary_credential_key = nil
+          @temporary_credential_secret = nil
+        else
           unless new_temporary_credential.is_a? ::Signet::OAuth1::Credential
             raise TypeError,
                   "Expected Signet::OAuth1::Credential, " \
@@ -335,9 +335,6 @@ module Signet
           end
           @temporary_credential_key = new_temporary_credential.key
           @temporary_credential_secret = new_temporary_credential.secret
-        else
-          @temporary_credential_key = nil
-          @temporary_credential_secret = nil
         end
       end
       alias request_token= temporary_credential=
@@ -357,7 +354,9 @@ module Signet
       # @param [String, #to_str] new_temporary_credential_key
       #   The temporary credential key.
       def temporary_credential_key= new_temporary_credential_key
-        if !new_temporary_credential_key.nil?
+        if new_temporary_credential_key.nil?
+          @temporary_credential_key = nil
+        else
           unless new_temporary_credential_key.respond_to? :to_str
             raise TypeError,
                   "Can't convert #{new_temporary_credential_key.class} " \
@@ -365,8 +364,6 @@ module Signet
           end
           new_temporary_credential_key = new_temporary_credential_key.to_str
           @temporary_credential_key = new_temporary_credential_key
-        else
-          @temporary_credential_key = nil
         end
       end
       alias request_token_key= temporary_credential_key=
@@ -386,7 +383,9 @@ module Signet
       # @param [String, #to_str] new_temporary_credential_secret
       #   The temporary credential secret.
       def temporary_credential_secret= new_temporary_credential_secret
-        if !new_temporary_credential_secret.nil?
+        if new_temporary_credential_secret.nil?
+          @temporary_credential_secret = nil
+        else
           unless new_temporary_credential_secret.respond_to? :to_str
             raise TypeError,
                   "Can't convert #{new_temporary_credential_secret.class} " \
@@ -395,8 +394,6 @@ module Signet
           new_temporary_credential_secret =
             new_temporary_credential_secret.to_str
           @temporary_credential_secret = new_temporary_credential_secret
-        else
-          @temporary_credential_secret = nil
         end
       end
       alias request_token_secret= temporary_credential_secret=
@@ -411,12 +408,10 @@ module Signet
             token_credential_key,
             token_credential_secret
           )
-        elsif !token_credential_key &&
-              !token_credential_secret
+        elsif !token_credential_key && !token_credential_secret
           nil
         else
-          raise ArgumentError,
-                "The token credential key and secret must be set."
+          raise ArgumentError, "The token credential key and secret must be set."
         end
       end
       alias access_token token_credential
@@ -427,7 +422,10 @@ module Signet
       # @param [Signet::OAuth1::Credential] new_token_credential
       #   The token credentials.
       def token_credential= new_token_credential
-        if !new_token_credential.nil?
+        if new_token_credential.nil?
+          @token_credential_key = nil
+          @token_credential_secret = nil
+        else
           unless new_token_credential.is_a? ::Signet::OAuth1::Credential
             raise TypeError,
                   "Expected Signet::OAuth1::Credential, " \
@@ -435,9 +433,6 @@ module Signet
           end
           @token_credential_key = new_token_credential.key
           @token_credential_secret = new_token_credential.secret
-        else
-          @token_credential_key = nil
-          @token_credential_secret = nil
         end
       end
       alias access_token= token_credential=
@@ -457,7 +452,9 @@ module Signet
       # @param [String, #to_str] new_token_credential_key
       #   The token credential key.
       def token_credential_key= new_token_credential_key
-        if !new_token_credential_key.nil?
+        if new_token_credential_key.nil?
+          @token_credential_key = nil
+        else
           unless new_token_credential_key.respond_to? :to_str
             raise TypeError,
                   "Can't convert #{new_token_credential_key.class} " \
@@ -465,8 +462,6 @@ module Signet
           end
           new_token_credential_key = new_token_credential_key.to_str
           @token_credential_key = new_token_credential_key
-        else
-          @token_credential_key = nil
         end
       end
       alias access_token_key= token_credential_key=
@@ -486,7 +481,9 @@ module Signet
       # @param [String, #to_str] new_token_credential_secret
       #   The token credential secret.
       def token_credential_secret= new_token_credential_secret
-        if !new_token_credential_secret.nil?
+        if new_token_credential_secret.nil?
+          @token_credential_secret = nil
+        else
           unless new_token_credential_secret.respond_to? :to_str
             raise TypeError,
                   "Can't convert #{new_token_credential_secret.class} " \
@@ -495,8 +492,6 @@ module Signet
           new_token_credential_secret =
             new_token_credential_secret.to_str
           @token_credential_secret = new_token_credential_secret
-        else
-          @token_credential_secret = nil
         end
       end
       alias access_token_secret= token_credential_secret=
@@ -515,15 +510,15 @@ module Signet
       # @param [String, #to_str] new_callback
       #   The OAuth callback.
       def callback= new_callback
-        if !new_callback.nil?
+        if new_callback.nil?
+          @callback = nil
+        else
           unless new_callback.respond_to? :to_str
             raise TypeError,
                   "Can't convert #{new_callback.class} into String."
           end
           new_callback = new_callback.to_str
           @callback = new_callback
-        else
-          @callback = nil
         end
       end
 
@@ -556,7 +551,7 @@ module Signet
       # @note A serialized client contains sensitive information. Persist or transmit with care.
       #
       # @return [String] A serialized JSON representation of the client.
-      def to_json
+      def to_json *_args
         MultiJson.dump(
           "temporary_credential_uri"    => temporary_credential_uri,
           "authorization_uri"           => authorization_uri,
@@ -571,8 +566,6 @@ module Signet
           "token_credential_secret"     => token_credential_secret
         )
       end
-      # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
 
       ##
       # Generates a request for temporary credentials.
@@ -635,8 +628,6 @@ module Signet
           req.headers = Faraday::Utils::Headers.new headers
         end
       end
-      # rubocop:enable Metrics/AbcSize
-      # rubocop:enable Metrics/MethodLength
       alias generate_request_token_request generate_temporary_credential_request
 
       ##
@@ -709,8 +700,6 @@ module Signet
         self.temporary_credential = credential
       end
       alias fetch_request_token! fetch_temporary_credential!
-      # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
 
       ##
       # Generates a request for token credentials.
@@ -776,7 +765,6 @@ module Signet
           req.headers = Faraday::Utils::Headers.new headers
         end
       end
-      # rubocop:enable Metrics/MethodLength
       alias generate_access_token_request generate_token_credential_request
 
       ##
@@ -818,7 +806,6 @@ module Signet
           message, request: request, response: response
         )
       end
-      # rubocop:enable Metrics/AbcSize
       alias fetch_access_token fetch_token_credential
 
       ##
@@ -846,10 +833,6 @@ module Signet
         self.token_credential = credential
       end
       alias fetch_access_token! fetch_token_credential!
-      # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/MethodLength
-      # rubocop:disable Metrics/PerceivedComplexity
 
       ##
       # Generates an authenticated request for protected resources.
@@ -950,7 +933,7 @@ module Signet
           request.body = env[:body]
 
           post_parameters = Addressable::URI.form_unencode env[:body]
-          parameters = parameters.concat post_parameters
+          parameters.concat post_parameters
         end
 
         # No need to attach URI query parameters, the .sign_parameters
@@ -970,10 +953,6 @@ module Signet
         request["Cache-Control"] = "no-store"
         request
       end
-      # rubocop:enable Metrics/AbcSize
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/MethodLength
-      # rubocop:enable Metrics/PerceivedComplexity
 
       ##
       # Transmits a request for a protected resource.

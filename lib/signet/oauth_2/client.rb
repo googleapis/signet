@@ -110,9 +110,6 @@ module Signet
         @access_type          = nil
         update! options
       end
-      # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/PerceivedComplexity
 
       ##
       # Updates an OAuth 2.0 client.
@@ -202,13 +199,10 @@ module Signet
         self.signing_key = options[:signing_key] if options.key? :signing_key
         self.extension_parameters = options[:extension_parameters] || {}
         self.additional_parameters = options[:additional_parameters] || {}
-        self.access_type = options.fetch(:access_type) { :offline }
+        self.access_type = options.fetch :access_type, :offline
         update_token! options
         self
       end
-      # rubocop:enable Metrics/AbcSize
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/PerceivedComplexity
 
       ##
       # Updates an OAuth 2.0 client.
@@ -261,10 +255,6 @@ module Signet
 
         self
       end
-      # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/MethodLength
-      # rubocop:disable Metrics/PerceivedComplexity
 
       ##
       # Returns the authorization URI that the user should be redirected to.
@@ -290,9 +280,7 @@ module Signet
         options[:state] = state unless options[:state]
         options.merge!(additional_parameters.merge(options[:additional_parameters] || {}))
         options.delete :additional_parameters
-        options = Hash[options.map do |key, option|
-          [key.to_s, option]
-        end]
+        options = options.transform_keys(&:to_s)
         uri = Addressable::URI.parse(
           ::Signet::OAuth2.generate_authorization_uri(
             @authorization_uri, options
@@ -304,10 +292,6 @@ module Signet
         end
         uri
       end
-      # rubocop:enable Metrics/AbcSize
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/MethodLength
-      # rubocop:enable Metrics/PerceivedComplexity
 
       ##
       # Sets the authorization URI for this client.
@@ -423,7 +407,7 @@ module Signet
           end
           @scope = new_scope
         when String
-          @scope = new_scope.split " "
+          @scope = new_scope.split
         when nil
           @scope = nil
         else
@@ -793,12 +777,12 @@ module Signet
       # @param [String, Integer, nil] new_expires_in
       #   The access token lifetime.
       def expires_in= new_expires_in
-        if !new_expires_in.nil?
-          @issued_at = Time.now
-          @expires_at = @issued_at + new_expires_in.to_i
-        else
+        if new_expires_in.nil?
           @expires_at = nil
           @issued_at = nil
+        else
+          @issued_at = Time.now
+          @expires_at = @issued_at + new_expires_in.to_i
         end
       end
 
@@ -922,8 +906,6 @@ module Signet
         assertion["sub"] = sub unless sub.nil?
         JWT.encode assertion, signing_key, signing_algorithm
       end
-      # rubocop:disable Style/MethodDefParentheses
-      # rubocop:disable Metrics/AbcSize
 
       ##
       # Serialize the client object to JSON.
@@ -931,7 +913,7 @@ module Signet
       # @note A serialized client contains sensitive information. Persist or transmit with care.
       #
       # @return [String] A serialized JSON representation of the client.
-      def to_json(*)
+      def to_json *_args
         MultiJson.dump(
           "authorization_uri"    => authorization_uri ? authorization_uri.to_s : nil,
           "token_credential_uri" => token_credential_uri ? token_credential_uri.to_s : nil,
@@ -956,10 +938,6 @@ module Signet
           "extension_parameters" => extension_parameters
         )
       end
-      # rubocop:enable Style/MethodDefParentheses
-      # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/MethodLength
-      # rubocop:disable Metrics/PerceivedComplexity
 
       ##
       # Generates a request for token credentials.
@@ -1005,8 +983,6 @@ module Signet
         additional.each { |k, v| parameters[k.to_s] = v }
         parameters
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/PerceivedComplexity
 
       def fetch_access_token options = {}
         raise ArgumentError, "Missing token endpoint URI." if token_credential_uri.nil?
@@ -1035,20 +1011,16 @@ module Signet
 
         message = "  Server message:\n#{response.body.to_s.strip}" unless body.to_s.strip.empty?
         if [400, 401, 403].include? status
-          message = "Authorization failed." + message
-          raise ::Signet::AuthorizationError.new(
-            message, response: response
-          )
+          message = "Authorization failed.#{message}"
+          raise ::Signet::AuthorizationError.new message, response: response
         elsif status.to_s[0] == "5"
-          message = "Remote server error." + message
+          message = "Remote server error.#{message}"
           raise ::Signet::RemoteServerError, message
         else
-          message = "Unexpected status code: #{response.status}." + message
+          message = "Unexpected status code: #{response.status}.#{message}"
           raise ::Signet::UnexpectedStatusError, message
         end
       end
-      # rubocop:enable Metrics/AbcSize
-      # rubocop:enable Metrics/MethodLength
 
       def fetch_access_token! options = {}
         token_hash = fetch_access_token options
@@ -1068,9 +1040,6 @@ module Signet
       def refresh! options = {}
         fetch_access_token! options
       end
-      # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
-      # rubocop:disable Metrics/PerceivedComplexity
 
       ##
       # Generates an authenticated request for protected resources.
@@ -1137,9 +1106,6 @@ module Signet
         request["Cache-Control"] = "no-store"
         request
       end
-      # rubocop:enable Metrics/AbcSize
-      # rubocop:enable Metrics/MethodLength
-      # rubocop:enable Metrics/PerceivedComplexity
 
       ##
       # Transmits a request for a protected resource.

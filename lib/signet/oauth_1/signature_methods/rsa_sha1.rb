@@ -11,7 +11,7 @@ module Signet #:nodoc:
 
 
         private_key = OpenSSL::PKey::RSA.new client_credential_secret
-        signature = private_key.sign OpenSSL::Digest::SHA1.new, base_string
+        signature = private_key.sign OpenSSL::Digest.new("SHA1"), base_string
         # using strict_encode64 because the encode64 method adds newline characters after ever 60 chars
         Base64.strict_encode64(signature).strip
       end

@@ -15,11 +15,6 @@
 module Signet #:nodoc:
   module OAuth1
     class Credential
-      # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/MethodLength
-      # rubocop:disable Metrics/PerceivedComplexity
-
       ##
       # Creates a token object from a key and secret.
       #
@@ -95,12 +90,9 @@ module Signet #:nodoc:
         raise TypeError, "Expected String, got #{@secret.class}." unless @secret.respond_to? :to_str
         @secret = @secret.to_str
       end
-      # rubocop:enable Metrics/AbcSize
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/MethodLength
-      # rubocop:enable Metrics/PerceivedComplexity
 
-      attr_accessor :key, :secret
+      attr_accessor :key
+      attr_accessor :secret
 
       def to_hash
         {

@@ -55,15 +55,13 @@ module Signet
           instance_variable_set "@#{attr}", options[attr]
         end
       end
-      # rubocop:disable Naming/UncommunicativeMethodParamName
 
       # Constant time string comparison.
-      def safe_equals? a, b
-        check = a.bytesize ^ b.bytesize
-        a.bytes.zip(b.bytes) { |x, y| check |= x ^ y.to_i }
+      def safe_equals? left, right
+        check = left.bytesize ^ right.bytesize
+        left.bytes.zip(right.bytes) { |x, y| check |= x ^ y.to_i }
         check.zero?
       end
-      # rubocop:enable Naming/UncommunicativeMethodParamName
 
       ##
       # Determine if the supplied nonce/timestamp pair is valid by calling
@@ -141,8 +139,6 @@ module Signet
         verified = @verifier.call verifier if @verifier.respond_to? :call
         verified ? true : false
       end
-      # rubocop:disable Metrics/MethodLength
-      # rubocop:disable Metrics/PerceivedComplexity
 
       ##
       # Validate and normalize the components from an HTTP request.
@@ -188,8 +184,6 @@ module Signet
         request_components[:body] = body
         request_components
       end
-      # rubocop:enable Metrics/MethodLength
-      # rubocop:enable Metrics/PerceivedComplexity
 
       ##
       # Validate and normalize the HTTP Authorization header.
@@ -199,11 +193,7 @@ module Signet
       def verify_auth_header_components headers
         auth_header = headers.find { |x| x[0] == "Authorization" }
         raise MalformedAuthorizationError, "Authorization header is missing" if auth_header.nil? || auth_header[1] == ""
-        auth_hash = ::Signet::OAuth1.parse_authorization_header(
-          auth_header[1]
-        ).each_with_object({}) { |(key, val), acc| acc[key.downcase] = val; }
-
-        auth_hash
+        ::Signet::OAuth1.parse_authorization_header(auth_header[1]).to_h.transform_keys(&:downcase)
       end
 
       ##
@@ -232,14 +222,9 @@ module Signet
 
         auth_header = request_components[:headers].find { |x| x[0] == "Authorization" }
         raise MalformedAuthorizationError, "Authorization header is missing" if auth_header.nil? || auth_header[1] == ""
-        auth_hash = ::Signet::OAuth1.parse_authorization_header(
-          auth_header[1]
-        ).each_with_object({}) { |(key, val), acc| acc[key.downcase] = val; }
+        auth_hash = ::Signet::OAuth1.parse_authorization_header(auth_header[1]).to_h.transform_keys(&:downcase)
         auth_hash["realm"]
       end
-      # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
-      # rubocop:disable Metrics/PerceivedComplexity
 
       ##
       # Authenticates a temporary credential request. If no oauth_callback is
@@ -308,7 +293,6 @@ module Signet
           false
         end
       end
-      # rubocop:enable Metrics/PerceivedComplexity
 
       ##
       # Authenticates a token credential request.
@@ -379,8 +363,6 @@ module Signet
           temporary_credential: temporary_credential,
           realm:                auth_hash["realm"] }
       end
-      # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/PerceivedComplexity
 
       ##
       # Authenticates a request for a protected resource.
@@ -496,10 +478,6 @@ module Signet
           token_credential:  token_credential,
           realm:             auth_hash["realm"] }
       end
-      # rubocop:enable Metrics/AbcSize
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/MethodLength
-      # rubocop:enable Metrics/PerceivedComplexity
     end
   end
 end

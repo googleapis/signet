@@ -31,8 +31,8 @@ require 'signet/oauth_2/client'
 client = Signet::OAuth2::Client.new(
   :authorization_uri => 'https://accounts.google.com/o/oauth2/auth',
   :token_credential_uri =>  'https://oauth2.googleapis.com/token',
-  :client_id => '44410190108-74nkm6jc5e3vvjqis803frkvmu88cu3a.apps.googleusercontent.com',
-  :client_secret => 'X1NUhvO-rQr9sm8uUSMY8i7v',
+  :client_id => "#{YOUR_CLIENT_ID}.apps.googleusercontent.com",
+  :client_secret => YOUR_CLIENT_SECRET,
   :scope => 'email profile',
   :redirect_uri => 'https://example.client.com/oauth'
 )
@@ -59,8 +59,11 @@ Be sure `https://rubygems.org` is in your gem sources.
 
 ## Supported Ruby Versions
 
-This library requires Ruby 2.4 or later.
-In general, this library supports Ruby versions that are considered current and
-supported by Ruby Core (that is, Ruby versions that are either in normal
-maintenance or in security maintenance).
-See https://www.ruby-lang.org/en/downloads/branches/ for further details.
+This library is supported on Ruby 2.5+.
+
+Google provides official support for Ruby versions that are actively supported
+by Ruby Core—that is, Ruby versions that are either in normal maintenance or in
+security maintenance, and not end of life. Currently, this means Ruby 2.5 and
+later. Older versions of Ruby _may_ still work, but are unsupported and not
+recommended. See https://www.ruby-lang.org/en/downloads/branches/ for details
+about the Ruby support schedule.

@@ -1,6 +1,6 @@
 require "pathname"
 
-require_relative "repo_metadata.rb"
+require_relative "repo_metadata"
 
 class DevsiteBuilder
   def initialize master_dir = "."

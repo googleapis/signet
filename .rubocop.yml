@@ -8,13 +8,17 @@ AllCops:
     - "Rakefile"
     - "yard/**/*"
     - "website/**/*"
+Metrics/AbcSize:
+  Enabled: false
 Metrics/ClassLength:
-  Exclude:
-    - "lib/signet/oauth_1/client.rb"
-    - "lib/signet/oauth_1/server.rb"
-    - "lib/signet/oauth_2/client.rb"
+  Enabled: false
+Metrics/CyclomaticComplexity:
+  Max: 30
+Metrics/MethodLength:
+  Enabled: false
 Metrics/ModuleLength:
-  Exclude:
-    - "lib/signet/oauth_1.rb"
+  Enabled: false
+Metrics/PerceivedComplexity:
+  Max: 30
 Style/Documentation:
   Enabled: false

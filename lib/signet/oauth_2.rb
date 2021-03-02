@@ -28,10 +28,10 @@ module Signet #:nodoc:
       case auth_scheme
       when /^Basic$/i
         # HTTP Basic is allowed in OAuth 2
-        return parse_basic_credentials(field_value[/^Basic\s+(.*)$/i, 1])
+        parse_basic_credentials(field_value[/^Basic\s+(.*)$/i, 1])
       when /^OAuth$/i
         # Other token types may be supported eventually
-        return parse_bearer_credentials(field_value[/^OAuth\s+(.*)$/i, 1])
+        parse_bearer_credentials(field_value[/^OAuth\s+(.*)$/i, 1])
       else
         raise ParseError,
               "Parsing non-OAuth Authorization headers is out of scope."
@@ -43,7 +43,7 @@ module Signet #:nodoc:
       case auth_scheme
       when /^OAuth$/i
         # Other token types may be supported eventually
-        return parse_oauth_challenge(field_value[/^OAuth\s+(.*)$/i, 1])
+        parse_oauth_challenge(field_value[/^OAuth\s+(.*)$/i, 1])
       else
         raise ParseError,
               "Parsing non-OAuth WWW-Authenticate headers is out of scope."
@@ -76,9 +76,9 @@ module Signet #:nodoc:
       raise TypeError, "Expected String, got #{body.class}." unless body.is_a? String
       case content_type
       when %r{^application/json.*}
-        return MultiJson.load body
+        MultiJson.load body
       when %r{^application/x-www-form-urlencoded.*}
-        return Hash[Addressable::URI.form_unencode(body)]
+        Hash[Addressable::URI.form_unencode(body)]
       else
         raise ArgumentError, "Invalid content type '#{content_type}'"
       end
@@ -100,9 +100,8 @@ module Signet #:nodoc:
         raise ArgumentError,
               "A client identifier may not contain a ':' character."
       end
-      "Basic " + Base64.encode64(
-        client_id + ":" + client_password
-      ).delete("\n")
+      token = Base64.encode64("#{client_id}:#{client_password}").delete("\n")
+      "Basic #{token}"
     end
 
     ##
@@ -121,11 +120,8 @@ module Signet #:nodoc:
       # TODO: escaping?
       header = "Bearer #{access_token}"
       if auth_params && !auth_params.empty?
-        header += (", " +
-          (auth_params.each_with_object [] do |(key, value), accu|
-            accu << "#{key}=\"#{value}\""
-          end).join(", ")
-                  )
+        additional_headers = auth_params.map { |key, value| "#{key}=\"#{value}\"" }
+        header = ([header] + additional_headers).join ", "
       end
       header
     end
