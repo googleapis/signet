@@ -1,5 +1,12 @@
 # Release History
 
+## [0.15.0](https://www.github.com/googleapis/signet/compare/v0.14.1...v0.15.0) (2021-03-04)
+
+
+### Features
+
+* Drop support for Ruby 2.4 and add support for Ruby 3.0 ([bd6fe87](https://www.github.com/googleapis/signet/commit/bd6fe87948f8fc7702720dae651e82f4fd348b5d))
+
 ## 0.14.1 / 2021-01-27
 
 * Fix OAuth1 signature with duplicate query param names
