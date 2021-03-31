@@ -14,7 +14,7 @@
 
 desc "Run CI checks"
 
-TESTS = ["spec", "rubocop", "yardoc", "build"]
+TESTS = ["spec", "rubocop", "yardoc", "linkinator", "build"]
 
 flag :only
 TESTS.each do |name|
