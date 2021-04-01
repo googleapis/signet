@@ -12,3 +12,5 @@ wiki
 .google-api.yaml
 client_secrets.json
 /.idea
+/node_modules
+/package-lock.json

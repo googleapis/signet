@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
   gem.description = "Signet is an OAuth 1.0 / OAuth 2.0 implementation.\n"
   gem.email = "sbazyl@google.com"
   gem.extra_rdoc_files = ["README.md"]
-  gem.files = ["signet.gemspec", "Rakefile", "LICENSE", "CHANGELOG.md", "README.md", "Gemfile"]
+  gem.files = ["signet.gemspec", "LICENSE", "CHANGELOG.md", "README.md"]
   gem.files += Dir.glob "lib/**/*.rb"
   gem.files += Dir.glob "spec/**/*.{rb,opts}"
   gem.files += Dir.glob "vendor/**/*.rb"
@@ -32,7 +32,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "google-style", "~> 1.25.1"
   gem.add_development_dependency "kramdown", "~> 1.5"
   gem.add_development_dependency "launchy", "~> 2.4"
-  gem.add_development_dependency "rake", "~> 12.0"
+  gem.add_development_dependency "rake", "~> 13.0"
   gem.add_development_dependency "rspec", "~> 3.1"
   gem.add_development_dependency "simplecov", "~> 0.9"
   gem.add_development_dependency "yard", "~> 0.9", ">= 0.9.12"
