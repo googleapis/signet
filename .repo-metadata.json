@@ -1,6 +1,5 @@
 {
-    "name": "signet",
-    "language": "ruby",
     "distribution-name": "signet",
+    "language": "ruby",
     "library_type": "AUTH"
 }
