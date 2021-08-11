@@ -659,7 +659,12 @@ describe Signet::OAuth2::Client, "configured for Google userinfo API" do
     @client.client_secret = "secret-12345"
     @client.refresh_token = "54321"
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
-      stub.post "/token" do
+      stub.post('/token') do |env|
+        expect(env[:body]).to eq(
+                                "grant_type=refresh_token&refresh_token=#{@client.refresh_token}&client_id=#{@client.client_id}&client_secret=#{@client.client_secret}"
+                              )
+        expect(env.request_headers.key?("Authorization")).to eq(false)
+        expect(env.request_headers["Content-Type"]).to eq("application/x-www-form-urlencoded")
         build_json_response(
           "access_token"  => "12345",
           "refresh_token" => "54321",
@@ -672,6 +677,36 @@ describe Signet::OAuth2::Client, "configured for Google userinfo API" do
     end
     @client.fetch_access_token!(
       connection: connection
+    )
+    expect(@client.access_token).to eq "12345"
+    expect(@client.refresh_token).to eq "54321"
+    expect(@client.expires_in).to eq 3600
+    stubs.verify_stubbed_calls
+  end
+
+  it "should correctly refresh an access token with basic authorization" do
+    @client.client_id = "client-12345"
+    @client.client_secret = "secret-12345"
+    @client.refresh_token = "54321"
+    basic_auth = Base64.encode64("#{@client.client_id}:#{@client.client_secret}").rstrip
+    stubs = Faraday::Adapter::Test::Stubs.new do |stub|
+      stub.post("/token") do |env|
+        expect(env[:body]).to eq("grant_type=refresh_token&refresh_token=#{@client.refresh_token}")
+        expect(env.request_headers["Authorization"]).to eq("Basic #{basic_auth}")
+        expect(env.request_headers["Content-Type"]).to eq("application/x-www-form-urlencoded")
+        build_json_response(
+          "access_token"  => "12345",
+          "refresh_token" => "54321",
+          "expires_in"    => "3600"
+        )
+      end
+    end
+    connection = Faraday.new(url: 'https://www.google.com') do |builder|
+      builder.adapter(:test, stubs)
+    end
+    @client.fetch_access_token!(
+      connection: connection,
+      use_basic_auth: true
     )
     expect(@client.access_token).to eq "12345"
     expect(@client.refresh_token).to eq "54321"

@@ -972,8 +972,8 @@ module Signet
           end
           parameters.merge! extension_parameters
         end
-        parameters["client_id"] = client_id unless client_id.nil?
-        parameters["client_secret"] = client_secret unless client_secret.nil?
+        parameters["client_id"] = client_id if !options[:use_basic_auth] && !client_id.nil?
+        parameters["client_secret"] = client_secret if !options[:use_basic_auth] && !client_secret.nil?
         if options[:scope]
           parameters["scope"] = options[:scope]
         elsif options[:use_configured_scope] && !scope.nil?
@@ -990,10 +990,11 @@ module Signet
         options = deep_hash_normalize options
 
         client = options[:connection] ||= Faraday.default_connection
-        url = Addressable::URI.parse(token_credential_uri).normalize.to_s
+        url = Addressable::URI.parse token_credential_uri
         parameters = generate_access_token_request options
         if client.is_a? Faraday::Connection
-          response = client.post url,
+          client.basic_auth client_id, client_secret if options[:use_basic_auth]
+          response = client.post url.normalize.to_s,
                                  Addressable::URI.form_encode(parameters),
                                  "Content-Type" => "application/x-www-form-urlencoded"
           status = response.status.to_i
@@ -1001,7 +1002,11 @@ module Signet
           content_type = response.headers["Content-type"]
         else
           # Hurley
-          response = client.post url, parameters
+          if options[:use_basic_auth]
+            url.user = client_id
+            url.password = client_secret
+          end
+          response = client.post url.normalize.to_s, parameters
           status = response.status_code.to_i
           body = response.body
           content_type = response.header[:content_type]
