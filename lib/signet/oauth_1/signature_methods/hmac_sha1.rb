@@ -1,7 +1,7 @@
 require "openssl"
 require "signet"
 
-module Signet #:nodoc:
+module Signet # :nodoc:
   module OAuth1
     module HMACSHA1
       def self.generate_signature \
