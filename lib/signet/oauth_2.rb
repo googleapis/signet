@@ -16,7 +16,7 @@ require "base64"
 require "signet"
 require "multi_json"
 
-module Signet #:nodoc:
+module Signet # :nodoc:
   ##
   # An implementation of http://tools.ietf.org/html/draft-ietf-oauth-v2-10
   #
