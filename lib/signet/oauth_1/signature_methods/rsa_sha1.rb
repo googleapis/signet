@@ -3,7 +3,7 @@ require "base64"
 require "openssl"
 require "signet"
 
-module Signet #:nodoc:
+module Signet # :nodoc:
   module OAuth1
     module RSASHA1
       def self.generate_signature \

@@ -14,7 +14,7 @@
 
 require "signet/version"
 
-module Signet #:nodoc:
+module Signet # :nodoc:
   def self.parse_auth_param_list auth_param_string
     # Production rules from:
     # http://tools.ietf.org/html/draft-ietf-httpbis-p1-messaging-12

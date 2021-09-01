@@ -880,13 +880,13 @@ module Signet
       end
 
       def grant_type= new_grant_type
-        case new_grant_type
-        when "authorization_code", "refresh_token",
-            "password", "client_credentials"
-          @grant_type = new_grant_type
-        else
-          @grant_type = Addressable::URI.parse new_grant_type
-        end
+        @grant_type =
+          case new_grant_type
+          when "authorization_code", "refresh_token", "password", "client_credentials"
+            new_grant_type
+          else
+            Addressable::URI.parse new_grant_type
+          end
       end
 
       def to_jwt options = {}
