@@ -1,5 +1,13 @@
 # Release History
 
+### [0.15.1](https://www.github.com/googleapis/signet/compare/signet/v0.15.0...signet/v0.15.1) (2021-09-02)
+
+
+### Bug Fixes
+
+* Remove extraneous files from the gem ([e515bb6](https://www.github.com/googleapis/signet/commit/e515bb627a64e32ec885412fed8b01eb73067ee0))
+* Require addressable 2.8 to remediate vulnerability ([9a2f899](https://www.github.com/googleapis/signet/commit/9a2f8996f522538c4bb7998535e2a50331d564fc))
+
 ## [0.15.0](https://www.github.com/googleapis/signet/compare/v0.14.1...v0.15.0) (2021-03-04)
 
 
