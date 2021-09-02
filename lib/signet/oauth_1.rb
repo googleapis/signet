@@ -3,7 +3,7 @@ require "signet"
 
 require "securerandom"
 
-module Signet #:nodoc:
+module Signet # :nodoc:
   module OAuth1
     OUT_OF_BAND = "oob".freeze
 

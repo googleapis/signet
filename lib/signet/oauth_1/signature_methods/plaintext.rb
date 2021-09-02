@@ -1,6 +1,6 @@
 require "signet"
 
-module Signet #:nodoc:
+module Signet # :nodoc:
   module OAuth1
     module PLAINTEXT
       def self.generate_signature \
