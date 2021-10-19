@@ -34,7 +34,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "yard", "~> 0.9", ">= 0.9.12"
 
   if gem.respond_to? :metadata
-    gem.metadata["changelog_uri"] = "https://github.com/googleapis/signet/blob/master/CHANGELOG.md"
+    gem.metadata["changelog_uri"] = "https://github.com/googleapis/signet/blob/main/CHANGELOG.md"
     gem.metadata["source_code_uri"] = "https://github.com/googleapis/signet"
     gem.metadata["bug_tracker_uri"] = "https://github.com/googleapis/signet/issues"
   end
