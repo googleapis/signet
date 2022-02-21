@@ -152,7 +152,7 @@ module Signet
       # @return [Hash] normalized request components
       def verify_request_components options = {}
         if options[:request]
-          if options[:request].is_a?(Faraday::Request) || options[:request].is_a?(Array)
+          if options[:request].is_a? Faraday::Request
             request = options[:request]
           elsif options[:adapter]
             request = options[:adapter].adapt_request options[:request]
