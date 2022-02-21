@@ -993,7 +993,14 @@ module Signet
         url = Addressable::URI.parse token_credential_uri
         parameters = generate_access_token_request options
         if client.is_a? Faraday::Connection
-          client.basic_auth client_id, client_secret if options[:use_basic_auth]
+          if options[:use_basic_auth]
+            # The Basic Auth middleware usage differs before and after Faraday v2
+            if Gem::Version.new(Faraday::VERSION).segments.first >= 2
+              client.request :authorization, :basic, client_id, client_secret
+            else
+              client.request :basic_auth, client_id, client_secret
+            end
+          end
           response = client.post url.normalize.to_s,
                                  Addressable::URI.form_encode(parameters),
                                  "Content-Type" => "application/x-www-form-urlencoded"

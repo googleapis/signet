@@ -157,7 +157,7 @@ module Signet
           elsif options[:adapter]
             request = options[:adapter].adapt_request options[:request]
           end
-          method = request.method
+          method = request.http_method
           uri = request.path
           headers = request.headers
           body = request.body

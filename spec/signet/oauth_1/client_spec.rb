@@ -602,7 +602,7 @@ describe Signet::OAuth1::Client, "configured" do
     # Repeat this because signatures change from test to test
     10.times do
       request = @client.generate_temporary_credential_request
-      expect(request.method).to eq :post
+      expect(request.http_method).to eq :post
       expect(request.path).to eq "http://example.com/temporary_credentials"
       authorization_header = request.headers["Authorization"]
       parameters = ::Signet::OAuth1.parse_authorization_header(
@@ -627,7 +627,7 @@ describe Signet::OAuth1::Client, "configured" do
       request = @client.generate_token_credential_request(
         verifier: "473f82d3"
       )
-      expect(request.method).to eq :post
+      expect(request.http_method).to eq :post
       expect(request.path).to eq "http://example.com/token_credentials"
       authorization_header = request.headers["Authorization"]
       parameters = ::Signet::OAuth1.parse_authorization_header(
@@ -659,7 +659,7 @@ describe Signet::OAuth1::Client, "configured" do
       signed_request = @client.generate_authenticated_request(
         request: original_request
       )
-      expect(signed_request.method).to eq :get
+      expect(signed_request.http_method).to eq :get
       expect(signed_request.path).to eq "https://photos.example.net/photos"
       expect(signed_request.params).to eq({ "file" => "vacation.jpg", "size" => "original" })
       authorization_header = signed_request.headers["Authorization"]
@@ -697,7 +697,7 @@ describe Signet::OAuth1::Client, "configured" do
       signed_request = @client.generate_authenticated_request(
         request: original_request
       )
-      expect(signed_request.method).to eq :post
+      expect(signed_request.http_method).to eq :post
       expect(signed_request.path).to eq "https://photos.example.net/photos"
       authorization_header = signed_request.headers["Authorization"]
       expect(signed_request.body).to eq "file=vacation.jpg&size=original"
@@ -739,7 +739,7 @@ describe Signet::OAuth1::Client, "configured" do
         # Should be same request object
         expect(original_request["Authorization"]).to eq signed_request["Authorization"]
 
-        expect(signed_request.method).to eq :get
+        expect(signed_request.http_method).to eq :get
         expect(signed_request.path).to eq "https://photos.example.net/photos"
         expect(signed_request.params).to eq ({ "file" => "vacation.jpg", "size" => "original" })
         authorization_header = signed_request.headers["Authorization"]
@@ -784,7 +784,7 @@ describe Signet::OAuth1::Client, "configured" do
         # Should be same request object
         expect(original_request["Authorization"]).to eq signed_request["Authorization"]
 
-        expect(signed_request.method).to eq :post
+        expect(signed_request.http_method).to eq :post
         expect(signed_request.path).to eq "https://photos.example.net/photos"
         authorization_header = signed_request.headers["Authorization"]
         # Can't rely on the order post parameters are encoded in.
