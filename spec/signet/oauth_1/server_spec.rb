@@ -156,7 +156,7 @@ describe Signet::OAuth1::Server, "configured" do
   it "should raise an error if a bogus request is provided" do
     expect(lambda do
       @server.authenticate_resource_request(
-        request: []
+        request: Faraday::Request.new
       )
     end).to raise_error(ArgumentError)
   end

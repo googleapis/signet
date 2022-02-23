@@ -7,4 +7,3 @@ require "simplecov"
 require "faraday"
 
 SimpleCov.start if ENV["COVERAGE"]
-Faraday::Adapter.load_middleware :test

@@ -20,7 +20,7 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version = ">= 2.5"
 
   gem.add_runtime_dependency "addressable", "~> 2.8"
-  gem.add_runtime_dependency "faraday", ">= 0.17.3", "< 2.0"
+  gem.add_runtime_dependency "faraday", ">= 0.17.5", "< 3.0"
   gem.add_runtime_dependency "jwt", ">= 1.5", "< 3.0"
   gem.add_runtime_dependency "multi_json", "~> 1.10"
 
