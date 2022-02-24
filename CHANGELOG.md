@@ -1,5 +1,12 @@
 # Release History
 
+### [0.16.1](https://www.github.com/googleapis/signet/compare/signet/v0.16.0...signet/v0.16.1) (2022-02-24)
+
+
+### Bug Fixes
+
+* Support Faraday 2 ([f1c6cc3](https://www.github.com/googleapis/signet/commit/f1c6cc373876ea84281fadf72d7041976f2bc133))
+
 ## [0.16.0](https://www.github.com/googleapis/signet/compare/signet/v0.15.0...signet/v0.16.0) (2021-09-03)
 
 
