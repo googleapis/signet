@@ -4,5 +4,5 @@
     "language": "ruby",
     "library_type": "AUTH",
     "release_level": "stable",
-    "repo": "googleapis/signet",
+    "repo": "googleapis/signet"
 }
