@@ -1,5 +1,23 @@
 # Release History
 
+## 1.0.0 (2022-04-20)
+
+#### Features
+
+* Drop support for Ruby 2.4 and add support for Ruby 3.0
+* Support array values of the "aud" field
+* support Faraday 1.x
+* Support for fetching an access token with basic auth
+* support for fetching ID tokens from google oauth2 endpoint
+#### Bug Fixes
+
+* Avoid rakefile task collisions, and fix tag format
+* Fix OAuth1 signature with duplicate query param names
+* Remove extraneous files from the gem
+* Require addressable 2.8 to remediate vulnerability
+* Support Faraday 2
+* When building URIs via Hash, Addressable expects URI#new and URI#parse to provide hash keys as symbols. One example of a little known occurrence where this would cause an issue is accessing the Google API via Google::APIClient::FileStorage, which stores and retrieves files as JSON - the keys of which are loaded in by the Google-Api-Client gem as strings. Here, we ensure that our options meet the format Addressable expects. The authorization/credential_uri= methods have been cleaned up a bit as well.
+
 ### 0.16.1 (2022-02-24)
 
 #### Bug Fixes
