@@ -1,5 +1,9 @@
 # Release History
 
+### 0.17.0 (2022-06-23)
+
+* Updated minimum Ruby version to 2.6
+
 ### 0.16.1 (2022-02-24)
 
 #### Bug Fixes
