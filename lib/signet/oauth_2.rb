@@ -78,7 +78,7 @@ module Signet # :nodoc:
       when %r{^application/json.*}
         MultiJson.load body
       when %r{^application/x-www-form-urlencoded.*}
-        Hash[Addressable::URI.form_unencode(body)]
+        Addressable::URI.form_unencode(body).to_h
       else
         raise ArgumentError, "Invalid content type '#{content_type}'"
       end
