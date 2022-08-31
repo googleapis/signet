@@ -23,6 +23,9 @@ jobs:
             ruby: "3.0"
             task: spec
           - os: ubuntu-latest
+            ruby: "truffleruby-head"
+            task: spec
+          - os: ubuntu-latest
             ruby: "3.1"
             task: spec
           - os: macos-latest
