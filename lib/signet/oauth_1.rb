@@ -350,7 +350,7 @@ module Signet # :nodoc:
       query_values = parsed_uri.query_values || {}
       if options[:additional_parameters]
         query_values = query_values.merge(
-          options[:additional_parameters].each_with_object({}) { |(k, v), h| h[k] = v; }
+          options[:additional_parameters].each_with_object({}) { |(k, v), h| h[k] = v }
         )
       end
       query_values["oauth_token"] = temporary_credential_key if temporary_credential_key

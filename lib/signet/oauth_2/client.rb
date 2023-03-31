@@ -611,7 +611,7 @@ module Signet
       # @param [Integer, String] new_expiry
       #   Assertion expiry, in seconds
       def expiry= new_expiry
-        @expiry = new_expiry ? new_expiry.to_i : nil
+        @expiry = new_expiry&.to_i
       end
 
       ##
@@ -916,22 +916,22 @@ module Signet
       # @return [String] A serialized JSON representation of the client.
       def to_json *_args
         MultiJson.dump(
-          "authorization_uri"    => authorization_uri ? authorization_uri.to_s : nil,
-          "token_credential_uri" => token_credential_uri ? token_credential_uri.to_s : nil,
+          "authorization_uri"    => authorization_uri&.to_s,
+          "token_credential_uri" => token_credential_uri&.to_s,
           "client_id"            => client_id,
           "client_secret"        => client_secret,
           "scope"                => scope,
           "target_audience"      => target_audience,
           "state"                => state,
           "code"                 => code,
-          "redirect_uri"         => redirect_uri ? redirect_uri.to_s : nil,
+          "redirect_uri"         => redirect_uri&.to_s,
           "username"             => username,
           "password"             => password,
           "issuer"               => issuer,
           "audience"             => audience,
           "person"               => person,
           "expiry"               => expiry,
-          "expires_at"           => expires_at ? expires_at.to_i : nil,
+          "expires_at"           => expires_at&.to_i,
           "signing_key"          => signing_key,
           "refresh_token"        => refresh_token,
           "access_token"         => access_token,
