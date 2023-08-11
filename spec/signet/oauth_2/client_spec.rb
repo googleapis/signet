@@ -64,7 +64,7 @@ describe Signet::OAuth2::Client, "unconfigured" do
   end
 
   it "should allow to set granted scopes" do
-    @client.granted_scopes = ["granted_scopes1 granted_scopes2"]
+    @client.granted_scopes = "granted_scopes1 granted_scopes2"
     expect(@client.granted_scopes).to eq ["granted_scopes1", "granted_scopes2"]
   end
 
@@ -381,14 +381,14 @@ describe Signet::OAuth2::Client, "configured for Google userinfo API" do
       refresh_token: "54321",
       :expires_in    => 3600,
       :issued_at     => issued_at,
-      :granted_scopes => ["scope1"]
+      :granted_scopes => "scope1"
     )
     expect(@client.access_token).to eq "12345"
     expect(@client.refresh_token).to eq "54321"
     expect(@client.expires_in).to eq 3600
     expect(@client.issued_at).to eq issued_at
     expect(@client).to_not be_expired
-    expect(@client).to eq ["scope1"]
+    expect(@client.granted_scopes).to eq ["scope1"]
   end
 
   it "should handle expires as equivalent to expires_in" do

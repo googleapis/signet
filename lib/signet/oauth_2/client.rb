@@ -843,8 +843,8 @@ module Signet
       #   The scope of access the client is requesting.  This may be
       #   expressed as either an Array of String objects or as a
       #   space-delimited String.
-      def granted_scopes= new_granted_scope
-        @granted_scopes = new_granted_scope&.split
+      def granted_scopes= new_granted_scopes
+        @granted_scopes = new_granted_scopes&.split
       end
 
       ##
@@ -1046,12 +1046,13 @@ module Signet
           content_type = response.header[:content_type]
         end
 
-        parsed_response = ::Signet::OAuth2.parse_credentials body, content_type if status == 200
-        parsed_response["granted_scopes"] = parsed_response.delete("scope")
-        return parsed_response
-
         message = "  Server message:\n#{response.body.to_s.strip}" unless body.to_s.strip.empty?
-        if [400, 401, 403].include? status
+
+        if status == 200
+          parsed_response = ::Signet::OAuth2.parse_credentials body, content_type 
+          parsed_response["granted_scopes"] = parsed_response.delete("scope") if parsed_response
+          return parsed_response
+        elsif [400, 401, 403].include? status
           message = "Authorization failed.#{message}"
           raise ::Signet::AuthorizationError.new message, response: response
         elsif status.to_s[0] == "5"
