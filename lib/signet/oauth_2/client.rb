@@ -78,6 +78,8 @@ module Signet
       #   - <code>:extension_parameters</code> -
       #     When using an extension grant type, this the set of parameters used
       #     by that extension.
+      #   - <code>:granted_scopes</code> -
+      #     All scopes granted by authorization server.
       #
       # @example
       #   client = Signet::OAuth2::Client.new(
@@ -109,6 +111,7 @@ module Signet
         @state                = nil
         @username             = nil
         @access_type          = nil
+        @granted_scopes       = nil
         update! options
       end
 
@@ -167,6 +170,8 @@ module Signet
       #   - <code>:extension_parameters</code> -
       #     When using an extension grant type, this is the set of parameters used
       #     by that extension.
+      #   - <code>:granted_scopes</code> -
+      #     All scopes granted by authorization server.
       #
       # @example
       #   client.update!(
@@ -253,7 +258,7 @@ module Signet
         self.access_token = options[:access_token] if options.key? :access_token
         self.refresh_token = options[:refresh_token] if options.key? :refresh_token
         self.id_token = options[:id_token] if options.key? :id_token
-
+        self.granted_scopes = options[:granted_scopes] if options.key? :granted_scopes
         self
       end
 
@@ -824,6 +829,25 @@ module Signet
       end
 
       ##
+      # Returns the scopes granted by the authorization server.
+      #
+      # @return [Array] The scope of access returned by the authorization server.
+      def granted_scopes
+        @granted_scopes
+      end
+
+      ##
+      # Sets the scopes returned by authorization server for this client.
+      #
+      # @param [Array] new_granted_scopes
+      #   The scope of access the client is requesting.  This may be
+      #   expressed as either an Array of String objects or as a
+      #   space-delimited String.
+      def granted_scopes= new_granted_scope
+        @granted_scopes = new_granted_scope&.split
+      end
+
+      ##
       # Returns true if the access token has expired.
       # Returns false if the token has not expired or has an nil @expires_at.
       #
@@ -857,6 +881,7 @@ module Signet
         @code = nil
         @issued_at = nil
         @expires_at = nil
+        @granted_scopes = nil
       end
 
       ##
@@ -936,7 +961,8 @@ module Signet
           "refresh_token"        => refresh_token,
           "access_token"         => access_token,
           "id_token"             => id_token,
-          "extension_parameters" => extension_parameters
+          "extension_parameters" => extension_parameters,
+          "granted_scopes"       => granted_scopes
         )
       end
 
@@ -1020,7 +1046,9 @@ module Signet
           content_type = response.header[:content_type]
         end
 
-        return ::Signet::OAuth2.parse_credentials body, content_type if status == 200
+        parsed_response = ::Signet::OAuth2.parse_credentials body, content_type if status == 200
+        parsed_response["granted_scopes"] = parsed_response.delete("scope")
+        return parsed_response
 
         message = "  Server message:\n#{response.body.to_s.strip}" unless body.to_s.strip.empty?
         if [400, 401, 403].include? status
