@@ -1049,9 +1049,9 @@ module Signet
         message = "  Server message:\n#{response.body.to_s.strip}" unless body.to_s.strip.empty?
 
         if status == 200
-          parsed_response = ::Signet::OAuth2.parse_credentials body, content_type 
+          parsed_response = ::Signet::OAuth2.parse_credentials body, content_type
           parsed_response["granted_scopes"] = parsed_response.delete("scope") if parsed_response
-          return parsed_response
+          parsed_response
         elsif [400, 401, 403].include? status
           message = "Authorization failed.#{message}"
           raise ::Signet::AuthorizationError.new message, response: response
