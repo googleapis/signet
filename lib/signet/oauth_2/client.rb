@@ -1048,20 +1048,20 @@ module Signet
 
         message = "  Server message:\n#{response.body.to_s.strip}" unless body.to_s.strip.empty?
 
-        if status == 200
-          parsed_response = ::Signet::OAuth2.parse_credentials body, content_type
-          parsed_response["granted_scopes"] = parsed_response.delete("scope") if parsed_response
-          parsed_response
-        elsif [400, 401, 403].include? status
+        if [400, 401, 403].include? status
           message = "Authorization failed.#{message}"
           raise ::Signet::AuthorizationError.new message, response: response
         elsif status.to_s[0] == "5"
           message = "Remote server error.#{message}"
           raise ::Signet::RemoteServerError, message
-        else
+        elsif status != 200
           message = "Unexpected status code: #{response.status}.#{message}"
           raise ::Signet::UnexpectedStatusError, message
         end
+        # status == 200
+        parsed_response = ::Signet::OAuth2.parse_credentials body, content_type
+        parsed_response["granted_scopes"] = parsed_response.delete("scope") if parsed_response
+        parsed_response
       end
 
       def fetch_access_token! options = {}
