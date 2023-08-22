@@ -32,53 +32,53 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the client.
-      #   - <code>:authorization_uri</code> -
+      #   - `authorization_uri` -
       #     The authorization server's HTTP endpoint capable of
       #     authenticating the end-user and obtaining authorization.
-      #   - <code>:token_credential_uri</code> -
+      #   - `token_credential_uri` -
       #     The authorization server's HTTP endpoint capable of issuing
       #     tokens and refreshing expired tokens.
-      #   - <code>:client_id</code> -
+      #   - `client_id` -
       #     A unique identifier issued to the client to identify itself to the
       #     authorization server.
-      #   - <code>:client_secret</code> -
+      #   - `client_secret` -
       #     A shared symmetric secret issued by the authorization server,
       #     which is used to authenticate the client.
-      #   - <code>:scope</code> -
+      #   - `scope` -
       #     The scope of the access request, expressed either as an Array
       #     or as a space-delimited String.
-      #   - <code>:target_audience</code> -
+      #   - `target_audience` -
       #     The final target audience for ID tokens fetched by this client,
       #     as a String.
-      #   - <code>:state</code> -
+      #   - `state` -
       #     An arbitrary string designed to allow the client to maintain state.
-      #   - <code>:code</code> -
+      #   - `code` -
       #     The authorization code received from the authorization server.
-      #   - <code>:redirect_uri</code> -
+      #   - `redirect_uri` -
       #     The redirection URI used in the initial request.
-      #   - <code>:username</code> -
+      #   - `username` -
       #     The resource owner's username.
-      #   - <code>:password</code> -
+      #   - `password` -
       #     The resource owner's password.
-      #   - <code>:issuer</code> -
+      #   - `issuer` -
       #     Issuer ID when using assertion profile
-      #   - <code>:person</code> -
+      #   - `person` -
       #     Target user for assertions
-      #   - <code>:expiry</code> -
+      #   - `expiry` -
       #     Number of seconds assertions are valid for
-      #   - <code>:signing_key</code> -
+      #   - `signing_key` -
       #     Signing key when using assertion profile
-      #   - <code>:refresh_token</code> -
+      #   - `refresh_token` -
       #     The refresh token associated with the access token
       #     to be refreshed.
-      #   - <code>:access_token</code> -
+      #   - `access_token` -
       #     The current access token for this client.
-      #   - <code>:id_token</code> -
+      #   - `id_token` -
       #     The current ID token for this client.
-      #   - <code>:extension_parameters</code> -
+      #   - `extension_parameters` -
       #     When using an extension grant type, this the set of parameters used
       #     by that extension.
-      #   - <code>:granted_scopes</code> -
+      #   - `granted_scopes` -
       #     All scopes granted by authorization server.
       #
       # @example
@@ -120,57 +120,57 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the client.
-      #   - <code>:authorization_uri</code> -
+      #   - `authorization_uri` -
       #     The authorization server's HTTP endpoint capable of
       #     authenticating the end-user and obtaining authorization.
-      #   - <code>:token_credential_uri</code> -
+      #   - `token_credential_uri` -
       #     The authorization server's HTTP endpoint capable of issuing
       #     tokens and refreshing expired tokens.
-      #   - <code>:client_id</code> -
+      #   - `client_id` -
       #     A unique identifier issued to the client to identify itself to the
       #     authorization server.
-      #   - <code>:client_secret</code> -
+      #   - `client_secret` -
       #     A shared symmetric secret issued by the authorization server,
       #     which is used to authenticate the client.
-      #   - <code>:scope</code> -
+      #   - `scope` -
       #     The scope of the access request, expressed either as an Array
       #     or as a space-delimited String.
-      #   - <code>:target_audience</code> -
+      #   - `target_audience` -
       #     The final target audience for ID tokens fetched by this client,
       #     as a String.
-      #   - <code>:state</code> -
+      #   - `state` -
       #     An arbitrary string designed to allow the client to maintain state.
-      #   - <code>:code</code> -
+      #   - `code` -
       #     The authorization code received from the authorization server.
-      #   - <code>:redirect_uri</code> -
+      #   - `redirect_uri` -
       #     The redirection URI used in the initial request.
-      #   - <code>:username</code> -
+      #   - `username` -
       #     The resource owner's username.
-      #   - <code>:password</code> -
+      #   - `password` -
       #     The resource owner's password.
-      #   - <code>:issuer</code> -
+      #   - `issuer` -
       #     Issuer ID when using assertion profile
-      #   - <code>:audience</code> -
+      #   - `audience` -
       #     Target audience for assertions
-      #   - <code>:person</code> -
+      #   - `person` -
       #     Target user for assertions
-      #   - <code>:expiry</code> -
+      #   - `expiry` -
       #     Number of seconds assertions are valid for
-      #   - <code>:signing_key</code> -
+      #   - `signing_key` -
       #     Signing key when using assertion profile
-      #   - <code>:refresh_token</code> -
+      #   - `refresh_token` -
       #     The refresh token associated with the access token
       #     to be refreshed.
-      #   - <code>:access_token</code> -
+      #   - `access_token` -
       #     The current access token for this client.
-      #   - <code>:access_type</code> -
+      #   - `access_type` -
       #     The current access type parameter for #authorization_uri.
-      #   - <code>:id_token</code> -
+      #   - `id_token` -
       #     The current ID token for this client.
-      #   - <code>:extension_parameters</code> -
+      #   - `extension_parameters` -
       #     When using an extension grant type, this is the set of parameters used
       #     by that extension.
-      #   - <code>:granted_scopes</code> -
+      #   - `granted_scopes` -
       #     All scopes granted by authorization server.
       #
       # @example
@@ -839,10 +839,9 @@ module Signet
       ##
       # Sets the scopes returned by authorization server for this client.
       #
-      # @param [Array] new_granted_scopes
-      #   The scope of access the client is requesting.  This may be
-      #   expressed as either an Array of String objects or as a
-      #   space-delimited String.
+      # @param [String, nil] new_granted_scopes
+      #   The scope of access returned by authorization server. This will
+      #   ideally be expressed as space-delimited String.
       def granted_scopes= new_granted_scopes
         @granted_scopes = new_granted_scopes&.split
       end
