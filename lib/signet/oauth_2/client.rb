@@ -32,53 +32,53 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the client.
-      #   - `authorization_uri` -
+      #   - `:authorization_uri` -
       #     The authorization server's HTTP endpoint capable of
       #     authenticating the end-user and obtaining authorization.
-      #   - `token_credential_uri` -
+      #   - `:token_credential_uri` -
       #     The authorization server's HTTP endpoint capable of issuing
       #     tokens and refreshing expired tokens.
-      #   - `client_id` -
+      #   - `:client_id` -
       #     A unique identifier issued to the client to identify itself to the
       #     authorization server.
-      #   - `client_secret` -
+      #   - `:client_secret` -
       #     A shared symmetric secret issued by the authorization server,
       #     which is used to authenticate the client.
-      #   - `scope` -
+      #   - `:scope` -
       #     The scope of the access request, expressed either as an Array
       #     or as a space-delimited String.
-      #   - `target_audience` -
+      #   - `:target_audience` -
       #     The final target audience for ID tokens fetched by this client,
       #     as a String.
-      #   - `state` -
+      #   - `:state` -
       #     An arbitrary string designed to allow the client to maintain state.
-      #   - `code` -
+      #   - `:code` -
       #     The authorization code received from the authorization server.
-      #   - `redirect_uri` -
+      #   - `:redirect_uri` -
       #     The redirection URI used in the initial request.
-      #   - `username` -
+      #   - `:username` -
       #     The resource owner's username.
-      #   - `password` -
+      #   - `:password` -
       #     The resource owner's password.
-      #   - `issuer` -
+      #   - `:issuer` -
       #     Issuer ID when using assertion profile
-      #   - `person` -
+      #   - `:person` -
       #     Target user for assertions
-      #   - `expiry` -
+      #   - `:expiry` -
       #     Number of seconds assertions are valid for
-      #   - `signing_key` -
+      #   - `:signing_key` -
       #     Signing key when using assertion profile
-      #   - `refresh_token` -
+      #   - `:refresh_token` -
       #     The refresh token associated with the access token
       #     to be refreshed.
-      #   - `access_token` -
+      #   - `:access_token` -
       #     The current access token for this client.
-      #   - `id_token` -
+      #   - `:id_token` -
       #     The current ID token for this client.
-      #   - `extension_parameters` -
+      #   - `:extension_parameters` -
       #     When using an extension grant type, this the set of parameters used
       #     by that extension.
-      #   - `granted_scopes` -
+      #   - `:granted_scopes` -
       #     All scopes granted by authorization server.
       #
       # @example
@@ -120,57 +120,57 @@ module Signet
       #
       # @param [Hash] options
       #   The configuration parameters for the client.
-      #   - `authorization_uri` -
+      #   - `:authorization_uri` -
       #     The authorization server's HTTP endpoint capable of
       #     authenticating the end-user and obtaining authorization.
-      #   - `token_credential_uri` -
+      #   - `:token_credential_uri` -
       #     The authorization server's HTTP endpoint capable of issuing
       #     tokens and refreshing expired tokens.
-      #   - `client_id` -
+      #   - `:client_id` -
       #     A unique identifier issued to the client to identify itself to the
       #     authorization server.
-      #   - `client_secret` -
+      #   - `:client_secret` -
       #     A shared symmetric secret issued by the authorization server,
       #     which is used to authenticate the client.
-      #   - `scope` -
+      #   - `:scope` -
       #     The scope of the access request, expressed either as an Array
       #     or as a space-delimited String.
-      #   - `target_audience` -
+      #   - `:target_audience` -
       #     The final target audience for ID tokens fetched by this client,
       #     as a String.
-      #   - `state` -
+      #   - `:state` -
       #     An arbitrary string designed to allow the client to maintain state.
-      #   - `code` -
+      #   - `:code` -
       #     The authorization code received from the authorization server.
-      #   - `redirect_uri` -
+      #   - `:redirect_uri` -
       #     The redirection URI used in the initial request.
-      #   - `username` -
+      #   - `:username` -
       #     The resource owner's username.
-      #   - `password` -
+      #   - `:password` -
       #     The resource owner's password.
-      #   - `issuer` -
+      #   - `:issuer` -
       #     Issuer ID when using assertion profile
-      #   - `audience` -
+      #   - `:audience` -
       #     Target audience for assertions
-      #   - `person` -
+      #   - `:person` -
       #     Target user for assertions
-      #   - `expiry` -
+      #   - `:expiry` -
       #     Number of seconds assertions are valid for
-      #   - `signing_key` -
+      #   - `:signing_key` -
       #     Signing key when using assertion profile
-      #   - `refresh_token` -
+      #   - `:refresh_token` -
       #     The refresh token associated with the access token
       #     to be refreshed.
-      #   - `access_token` -
+      #   - `:access_token` -
       #     The current access token for this client.
-      #   - `access_type` -
+      #   - `:access_type` -
       #     The current access type parameter for #authorization_uri.
-      #   - `id_token` -
+      #   - `:id_token` -
       #     The current ID token for this client.
-      #   - `extension_parameters` -
+      #   - `:extension_parameters` -
       #     When using an extension grant type, this is the set of parameters used
       #     by that extension.
-      #   - `granted_scopes` -
+      #   - `:granted_scopes` -
       #     All scopes granted by authorization server.
       #
       # @example
@@ -831,7 +831,7 @@ module Signet
       ##
       # Returns the scopes granted by the authorization server.
       #
-      # @return [Array] The scope of access returned by the authorization server.
+      # @return [Array, nil] The scope of access returned by the authorization server.
       def granted_scopes
         @granted_scopes
       end
@@ -839,11 +839,20 @@ module Signet
       ##
       # Sets the scopes returned by authorization server for this client.
       #
-      # @param [String, nil] new_granted_scopes
+      # @param [String, Array, nil] new_granted_scopes
       #   The scope of access returned by authorization server. This will
       #   ideally be expressed as space-delimited String.
       def granted_scopes= new_granted_scopes
-        @granted_scopes = new_granted_scopes&.split
+        case new_granted_scopes
+        when Array
+          @granted_scopes = new_granted_scopes
+        when String
+          @granted_scopes = new_granted_scopes.split
+        when nil
+          @granted_scopes = nil
+        else
+          raise TypeError, "Expected Array or String, got #{new_granted_scopes.class}"
+        end
       end
 
       ##

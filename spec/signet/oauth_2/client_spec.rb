@@ -63,8 +63,13 @@ describe Signet::OAuth2::Client, "unconfigured" do
     expect(@client.scope).to eq ["legit", "alsolegit"]
   end
 
-  it "should allow to set granted scopes" do
+  it "should allow to set granted scopes as String" do
     @client.granted_scopes = "granted_scopes1 granted_scopes2"
+    expect(@client.granted_scopes).to eq ["granted_scopes1", "granted_scopes2"]
+  end
+
+  it "should allow to set granted scopes as Array" do
+    @client.granted_scopes = ["granted_scopes1", "granted_scopes2"]
     expect(@client.granted_scopes).to eq ["granted_scopes1", "granted_scopes2"]
   end
 
