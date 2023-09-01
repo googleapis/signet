@@ -63,6 +63,16 @@ describe Signet::OAuth2::Client, "unconfigured" do
     expect(@client.scope).to eq ["legit", "alsolegit"]
   end
 
+  it "should allow to set granted scopes as String" do
+    @client.granted_scopes = "granted_scopes1 granted_scopes2"
+    expect(@client.granted_scopes).to eq ["granted_scopes1", "granted_scopes2"]
+  end
+
+  it "should allow to set granted scopes as Array" do
+    @client.granted_scopes = ["granted_scopes1", "granted_scopes2"]
+    expect(@client.granted_scopes).to eq ["granted_scopes1", "granted_scopes2"]
+  end
+
   it "should raise an error if a bogus redirect URI is provided" do
     expect(lambda do
       @client = Signet::OAuth2::Client.new redirect_uri: :bogus
@@ -375,13 +385,15 @@ describe Signet::OAuth2::Client, "configured for Google userinfo API" do
       :access_token  => "12345",
       refresh_token: "54321",
       :expires_in    => 3600,
-      :issued_at     => issued_at
+      :issued_at     => issued_at,
+      :granted_scopes => "scope1"
     )
     expect(@client.access_token).to eq "12345"
     expect(@client.refresh_token).to eq "54321"
     expect(@client.expires_in).to eq 3600
     expect(@client.issued_at).to eq issued_at
     expect(@client).to_not be_expired
+    expect(@client.granted_scopes).to eq ["scope1"]
   end
 
   it "should handle expires as equivalent to expires_in" do
