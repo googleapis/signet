@@ -1,5 +1,11 @@
 # Release History
 
+### 0.18.0 (2023-09-01)
+
+#### Features
+
+* Expose Granted Scopes while fetching credentials ([#230](https://github.com/googleapis/signet/issues/230)) 
+
 ### 0.17.0 (2022-06-23)
 
 * Updated minimum Ruby version to 2.6
