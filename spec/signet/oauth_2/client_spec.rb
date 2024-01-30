@@ -1144,6 +1144,12 @@ describe Signet::OAuth2::Client, "configured with custom parameters" do
  })
   end
 
+  it "should use code_verifier if passed in additional_parameters when generating authorization_uri" do
+    @client.update! additional_parameters: { code_verifier: "IeJRY4uem0581Lcw6CiZ3fNwngg" }
+    expect(@client.additional_parameters).to eq ({ code_verifier: "IeJRY4uem0581Lcw6CiZ3fNwngg" })
+    expect(@client.authorization_uri.query).to match (/code_verifier=/)
+  end
+
   it "should merge new authorization_uri custom parameters" do
     expect(@client.authorization_uri(additional_parameters: { "type" => "new_type", "new_param" => "new_val" }).query_values).to eql({ "access_type" => "offline", "client_id" => "s6BhdRkqt3", "new_param" => "new_val", "response_type" => "code", "redirect_uri" => "https://example.client.com/callback", "type" => "new_type" })
   end
