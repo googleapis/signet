@@ -17,14 +17,14 @@ Gem::Specification.new do |gem|
   gem.rdoc_options = ["--main", "README.md"]
   gem.summary = "Signet is an OAuth 1.0 / OAuth 2.0 implementation."
 
-  gem.required_ruby_version = ">= 2.6"
+  gem.required_ruby_version = ">= 2.7"
 
   gem.add_runtime_dependency "addressable", "~> 2.8"
   gem.add_runtime_dependency "faraday", ">= 0.17.5", "< 3.a"
   gem.add_runtime_dependency "jwt", ">= 1.5", "< 3.0"
   gem.add_runtime_dependency "multi_json", "~> 1.10"
 
-  gem.add_development_dependency "google-style", "~> 1.26.1"
+  gem.add_development_dependency "google-style", "~> 1.27.1"
   gem.add_development_dependency "kramdown", "~> 1.5"
   gem.add_development_dependency "launchy", "~> 2.4"
   gem.add_development_dependency "rake", "~> 13.0"
