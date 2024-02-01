@@ -1,5 +1,11 @@
 # Release History
 
+### 0.19.0 (2024-02-01)
+
+#### Features
+
+* Drop support for Ruby 2.6 ([#237](https://github.com/googleapis/signet/issues/237)) 
+
 ### 0.18.0 (2023-09-01)
 
 #### Features
