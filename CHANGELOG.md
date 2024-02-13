@@ -4,7 +4,7 @@
 
 #### Features
 
-* Drop support for Ruby 2.6 ([#237](https://github.com/googleapis/signet/issues/237)) 
+* Update minimum Ruby version to 2.7
 
 ### 0.18.0 (2023-09-01)
 
