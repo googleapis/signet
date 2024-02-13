@@ -1,5 +1,11 @@
 # Release History
 
+### 0.19.0 (2024-02-01)
+
+#### Features
+
+* Update minimum Ruby version to 2.7
+
 ### 0.18.0 (2023-09-01)
 
 #### Features
