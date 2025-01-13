@@ -114,9 +114,7 @@ module Signet # :nodoc:
     #
     # @return [String]
     #   The value for the HTTP Basic Authorization header.
-    def self.generate_bearer_authorization_header \
-      access_token, auth_params = nil
-
+    def self.generate_bearer_authorization_header access_token, auth_params = nil
       # TODO: escaping?
       header = "Bearer #{access_token}"
       if auth_params && !auth_params.empty?
