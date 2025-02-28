@@ -7,30 +7,22 @@ Gem::Specification.new do |gem|
 
   gem.required_rubygems_version = ">= 1.3.5"
   gem.require_paths = ["lib"]
-  gem.authors = ["Bob Aman", "Steven Bazyl"]
+  gem.authors = ["Google LLC"]
   gem.license = "Apache-2.0"
   gem.description = "Signet is an OAuth 1.0 / OAuth 2.0 implementation.\n"
-  gem.email = "sbazyl@google.com"
+  gem.email = ["googleapis-packages@google.com"]
   gem.extra_rdoc_files = ["README.md"]
   gem.files = Dir.glob("lib/**/*.rb") + Dir.glob("*.md") + ["LICENSE", ".yardopts"]
   gem.homepage = "https://github.com/googleapis/signet"
   gem.rdoc_options = ["--main", "README.md"]
   gem.summary = "Signet is an OAuth 1.0 / OAuth 2.0 implementation."
 
-  gem.required_ruby_version = ">= 2.7"
+  gem.required_ruby_version = ">= 3.0"
 
-  gem.add_runtime_dependency "addressable", "~> 2.8"
-  gem.add_runtime_dependency "faraday", ">= 0.17.5", "< 3.a"
-  gem.add_runtime_dependency "jwt", ">= 1.5", "< 3.0"
-  gem.add_runtime_dependency "multi_json", "~> 1.10"
-
-  gem.add_development_dependency "google-style", "~> 1.27.1"
-  gem.add_development_dependency "kramdown", "~> 1.5"
-  gem.add_development_dependency "launchy", "~> 2.4"
-  gem.add_development_dependency "rake", "~> 13.0"
-  gem.add_development_dependency "redcarpet", "~> 3.0"
-  gem.add_development_dependency "rspec", "~> 3.1"
-  gem.add_development_dependency "yard", "~> 0.9", ">= 0.9.12"
+  gem.add_dependency "addressable", "~> 2.8"
+  gem.add_dependency "faraday", ">= 0.17.5", "< 3.a"
+  gem.add_dependency "jwt", ">= 1.5", "< 3.0"
+  gem.add_dependency "multi_json", "~> 1.10"
 
   if gem.respond_to? :metadata
     gem.metadata["changelog_uri"] = "https://github.com/googleapis/signet/blob/main/CHANGELOG.md"
