@@ -75,7 +75,7 @@ module Signet
           nonce =
             @nonce_timestamp.call nonce, timestamp
         end
-        nonce ? true : false
+        !!nonce
       end
 
       ##
@@ -112,9 +112,9 @@ module Signet
       # Call a credential lookup, and cast the result to a proper Credential.
       #
       # @param [Proc] credential to call.
-      # @param [String] key provided to the Proc in <code>credential</code>
+      # @param [String] key provided to the Proc in `credential`
       # @return [Signet::OAuth1::Credential] credential provided by
-      #   <code>credential</code> (if any).
+      #   `credential` (if any).
       def call_credential_lookup credential, key
         cred = credential.call key if
                 credential.respond_to? :call
@@ -134,17 +134,17 @@ module Signet
       #
       # @param [String] verifier Key provided to the {#verifier} Proc.
       # @return [Boolean] if the verifier Proc returns anything other than
-      #   <code>nil</code> or <code>false</code>.
+      #   `nil` or `false`
       def find_verifier verifier
         verified = @verifier.call verifier if @verifier.respond_to? :call
-        verified ? true : false
+        !!verified
       end
 
       ##
       # Validate and normalize the components from an HTTP request.
       # @overload verify_request_components(options)
       #   @param [Faraday::Request] request A pre-constructed request to verify.
-      #   @param [String] method the HTTP method , defaults to <code>GET</code>
+      #   @param [String] method the HTTP method , defaults to `GET`
       #   @param [Addressable::URI, String] uri the URI .
       #   @param [Hash, Array] headers the HTTP headers.
       #   @param [StringIO, String] body The HTTP body.
@@ -199,7 +199,7 @@ module Signet
       ##
       # @overload request_realm(options)
       #   @param [Hash] request A pre-constructed request to verify.
-      #   @param [String] method the HTTP method , defaults to <code>GET</code>
+      #   @param [String] method the HTTP method , defaults to `GET`
       #   @param [Addressable::URI, String] uri the URI .
       #   @param [Hash, Array] headers the HTTP headers.
       #   @param [StringIO, String] body The HTTP body.
@@ -228,16 +228,16 @@ module Signet
 
       ##
       # Authenticates a temporary credential request. If no oauth_callback is
-      # present in the request, <code>oob</code> will be returned.
+      # present in the request, `oob` will be returned.
       #
       # @overload authenticate_temporary_credential_request(options)
       #   @param [Hash] request The configuration parameters for the request.
-      #   @param [String] method the HTTP method , defaults to <code>GET</code>
+      #   @param [String] method the HTTP method , defaults to `GET`
       #   @param [Addressable::URI, String] uri the URI .
       #   @param [Hash, Array] headers the HTTP headers.
       #   @param [StringIO, String] body The HTTP body.
       #   @param [HTTPAdapter] adapter The HTTP adapter(optional).
-      # @return [String] The oauth_callback value, or <code>false</code> if not valid.
+      # @return [String] The oauth_callback value, or `false` if not valid.
       def authenticate_temporary_credential_request options = {}
         verifications = {
           client_credential: lambda { |_x|
@@ -279,7 +279,7 @@ module Signet
           method,
           uri,
           # Realm isn't used, and will throw the signature off.
-          auth_hash.reject { |k, _v| k == "realm" }.to_a,
+          auth_hash.except("realm").to_a,
           client_credential_secret,
           nil
         )
@@ -298,13 +298,13 @@ module Signet
       # Authenticates a token credential request.
       # @overload authenticate_token_credential_request(options)
       #   @param [Hash] request The configuration parameters for the request.
-      #   @param [String] method the HTTP method , defaults to <code>GET</code>
+      #   @param [String] method the HTTP method , defaults to `GET`
       #   @param [Addressable::URI, String] uri the URI .
       #   @param [Hash, Array] headers the HTTP headers.
       #   @param [StringIO, String] body The HTTP body.
       #   @param [HTTPAdapter] adapter The HTTP adapter(optional).
       # @return [Hash] A hash of credentials and realm for a valid request,
-      #   or <code>nil</code> if not valid.
+      #   or `nil` if not valid.
       def authenticate_token_credential_request options = {}
         verifications = {
           client_credential:    lambda { |_x|
@@ -353,7 +353,7 @@ module Signet
           method,
           uri,
           # Realm isn't used, and will throw the signature off.
-          auth_hash.reject { |k, _v| k == "realm" }.to_a,
+          auth_hash.except("realm").to_a,
           client_credential.secret,
           temporary_credential.secret
         )
@@ -368,7 +368,7 @@ module Signet
       # Authenticates a request for a protected resource.
       # @overload authenticate_resource_request(options)
       #   @param [Hash] request The configuration parameters for the request.
-      #   @param [String] method the HTTP method , defaults to <code>GET</code>
+      #   @param [String] method the HTTP method , defaults to `GET`
       #   @param [Addressable::URI, String] uri the URI .
       #   @param [Hash, Array] headers the HTTP headers.
       #   @param [StringIO, String] body The HTTP body.
@@ -376,7 +376,7 @@ module Signet
       #   @param [HTTPAdapter] adapter The HTTP adapter(optional).
       #
       # @return [Hash] A hash of the credentials and realm for a valid request,
-      #   or <code>nil</code> if not valid.
+      #   or `nil` if not valid.
       def authenticate_resource_request options = {}
         verifications = {
           client_credential: lambda do |_x|
@@ -468,7 +468,7 @@ module Signet
           method,
           uri,
           # Realm isn't used, and will throw the signature off.
-          auth_hash.reject { |k, _v| k == "realm" }.to_a,
+          auth_hash.except("realm").to_a,
           client_credential_secret,
           token_credential_secret
         )
