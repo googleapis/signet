@@ -3,7 +3,7 @@ source "https://rubygems.org"
 gemspec
 
 gem "gems", "~> 1.2"
-gem "google-style", "~> 1.30.1"
+gem "google-style", ">= 1.30.1", "< 1.32"
 gem "hurley"
 gem "jruby-openssl", platforms: :jruby
 gem "kramdown", "~> 1.5"
