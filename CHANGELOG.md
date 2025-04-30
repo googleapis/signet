@@ -4,8 +4,7 @@
 
 #### Features
 
-* Update minimum required Ruby to 3.0 ([#246](https://github.com/googleapis/signet/issues/246)) 
-* Updated required Ruby version to 3.1 ([#253](https://github.com/googleapis/signet/issues/253)) 
+* Updated minimum Ruby version to 3.1 ([#253](https://github.com/googleapis/signet/issues/253)) 
 
 ### 0.19.0 (2024-02-01)
 
