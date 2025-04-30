@@ -1,5 +1,11 @@
 # Release History
 
+### 0.20.0 (2025-04-30)
+
+#### Features
+
+* Updated minimum Ruby version to 3.1 ([#253](https://github.com/googleapis/signet/issues/253)) 
+
 ### 0.19.0 (2024-02-01)
 
 #### Features
