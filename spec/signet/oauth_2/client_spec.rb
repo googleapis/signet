@@ -207,7 +207,7 @@ describe Signet::OAuth2::Client, "configured for assertions profile" do
       jwt = @client.to_jwt
       expect(jwt).not_to be_nil
 
-      claim, header = JWT.decode jwt, @key.public_key, true, algorithm: "RS256"
+      claim, _header = JWT.decode jwt, @key.public_key, true, algorithm: "RS256"
       expect(claim["iss"]).to eq "app@example.com"
       expect(claim["scope"]).to eq "https://www.googleapis.com/auth/userinfo.profile"
       expect(claim["aud"]).to eq "https://oauth2.googleapis.com/token"
@@ -218,7 +218,7 @@ describe Signet::OAuth2::Client, "configured for assertions profile" do
       jwt = @client.to_jwt
       expect(jwt).not_to be_nil
 
-      claim, header = JWT.decode jwt, @key.public_key, true, algorithm: "RS256"
+      claim, _header = JWT.decode jwt, @key.public_key, true, algorithm: "RS256"
       expect(claim["iss"]).to eq "app@example.com"
       expect(claim["prn"]).to eq "user@example.com"
       expect(claim["scope"]).to eq "https://www.googleapis.com/auth/userinfo.profile"
@@ -230,7 +230,7 @@ describe Signet::OAuth2::Client, "configured for assertions profile" do
       jwt = @client.to_jwt
       expect(jwt).not_to be_nil
 
-      claim, header = JWT.decode jwt, @key.public_key, true, algorithm: "RS256"
+      claim, _header = JWT.decode jwt, @key.public_key, true, algorithm: "RS256"
       expect(claim["iss"]).to eq "app@example.com"
       expect(claim["prn"]).to eq "user@example.com"
       expect(claim["scope"]).to eq "https://www.googleapis.com/auth/userinfo.profile"
@@ -242,7 +242,7 @@ describe Signet::OAuth2::Client, "configured for assertions profile" do
       jwt = @client.to_jwt
       expect(jwt).not_to be_nil
 
-      claim, header = JWT.decode jwt, @key.public_key, true, algorithm: "RS256"
+      claim, _header = JWT.decode jwt, @key.public_key, true, algorithm: "RS256"
       expect(claim["iss"]).to eq "app@example.com"
       expect(claim["sub"]).to eq "user@example.com"
       expect(claim["scope"]).to eq "https://www.googleapis.com/auth/userinfo.profile"
@@ -266,7 +266,7 @@ describe Signet::OAuth2::Client, "configured for assertions profile" do
       stubs = Faraday::Adapter::Test::Stubs.new do |stub|
         stub.post "/token" do |env|
           params = Addressable::URI.form_unencode env[:body]
-          claim, header = JWT.decode params.assoc("assertion").last, @key.public_key, true, algorithm: "RS256"
+          JWT.decode params.assoc("assertion").last, @key.public_key, true, algorithm: "RS256"
           expect(params.assoc("grant_type")).to eq ["grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer"]
           build_json_response(
             "access_token" => "1/abcdef1234567890",
@@ -301,7 +301,7 @@ describe Signet::OAuth2::Client, "configured for assertions profile" do
       jwt = @client.to_jwt
       expect(jwt).not_to be_nil
 
-      claim, header = JWT.decode jwt, @key, true, algorithm: "HS256"
+      claim, _header = JWT.decode jwt, @key, true, algorithm: "HS256"
       expect(claim["iss"]).to eq "app@example.com"
       expect(claim["scope"]).to eq "https://www.googleapis.com/auth/userinfo.profile"
       expect(claim["aud"]).to eq "https://oauth2.googleapis.com/token"
@@ -814,7 +814,7 @@ describe Signet::OAuth2::Client, "configured for Google userinfo API" do
     @client.client_id = "client-12345"
     @client.client_secret = "secret-12345"
     @client.access_token = "12345"
-    request = @client.generate_authenticated_request(
+    @client.generate_authenticated_request(
       realm:   "Example",
       request: conn.build_request(:get) do |req|
         req.url "https://www.googleapis.com/oauth2/v1/userinfo?alt=json"
@@ -1286,7 +1286,7 @@ describe Signet::OAuth2::Client, "configured for id tokens" do
     stubs = Faraday::Adapter::Test::Stubs.new do |stub|
       stub.post "/token" do |env|
         params = Addressable::URI.form_unencode env[:body]
-        claim, header = JWT.decode params.assoc("assertion").last, @key.public_key, true, algorithm: "RS256"
+        claim, _header = JWT.decode params.assoc("assertion").last, @key.public_key, true, algorithm: "RS256"
         expect(params.assoc("grant_type")).to eq ["grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer"]
         expect(claim["target_audience"]).to eq "https://api.example.com"
         expect(claim["iss"]).to eq "app@example.com"
