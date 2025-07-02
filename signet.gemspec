@@ -21,7 +21,7 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency "addressable", "~> 2.8"
   gem.add_dependency "faraday", ">= 0.17.5", "< 3.a"
-  gem.add_dependency "jwt", ">= 1.5", "< 3.0"
+  gem.add_dependency "jwt", ">= 1.5", "< 4.0"
   gem.add_dependency "multi_json", "~> 1.10"
 
   if gem.respond_to? :metadata
