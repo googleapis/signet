@@ -1,5 +1,11 @@
 # Release History
 
+### 0.21.0 (2025-08-25)
+
+#### Features
+
+* support for JWT 3.x ([#259](https://github.com/googleapis/signet/issues/259)) 
+
 ### 0.20.0 (2025-04-30)
 
 #### Features
