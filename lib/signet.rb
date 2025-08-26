@@ -12,6 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+require "English"
 require "signet/version"
 
 module Signet # :nodoc:
