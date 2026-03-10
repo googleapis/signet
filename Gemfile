@@ -5,6 +5,7 @@ gemspec
 gem "gems", "~> 1.2"
 gem "google-style", "~> 1.31.0"
 gem "hurley"
+gem "irb", "~> 1.17"
 gem "jruby-openssl", platforms: :jruby
 gem "kramdown", "~> 1.5"
 gem "launchy", "~> 2.4"
