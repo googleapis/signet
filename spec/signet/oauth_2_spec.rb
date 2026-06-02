@@ -182,7 +182,7 @@ describe Signet::OAuth2 do
           "This is not JSON.",
           "application/json"
         )
-      end).to raise_error(MultiJson::DecodeError)
+      end).to raise_error(Signet::ParseError)
     end
 
     it "should raise an error for a bogus body" do

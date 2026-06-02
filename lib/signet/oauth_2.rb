@@ -14,7 +14,7 @@
 
 require "base64"
 require "signet"
-require "multi_json"
+require "json"
 
 module Signet # :nodoc:
   ##
@@ -76,7 +76,11 @@ module Signet # :nodoc:
       raise TypeError, "Expected String, got #{body.class}." unless body.is_a? String
       case content_type
       when %r{^application/json.*}
-        MultiJson.load body
+        begin
+          JSON.parse body
+        rescue JSON::ParserError => e
+          raise Signet::ParseError, e.message
+        end
       when %r{^application/x-www-form-urlencoded.*}
         Addressable::URI.form_unencode(body).to_h
       else
