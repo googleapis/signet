@@ -19,6 +19,7 @@ require "signet"
 require "signet/errors"
 require "signet/oauth_2"
 require "jwt"
+require "json"
 require "date"
 require "time"
 
@@ -948,7 +949,7 @@ module Signet
       #
       # @return [String] A serialized JSON representation of the client.
       def to_json *_args
-        MultiJson.dump(
+        JSON.generate(
           "authorization_uri"    => authorization_uri&.to_s,
           "token_credential_uri" => token_credential_uri&.to_s,
           "client_id"            => client_id,

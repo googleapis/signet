@@ -21,6 +21,7 @@ require "signet"
 require "signet/errors"
 require "signet/oauth_1"
 require "signet/oauth_1/credential"
+require "json"
 
 module Signet
   module OAuth1
@@ -552,7 +553,7 @@ module Signet
       #
       # @return [String] A serialized JSON representation of the client.
       def to_json *_args
-        MultiJson.dump(
+        JSON.generate(
           "temporary_credential_uri"    => temporary_credential_uri,
           "authorization_uri"           => authorization_uri,
           "token_credential_uri"        => token_credential_uri,
