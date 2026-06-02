@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 require "spec_helper"
-require "multi_json"
+require "json"
 require "signet/oauth_1/client"
 require "addressable/uri"
 require "stringio"
@@ -408,7 +408,7 @@ describe Signet::OAuth1::Client, "configured" do
     json = @client.to_json
     expect(json).not_to be_nil
 
-    deserialized = MultiJson.load json
+    deserialized = JSON.parse json
     expect(deserialized["temporary_credential_uri"]).to eq "http://example.com/temporary_credentials"
     expect(deserialized["authorization_uri"]).to include(
       "http://example.com/authorize"

@@ -20,7 +20,7 @@ require "date"
 conn = Faraday.default_connection
 
 def build_json_response payload
-  [200, { "Content-Type" => "application/json; charset=utf-8" }, MultiJson.dump(payload)]
+  [200, { "Content-Type" => "application/json; charset=utf-8" }, JSON.generate(payload)]
 end
 
 def build_form_encoded_response payload
@@ -254,7 +254,7 @@ describe Signet::OAuth2::Client, "configured for assertions profile" do
       json = @client.to_json
       expect(json).not_to be_nil
 
-      deserialized = MultiJson.load json
+      deserialized = JSON.parse json
       expect(deserialized["token_credential_uri"]).to eq "https://oauth2.googleapis.com/token"
       expect(deserialized["scope"]).to eq ["https://www.googleapis.com/auth/userinfo.profile"]
       expect(deserialized["issuer"]).to eq "app@example.com"
