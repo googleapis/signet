@@ -1,5 +1,11 @@
 # Release History
 
+### 0.22.0 (2026-06-04)
+
+#### Features
+
+* migrate from multi_json to standard json ([#273](https://github.com/googleapis/signet/issues/273)) ([bd067b2](https://github.com/googleapis/signet/commit/bd067b2a54442fbc9a1d084c3c78dc913bd3be86)), closes [#272](https://github.com/googleapis/signet/issues/272)
+
 ### 0.21.0 (2025-08-25)
 
 #### Features
