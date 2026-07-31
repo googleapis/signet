@@ -2,7 +2,6 @@
 .DS_Store
 .yardoc
 .bundle
-Gemfile.lock
 coverage
 doc
 heckling
