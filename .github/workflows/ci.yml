@@ -55,10 +55,10 @@ jobs:
         node-version: "24.x"
     - name: Install dependencies
       shell: bash
-      run: "gem install --no-document toys -v '~> 0.22.0' && bundle install"
+      run: bundle install
     - name: Test ${{ matrix.task }}
       shell: bash
       run: |
         for task in $(echo "${{ matrix.task }}" | tr ',' ' '); do
-          toys "$task" < /dev/null
+          bundle exec rake "$task" < /dev/null
         done
