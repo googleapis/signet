@@ -1,5 +1,11 @@
 # Release History
 
+### 0.22.1 (2026-10-13)
+
+#### Documentation
+
+* trigger a release to verify the new publishing pipeline ([#290](https://github.com/googleapis/signet/issues/290)) 
+
 ### 0.22.0 (2026-06-04)
 
 #### Features
