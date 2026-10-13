@@ -172,7 +172,7 @@ module Signet # :nodoc:
       uri = Addressable::URI.new(
         scheme:    parsed_uri.normalized_scheme,
         authority: parsed_uri.normalized_authority,
-        path:      parsed_uri.path,
+        path:      parsed_uri.path.to_s.empty? ? "/" : parsed_uri.path,
         query:     parsed_uri.query,
         fragment:  parsed_uri.fragment
       )
@@ -209,7 +209,7 @@ module Signet # :nodoc:
         "#{encode k}=\"#{encode v}\""
       end
       if realm
-        realm = realm.gsub '"', '\"'
+        realm = realm.gsub(/[\\"]/) { |character| "\\#{character}" }
         parameter_list.unshift "realm=\"#{realm}\""
       end
       "OAuth #{parameter_list.join ', '}"
