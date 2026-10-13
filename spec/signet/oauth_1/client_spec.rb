@@ -548,7 +548,7 @@ describe Signet::OAuth1::Client, "configured" do
 
   it "should not raise an error if a request is "\
      "provided without a connection" do
-    request = @client.generate_authenticated_request(
+    @client.generate_authenticated_request(
       request: conn.build_request(:get) do |req|
         req.url "http://www.example.com/"
       end
