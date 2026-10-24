@@ -46,7 +46,7 @@ jobs:
       with:
         persist-credentials: false
     - name: Install Ruby ${{ matrix.ruby }}
-      uses: ruby/setup-ruby@d45b1a4e94b71acab930e56e79c6aa188764e7f9 # v1.316.0
+      uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f # v1.335.0
       with:
         ruby-version: "${{ matrix.ruby }}"
     - name: Install NodeJS 24.x
