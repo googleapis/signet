@@ -70,7 +70,7 @@ describe Signet::OAuth2 do
 
     it "should not allow unquoted strings that do not match tchar" do
       expect(lambda do
-        parameters = Signet::OAuth2.parse_authorization_header(
+        Signet::OAuth2.parse_authorization_header(
           "OAuth vF9dft4qmT, first=one:1"
         )
       end).to raise_error(Signet::ParseError)
