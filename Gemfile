@@ -8,7 +8,7 @@ gem "hurley"
 gem "irb", "~> 1.17"
 gem "jruby-openssl", platforms: :jruby
 gem "kramdown", "~> 2.3"
-gem "launchy", "~> 2.4"
+gem "launchy", ">= 2.4", "< 4"
 gem "rake", "~> 13.0"
 gem "redcarpet", "~> 3.0"
 gem "rspec", "~> 3.1"
