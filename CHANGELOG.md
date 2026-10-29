@@ -1,5 +1,11 @@
 # Release History
 
+### 0.22.2 (2026-10-23)
+
+#### Documentation
+
+* link to the published Ruby version support policy ([#292](https://github.com/googleapis/signet/issues/292)) 
+
 ### 0.22.1 (2026-10-13)
 
 #### Documentation
