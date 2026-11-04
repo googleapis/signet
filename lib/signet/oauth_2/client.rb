@@ -950,7 +950,7 @@ module Signet
       # @return [String] A serialized JSON representation of the client.
       def to_json *_args
         JSON.generate(
-          "authorization_uri"    => authorization_uri&.to_s,
+          "authorization_uri"    => @authorization_uri&.to_s,
           "token_credential_uri" => token_credential_uri&.to_s,
           "client_id"            => client_id,
           "client_secret"        => client_secret,
@@ -1064,7 +1064,7 @@ module Signet
           message = "Remote server error.#{message}"
           raise ::Signet::RemoteServerError, message
         elsif status != 200
-          message = "Unexpected status code: #{response.status}.#{message}"
+          message = "Unexpected status code: #{status}.#{message}"
           raise ::Signet::UnexpectedStatusError, message
         end
         # status == 200
