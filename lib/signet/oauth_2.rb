@@ -119,10 +119,12 @@ module Signet # :nodoc:
     # @return [String]
     #   The value for the HTTP Basic Authorization header.
     def self.generate_bearer_authorization_header access_token, auth_params = nil
-      # TODO: escaping?
       header = "Bearer #{access_token}"
       if auth_params && !auth_params.empty?
-        additional_headers = auth_params.map { |key, value| "#{key}=\"#{value}\"" }
+        additional_headers = auth_params.map do |key, value|
+          value = value.to_s.gsub(/[\\"]/) { |character| "\\#{character}" }
+          "#{key}=\"#{value}\""
+        end
         header = ([header] + additional_headers).join ", "
       end
       header
@@ -137,9 +139,7 @@ module Signet # :nodoc:
     #
     # @return [String] The authorization URI to redirect the user to.
     def self.generate_authorization_uri authorization_uri, parameters = {}
-      parameters.each do |key, value|
-        parameters.delete key if value.nil?
-      end
+      parameters = parameters.compact
       parsed_uri = Addressable::URI.parse(authorization_uri).dup
       query_values = parsed_uri.query_values || {}
       query_values = query_values.merge parameters

@@ -752,6 +752,7 @@ module Signet
       #
       # @return [String] The decoded ID token.
       def decoded_id_token(public_key = nil, options = {}, &)
+        options = options.dup
         options[:algorithm] ||= signing_algorithm
         verify = !public_key.nil? || block_given?
         payload, _header = JWT.decode(id_token, public_key, verify, options, &)
