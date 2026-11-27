@@ -74,7 +74,7 @@ module Signet # :nodoc:
 
     def self.parse_credentials body, content_type
       raise TypeError, "Expected String, got #{body.class}." unless body.is_a? String
-      case content_type
+      case content_type.to_s.downcase
       when %r{^application/json.*}
         begin
           JSON.parse body
